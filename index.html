@@ -1,0 +1,264 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2685.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="zh-TW"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;峇里島陽光與海灘存錢計劃&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;style&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>:root {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--primary-color: #0077b6;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--accent-color: #00b4d8;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--bg-color: #f0f4f8;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--card-bg: #ffffff;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--checked-bg: #a7c957;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--checked-text: #386641;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>--text-color: #333333;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>body {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--bg-color);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: var(--text-color);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>-webkit-tap-highlight-color: transparent;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>max-width: 100%;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 auto;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>h1 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: var(--primary-color);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.6rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 0 5px 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>letter-spacing: 1px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>header p {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.85rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #666;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.dashboard {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(2, 1fr);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card-bg);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 4px 10px rgba(0,0,0,0.05);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin-bottom: 20px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.stat-card {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 5px 0;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.stat-card h3 {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0 0 3px 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.8rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #777;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.stat-card p {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>margin: 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1.25rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: var(--primary-color);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.grid-container {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>flex-direction: column;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 15px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.month-column {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: var(--card-bg);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>box-shadow: 0 2px 6px rgba(0,0,0,0.03);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #e1e8ed;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>overflow: hidden;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.month-header {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background: #e0f2fe;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #0369a1;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 1rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-bottom: 1px solid #bae6fd;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: flex;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>justify-content: space-between;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>align-items: center;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.month-target {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.8rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #0e7490;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: 500;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.days-list {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 10px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>display: grid;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>grid-template-columns: repeat(5, 1fr);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gap: 8px;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.day-cell {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>padding: 12px 0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-align: center;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: #f8fafc;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border: 1px solid #e2e8f0;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-radius: 6px;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-size: 0.95rem;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>font-weight: bold;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: #475569;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>transition: all 0.1s ease;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>user-select: none;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>.day-cell.checked {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>background-color: var(--checked-bg) !important;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>color: var(--checked-text) !important;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>border-color: #7a9a46;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>text-decoration: line-through;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/style&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;div class="container"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;header&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;h1&gt;峇里島陽光與海灘存錢計劃&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;p&gt;每天一點點，離陽光海灘更近一步！🌴&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="dashboard"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h3&gt;目前已存總金額&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p id="total-saved" style="font-size: 1.8rem; color: #059669;"&gt;$0&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-card" style="margin-top: 5px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h3&gt;已完成天數&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p id="days-count"&gt;0 / 365 天&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="stat-card" style="margin-top: 5px;"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h3&gt;目前總進度&lt;/h3&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p id="progress-percent"&gt;0%&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div class="grid-container" id="months-grid"&gt;&lt;/div&gt;</p>
+<p class="p1">&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const monthsData = [</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "一月", target: "存下 496 元", start: 1, end: 31 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "二月", target: "存下 1274 元", start: 32, end: 59 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "三月", target: "存下 2325 元", start: 60, end: 90 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "四月", target: "存下 3165 元", start: 91, end: 120 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "五月", target: "存下 4216 元", start: 121, end: 151 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "六月", target: "存下 4995 元", start: 152, end: 181 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "七月", target: "存下 6107 元", start: 182, end: 212 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "八月", target: "存下 7068 元", start: 213, end: 243 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "九月", target: "存下 7755 元", start: 244, end: 273 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "十月", target: "存下 8959 元", start: 274, end: 304 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "十一月", target: "存下 9585 元", start: 305, end: 334 },</p>
+<p class="p1"><span class="Apple-converted-space">        </span>{ name: "十二月", target: "存下 10850 元", start: 335, end: 365 }</p>
+<p class="p1"><span class="Apple-converted-space">    </span>];</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>let checkedDays = JSON.parse(localStorage.getItem('365_savings_progress')) || [];</p>
+<p class="p1"><span class="Apple-converted-space">    </span>const gridContainer = document.getElementById('months-grid');</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function renderGrid() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>gridContainer.innerHTML = '';</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>monthsData.forEach(month =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>const col = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>col.className = 'month-column';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const header = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>header.className = 'month-header';</p>
+<p class="p1"><span class="Apple-converted-space">            </span>header.innerHTML = `&lt;span&gt;${month.name}&lt;/span&gt;&lt;span class="month-target"&gt;${month.target}&lt;/span&gt;`;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>col.appendChild(header);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>const daysList = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">            </span>daysList.className = 'days-list';</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>for (let i = month.start; i &lt;= month.end; i++) {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>const cell = document.createElement('div');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cell.className = 'day-cell';</p>
+<p class="p1"><span class="Apple-converted-space">                </span>cell.innerText = i;</p>
+<p class="p2"><span class="Apple-converted-space">                </span></p>
+<p class="p1"><span class="Apple-converted-space">                </span>if (checkedDays.includes(i)) {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>cell.classList.add('checked');</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">                </span>cell.addEventListener('click', () =&gt; toggleDay(i, cell));</p>
+<p class="p1"><span class="Apple-converted-space">                </span>daysList.appendChild(cell);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">            </span>col.appendChild(daysList);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>gridContainer.appendChild(col);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>updateDashboard();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function toggleDay(dayAmount, element) {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const index = checkedDays.indexOf(dayAmount);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>if (index === -1) {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>checkedDays.push(dayAmount);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>element.classList.add('checked');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>} else {</p>
+<p class="p1"><span class="Apple-converted-space">            </span>checkedDays.splice(index, 1);</p>
+<p class="p1"><span class="Apple-converted-space">            </span>element.classList.remove('checked');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}</p>
+<p class="p2"><span class="Apple-converted-space">        </span></p>
+<p class="p1"><span class="Apple-converted-space">        </span>localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays));</p>
+<p class="p1"><span class="Apple-converted-space">        </span>updateDashboard();</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>function updateDashboard() {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const totalSaved = checkedDays.reduce((sum, val) =&gt; sum + val, 0);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const daysCount = checkedDays.length;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const progressPercent = ((daysCount / 365) * 100).toFixed(1);</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('days-count').innerText = `${daysCount} / 365 天`;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>document.getElementById('progress-percent').innerText = `${progressPercent}%`;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>}</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">    </span>renderGrid();</p>
+<p class="p1">&lt;/script&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
