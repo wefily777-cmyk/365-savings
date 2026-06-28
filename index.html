@@ -47,6 +47,7 @@
             margin: 0;
         }
 
+        /* 統計面板 */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -55,7 +56,7 @@
             padding: 15px;
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .stat-card {
@@ -76,6 +77,53 @@
             color: var(--primary-color);
         }
 
+        /* 隨機名人抽籤區 */
+        .random-box {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            border: 1px solid #7dd3fc;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+
+        .random-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #0369a1;
+            margin-bottom: 8px;
+        }
+
+        .celebrity-info {
+            font-size: 1rem;
+            color: #0c4a6e;
+            margin-bottom: 12px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .random-btn {
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+
+        .random-btn:active {
+            background-color: #0369a1;
+        }
+
+        /* 月份排版 */
         .grid-container {
             display: flex;
             flex-direction: column;
@@ -135,6 +183,17 @@
             border-color: #7a9a46;
             text-decoration: line-through;
         }
+
+        /* 閃爍動畫提示選中的格子 */
+        @keyframes highlight {
+            0% { transform: scale(1); background-color: #fef08a; }
+            50% { transform: scale(1.1); background-color: #fde047; }
+            100% { transform: scale(1); background-color: #fef08a; }
+        }
+        .target-flash {
+            animation: highlight 0.5s ease 3;
+            border-color: #eab308 !important;
+        }
     </style>
 </head>
 <body>
@@ -144,6 +203,13 @@
         <h1>✨ 祈祈星星的小小存錢計劃 ✨</h1>
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
+
+    <!-- 隨機名人抽籤區 -->
+    <div class="random-box">
+        <div class="random-title">🎲 今天存多少？聽聽歷史名人的生日！</div>
+        <div class="celebrity-info" id="celebrity-display">點擊下方按鈕，隨機抽選一位名人轉化為今日存錢數吧！</div>
+        <button class="random-btn" onclick="pickCelebrity()">隨機抽選名人生日</button>
+    </div>
 
     <div class="dashboard">
         <div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
@@ -164,6 +230,30 @@
 </div>
 
 <script>
+    // 名人資料庫（自動對應 1 ~ 365 內還沒存錢的數字數字）
+    const celebrityDatabase = [
+        { name: "愛因斯坦", desc: "相對論物理學家" },
+        { name: "牛頓", desc: "萬有引力發現者" },
+        { name: "達文西", desc: "文藝復興全才藝術家" },
+        { name: "莫札特", desc: "音樂神童" },
+        { name: "貝多芬", desc: "樂聖鋼琴家" },
+        { name: "莎士比亞", desc: "偉大劇作家" },
+        { name: "居禮夫人", desc: "放射性物理學家" },
+        { name: "特斯拉", desc: "交流電發明家" },
+        { name: "愛迪生", desc: "發明大王" },
+        { name: "賈伯斯", desc: "蘋果公司創辦人" },
+        { name: "比爾蓋茲", desc: "微軟創辦人" },
+        { name: "華特迪士尼", desc: "迪士尼王國創辦人" },
+        { name: "孔子", desc: "至聖先師" },
+        { name: "宮崎駿", desc: "動畫大師" },
+        { name: "安徒生", desc: "童話大師" },
+        { name: "萊特兄弟", desc: "飛機發明家" },
+        { name: "麥可喬丹", desc: "籃球之神" },
+        { name: "貝多芬", desc: "命運交響曲作者" },
+        { name: "梵谷", desc: "印象派畫家" },
+        { name: "畢卡索", desc: "立體派藝術大師" }
+    ];
+
     const monthsData = [
         { name: "一月", target: "存下 496 元", start: 1, end: 31 },
         { name: "二月", target: "存下 1274 元", start: 32, end: 59 },
@@ -181,6 +271,7 @@
 
     let checkedDays = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     const gridContainer = document.getElementById('months-grid');
+    const cellsMap = {}; // 用來快速尋找格子 DOM
 
     function renderGrid() {
         gridContainer.innerHTML = '';
@@ -201,6 +292,7 @@
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
                 cell.innerText = i;
+                cell.id = `day-${i}`;
                 
                 if (checkedDays.includes(i)) {
                     cell.classList.add('checked');
@@ -208,6 +300,7 @@
 
                 cell.addEventListener('click', () => toggleDay(i, cell));
                 daysList.appendChild(cell);
+                cellsMap[i] = cell;
             }
 
             col.appendChild(daysList);
@@ -239,6 +332,45 @@
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
         document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+    }
+
+    // 隨機抽選名人功能
+    function pickCelebrity() {
+        // 1. 找出所有「還沒存錢」的數字
+        const availableDays = [];
+        for (let i = 1; i <= 365; i++) {
+            if (!checkedDays.includes(i)) {
+                availableDays.push(i);
+            }
+        }
+
+        // 如果全部存滿了
+        if (availableDays.length === 0) {
+            document.getElementById('celebrity-display').innerHTML = "🎉 太厲害了！365天已經全數存滿囉！";
+            return;
+        }
+
+        // 2. 隨機抽一個還沒存的金額數字當作目標天數
+        const randomDayIdx = Math.floor(Math.random() * availableDays.length);
+        const selectedDay = availableDays[randomDayIdx];
+
+        // 3. 隨機選一個歷史名人
+        const randomCelebIdx = Math.floor(Math.random() * celebrityDatabase.length);
+        const celeb = celebrityDatabase[randomCelebIdx];
+
+        // 4. 顯示結果
+        document.getElementById('celebrity-display').innerHTML = `今日推薦：<strong>${celeb.name}</strong> (${celeb.desc})<br>他的神秘代碼引導你今天存下：<span style="color:#d97706; font-size:1.2rem; font-weight:bold;">$${selectedDay}</span> 元！`;
+
+        // 5. 畫面自動平滑滾動到該格子上，並讓它閃爍提示
+        const targetCell = cellsMap[selectedDay];
+        if (targetCell) {
+            targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            // 先移除之前的閃爍
+            document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
+            // 加上新閃爍
+            targetCell.classList.add('target-flash');
+        }
     }
 
     renderGrid();
