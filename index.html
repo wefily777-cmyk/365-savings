@@ -77,10 +77,10 @@
             color: var(--primary-color);
         }
 
-        /* 隨機抽籤區 */
+        /* 隨機驚喜抽籤區 */
         .random-box {
-            background: linear-gradient(135deg, #fef08a 0%, #fde047 100%);
-            border: 1px solid #facc15;
+            background: linear-gradient(135deg, #fef08a 0%, #bae6fd 100%);
+            border: 1px solid #bae6fd;
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 20px;
@@ -91,13 +91,13 @@
         .random-title {
             font-size: 0.9rem;
             font-weight: bold;
-            color: #854d0e;
+            color: #0369a1;
             margin-bottom: 8px;
         }
 
         .celebrity-info {
             font-size: 1rem;
-            color: #713f12;
+            color: #334155;
             margin-bottom: 12px;
             min-height: 45px;
             display: flex;
@@ -109,20 +109,20 @@
         }
 
         .random-btn {
-            background-color: #eab308;
-            color: #713f12;
-            border: 1px solid #ca8a04;
+            background-color: #0284c7;
+            color: white;
+            border: none;
             padding: 10px 20px;
             font-size: 0.95rem;
             font-weight: bold;
             border-radius: 20px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             transition: background 0.2s;
         }
 
         .random-btn:active {
-            background-color: #ca8a04;
+            background-color: #0369a1;
         }
 
         /* 月份排版 */
@@ -186,7 +186,6 @@
             text-decoration: line-through;
         }
 
-        /* 閃爍動畫提示選中的格子 */
         @keyframes highlight {
             0% { transform: scale(1); background-color: #fef08a; }
             50% { transform: scale(1.1); background-color: #bae6fd; }
@@ -206,10 +205,9 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
-    <!-- 隨機驚喜抽籤區 -->
     <div class="random-box">
-        <div class="random-title">🎲 歡樂存錢能量站</div>
-        <div class="celebrity-info" id="celebrity-display">今天該存多少呢？點擊下方按鈕，解鎖今日的驚喜數字與幽默金句吧！</div>
+        <div class="random-title">🎲 歡樂存錢雙重盲盒</div>
+        <div class="celebrity-info" id="celebrity-display">今天會抽到大名人，還是超級冷笑話呢？快按下按鈕解鎖！</div>
         <button class="random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
     </div>
 
@@ -246,8 +244,191 @@
         "每天給未來存一粒沙，一年後我們就有一座漂亮的沙灘可以度假了！🏖️",
         "加油！今天的努力，未來的你一定會打電話回來跟你說謝謝！📞",
         "每存下一筆錢，就像是在地圖上往夢想前進了一大步！🗺️",
-        "你知道小明為什麼存錢很快嗎？因為他很『省』思。大冷笑話！",
-        "存錢的過程雖然有點辛苦，但看到總金額啪啪啪往上漲的時候，真的超級爽！"
+        "你知道小明為什麼存錢很快嗎？分享給你知道，因為他很『省』思。大冷笑話！",
+        "存錢的過程雖然有點辛苦，但看到總金額啪啪啪往上漲的時候，真的超級爽！",
+        "請問世界上哪裡的手機訊號最好？答案是：阿富汗（阿，富，汗）！📱",
+        "今天偷懶不存錢，明天小豬撲滿就會對你嘆氣喔！哼哼～🐖",
+        "今天的任務金額是宇宙給你的神秘考驗，接招吧！💪",
+        "你知道什麼刀最長嗎？答案是：千刀萬剮（刮）！哈哈哈哈！",
+        "沒關係，大錢大存，小錢小存。只要動手點亮格子，就是最棒的！🎨",
+        "把手放進口袋，摸摸有沒有零錢？有的話，今天就是你的幸運日！🍀",
+        "一兩銀子買不到時間，但一兩銀子存起來，以後可以買大玩具！🧸",
+        "有隻鴨子叫小明，他走著走著就變成『歪果鴨』了。🦆",
+        "聽說愛存錢的小朋友，長大以後都會變得特別聰明跟幸運喔！",
+        "別看今天只有一點點，365天後這可是一筆能帶大家去大冒險的寶藏呢！"
+    ];
+
+    // 365位世界名人資料庫
+    const celebrityDatabase = [
+        { name: "愛因斯坦", desc: "相對論物理學家" }, { name: "牛頓", desc: "萬有引力發現者" },
+        { name: "達文西", desc: "文藝復興全才藝術家" }, { name: "莫札特", desc: "音樂神童" },
+        { name: "貝多芬", desc: "樂聖鋼琴家" }, { name: "莎士比亞", desc: "偉大劇作家" },
+        { name: "居禮夫人", desc: "放射性物理學家" }, { name: "特斯拉", desc: "交流電發明家" },
+        { name: "愛迪生", desc: "發明大王" }, { name: "賈伯斯", desc: "蘋果公司創辦人" },
+        { name: "比爾蓋茲", desc: "微軟創辦人" }, { name: "華特迪士尼", desc: "迪士尼王國創辦人" },
+        { name: "孔子", desc: "至聖先師" }, { name: "宮崎駿", desc: "動畫大師" },
+        { name: "安徒生", desc: "童話大師" }, { name: "萊特兄弟", desc: "飛機發明家" },
+        { name: "麥可喬丹", desc: "籃球之神" }, { name: "梵谷", desc: "印象派畫家" },
+        { name: "畢卡索", desc: "立體派藝術大師" }, { name: "伽利略", desc: "現代觀測天文學之父" },
+        { name: "霍金", desc: "黑洞理論物理學家" }, { name: "達爾文", desc: "演化論生物學家" },
+        { name: "馬克吐溫", desc: "湯姆歷險記作者" }, { name: "海明威", desc: "老人與海作者" },
+        { name: "巴哈", desc: "音樂之父" }, { name: "蕭邦", desc: "鋼琴詩人" },
+        { name: "舒伯特", desc: "歌曲之王" }, { name: "米開朗基羅", desc: "大衛像雕塑大師" },
+        { name: "莫內", desc: "印象派大師" }, { name: "安迪沃荷", desc: "普普藝術大師" },
+        { name: "亞里斯多德", desc: "古希臘大哲學家" }, { name: "蘇格拉底", desc: "西方哲學奠基者" },
+        { name: "諸葛亮", desc: "三國傳奇軍師" }, { name: "李白", desc: "唐朝詩仙" },
+        { name: "杜甫", desc: "唐朝詩聖" }, { name: "馬克波羅", desc: "東方見聞錄旅行家" },
+        { name: "哥倫布", desc: "新大陸發現者" }, { name: "麥哲倫", desc: "首次環球航海家" },
+        { name: "阿姆斯壯", desc: "第一位登陸月球的人" }, { name: "加加林", desc: "第一位進入太空的人" },
+        { name: "諾貝爾", desc: "炸藥發明家" }, { name: "萊布尼茲", desc: "微積分發明者之一" },
+        { name: "高斯", desc: "數學王子" }, { name: "歐拉", desc: "偉大的瑞士數學家" },
+        { name: "孟德爾", desc: "遺傳學之父" }, { name: "法拉第", desc: "電磁感應發現者" },
+        { name: "馬克士威", desc: "電磁學大師" }, { name: "普朗克", desc: "量子力學之父" },
+        { name: "費曼", desc: "幽默的量子物理學家" }, { name: "鮑林", desc: "雙料諾貝爾獎得主" },
+        { name: "歐本海默", desc: "原子彈之父" }, { name: "圖靈", desc: "電腦科學之父" },
+        { name: "馮紐曼", desc: "現代電腦架構之父" }, { name: "大谷翔平", desc: "現代棒球二刀流傳奇" },
+        { name: "梅西", desc: "當代世界足球球王" }, { name: "費德勒", desc: "網球優雅天王" },
+        { name: "納達爾", desc: "網球紅土之王" }, { name: "黑澤明", desc: "世界級電影導演大師" },
+        { name: "手塚治虫", desc: "日本漫畫之神" }, { name: "柏拉圖", desc: "古希臘哲學巨人" },
+        { name: "老子", desc: "道家學派創始人" }, { name: "莊子", desc: "浪漫主義哲學大師" },
+        { name: "司馬遷", desc: "史記作者" }, { name: "祖沖之", desc: "圓周率數學家" },
+        { name: "張衡", desc: "地動儀發明家" }, { name: "華佗", desc: "外科鼻祖神醫" },
+        { name: "孫武", desc: "孫子兵法作者" }, { name: "秦始皇", desc: "統一中國的第一位皇帝" },
+        { name: "漢武帝", desc: "開闢絲路的重要皇帝" }, { name: "唐太宗", desc: "貞觀之治的盛世明君" },
+        { name: "成吉思汗", desc: "橫跨歐亞的蒙古大汗" }, { name: "康熙帝", desc: "奠定清朝盛世的皇帝" },
+        { name: "林肯", desc: "解放黑奴的美國總統" }, { name: "華盛頓", desc: "美國國父" },
+        { name: "羅斯福", desc: "帶領美國度過二戰的總統" }, { name: "邱吉爾", desc: "英國鐵血首相" },
+        { name: "戴高樂", desc: "現代法國奠基將軍" }, { name: "甘地", desc: "印度非暴力獨立之父" },
+        { name: "曼德拉", desc: "南非反種族隔離領袖" }, { name: "聖女貞德", desc: "法國傳奇女英雄" },
+        { name: "伊莉莎白一世", desc: "英國黃金時代女王" }, { name: "維多利亞女王", desc: "英國日不落帝國女王" },
+        { name: "凱薩大帝", desc: "羅馬帝國奠基者" }, { name: "亞歷山大大帝", desc: "征服歐亞非的傳奇國王" },
+        { name: "拿破崙", desc: "橫掃歐洲的法國皇帝" }, { name: "織田信長", desc: "日本戰國三傑之一" },
+        { name: "豐臣秀吉", desc: "日本戰國時代終結者之一" }, { name: "德川家康", desc: "江戶幕府創始人" },
+        { name: "馬丁路德金", desc: "我有一個夢想演說家" }, { name: "德蕾莎修女", desc: "諾貝爾和平獎慈善家" },
+        { name: "南丁格爾", desc: "現代護理學先驅" }, { name: "馬可尼", desc: "無線電通信發明家" },
+        { name: "貝爾", desc: "電話發明家" }, { name: "瓦特", desc: "改良蒸汽機的工業先驅" },
+        { name: "史蒂芬生", desc: "蒸汽機車火車之父" }, { name: "富爾頓", desc: "蒸汽輪船發明家" },
+        { name: "福特", desc: "汽車流水線生產先驅" }, { name: "班茲", desc: "現代汽車發明者" },
+        { name: "齊柏林", desc: "硬式飛船發明家" }, { name: "海利", desc: "發現哈雷彗星的天文學家" },
+        { name: "克卜勒", desc: "行星運動定律發現者" }, { name: "哥白尼", desc: "日心說提出者" },
+        { name: "布魯諾", desc: "捍衛宇宙無限論的烈士" }, { name: "哈伯", desc: "發現宇宙膨脹的天文學家" },
+        { name: "勒梅特", desc: "大霹靂理論提出者" }, { name: "卡爾薩根", desc: "偉大的天文科普作家" },
+        { name: "道爾頓", desc: "近代原子論提出者" }, { name: "門得列夫", desc: "化學元素週期表發明者" },
+        { name: "拉瓦節", desc: "近代化學之父" }, { name: "波以耳", desc: "近代科學化學奠基者" },
+        { name: "海森堡", desc: "量子力學測不準原理" }, { name: "薛丁格", desc: "量子力學波動方程發明者" },
+        { name: "波耳", desc: "量子力學哥本哈根學派領袖" }, { name: "狄拉克", desc: "預言反物質存在的物理學家" },
+        { name: "倫琴", desc: "X光射線發現者" }, { name: "貝克勒", desc: "天然放射性發現者" },
+        { name: "查德威克", desc: "中子發現者" }, { name: "湯姆森", desc: "電子發現者" },
+        { name: "拉瑟福", desc: "近代原子核物理學之父" }, { name: "密立根", desc: "測出電子電荷的物理學家" },
+        { name: "巴斯德", desc: "微生物學與疫苗先驅" }, { name: "科赫", desc: "細菌學奠基人" },
+        { name: "哈維", desc: "發現血液循環的生理學家" }, { name: "林奈", desc: "現代生物分類學之父" },
+        { name: "威爾遜", desc: "社會生物學與螞蟻研究大師" }, { name: "珍古德", desc: "黑猩猩研究與保育專家" },
+        { name: "法布爾", desc: "昆蟲記作者" }, { name: "魏格納", desc: "大陸漂移學說提出者" },
+        { name: "萊爾", desc: "近代地質學之父" }, { name: "鮑威爾", desc: "大峽谷探險地質學家" },
+        { name: "庫克船長", desc: "太平洋偉大航海探險家" }, { name: "鄭和", desc: "明朝七下西洋的航海家" },
+        { name: "玄奘", desc: "前往印度取經的傳奇高僧" }, { name: "伊本巴圖塔", desc: "中世紀最偉大的旅行家" },
+        { name: "利瑪竇", desc: "明朝東西文化交流使者" }, { name: "徐霞客", desc: "中國古代地理名著作者" },
+        { name: "沈括", desc: "夢溪筆談全才科學家" }, { name: "郭守敬", desc: "元代天文學家" },
+        { name: "畢昇", desc: "活字印刷術發明家" }, { name: "蔡倫", desc: "造紙術重要改良者" },
+        { name: "狄賽爾", desc: "柴油引擎發明家" }, { name: "奧托", desc: "四行程內燃機發明家" },
+        { name: "吉列", desc: "安全剃刀發明家" }, { name: "固特異", desc: "硫化橡膠發明家" },
+        { name: "鄧祿普", desc: "充氣輪胎發明家" }, { name: "米其林兄弟", desc: "可拆卸輪胎發明家" },
+        { name: "斯賓塞", desc: "微波爐發明家" }, { name: "卡利瑟斯", desc: "現代冷氣空調發明家" },
+        { name: "鳥井信治郎", desc: "東方威士忌先驅" }, { name: "安藤百福", desc: "方便麵泡麵發明家" },
+        { name: "盛田昭夫", desc: "索尼隨身聽Walkman推動者" }, { name: "本田宗一郎", desc: "本田汽車創辦人" },
+        { name: "豐田喜一郎", desc: "豐田汽車創辦人" }, { name: "松下幸之助", desc: "日本經營之神" },
+        { name: "洛克菲勒", desc: "石油大亨與慈善家" }, { name: "卡內基", desc: "鋼鐵大王與圖書館資助者" },
+        { name: "摩根", desc: "華爾街金融巨擘" }, { name: "巴菲特", desc: "奧馬哈股神投資大師" },
+        { name: "索羅斯", desc: "著名的金融巨鱷與慈善家" }, { name: "馬斯克", desc: "特斯拉與SpaceX創辦人" },
+        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞馬遜Amazon創辦人" },
+        { name: "佩吉", desc: "Google共同創辦人" }, { name: "布林", desc: "Google共同創辦人" },
+        { name: "黃仁勳", desc: "輝達NVIDIA人工智慧教父" }, { name: "蘇姿丰", desc: "超微AMD半導體女王" },
+        { name: "張忠謀", desc: "台積電晶圓代工之父" }, { name: "薩姆奧特曼", desc: "OpenAI與ChatGPT核心推動者" },
+        { name: "舒曼", desc: "浪漫主義音樂大師" }, { name: "白遼士", desc: "幻想交響曲作曲家" },
+        { name: "韋瓦第", desc: "四季小提琴協奏曲作曲家" }, { name: "韓德爾", desc: "彌賽亞神劇作曲家" },
+        { name: "海頓", desc: "交響曲之父" }, { name: "李斯特", desc: "鋼琴之王" },
+        { name: "華格納", desc: "歌劇改革大師" }, { name: "威爾第", desc: "義大利歌劇巨擘" },
+        { name: "布拉姆斯", desc: "古典樂派繼承者" }, { name: "柴可夫斯基", desc: "天鵝湖音樂大師" },
+        { name: "德弗札克", desc: "新世界交響曲作曲家" }, { name: "格里格", desc: "挪威民族樂派大師" },
+        { name: "西貝流士", desc: "芬蘭頌作曲家" }, { name: "馬勒", desc: "巨人交響曲作曲家" },
+        { name: "拉赫曼尼諾夫", desc: "俄羅斯浪漫鋼琴大師" }, { name: "德布西", desc: "印象主義音樂先驅" },
+        { name: "拉威爾", desc: "波麗露舞曲作曲家" }, { name: "史特拉汶斯基", desc: "春之祭現代音樂先驅" },
+        { name: "普羅高菲夫", desc: "彼得與狼作曲家" }, { name: "蓋希文", desc: "藍色狂想曲大師" },
+        { name: "皮亞佐拉", desc: "新探戈音樂之父" }, { name: "久石讓", desc: "吉卜力經典配樂大師" },
+        { name: "約翰威廉斯", desc: "星際大戰與哈利波特配樂" }, { name: "漢斯季默", desc: "星際效應電影配樂大師" },
+        { name: "拉斐爾", desc: "文藝復興三傑畫家" }, { name: "羅丹", desc: "沉思者偉大雕塑家" },
+        { name: "林布蘭", desc: "光影魔術師荷蘭畫家" }, { name: "維梅爾", desc: "戴珍珠耳環的少女畫家" },
+        { name: "哥雅", desc: "西班牙浪漫主義畫家先驅" }, { name: "德拉克洛瓦", desc: "自由引導人民浪漫畫家" },
+        { name: "塞尚", desc: "現代藝術之父" }, { name: "高更", desc: "大溪地風情畫家" },
+        { name: "馬諦斯", desc: "野獸派色彩大師" }, { name: "康丁斯基", desc: "抽象畫先驅" },
+        { name: "馬格利特", desc: "超現實主義超幻畫家" }, { name: "達利", desc: "記憶的堅持大師" },
+        { name: "米羅", desc: "超現實純真色彩大師" }, { name: "草間彌生", desc: "圓點女王當代藝術家" },
+        { name: "村上隆", desc: "超扁平藝術當代大師" }, { name: "班克斯", desc: "神秘街頭塗鴉藝術家" },
+        { name: "高第", desc: "聖家堂傳奇建築大師" }, { name: "萊特", desc: "落水山莊建築大師" },
+        { name: "柯比意", desc: "功能主義現代建築之父" }, { name: "皮亞諾", desc: "龐畢度中心建築師" },
+        { name: "貝聿銘", desc: "羅浮宮金字塔華人建築大師" }, { name: "札哈哈蒂", desc: "曲線女王建築師" },
+        { name: "但丁", desc: "神曲作者" }, { name: "塞萬提斯", desc: "唐吉訶德作者" },
+        { name: "雨果", desc: "悲慘世界文學巨擘" }, { name: "大仲馬", desc: "基度山恩仇記作者" },
+        { name: "小仲馬", desc: "茶花女作者" }, { name: "凡爾納", desc: "海底兩萬哩作者" },
+        { name: "巴爾札克", desc: "人間喜劇文學大師" }, { name: "福樓拜", desc: "包法利夫人作者" },
+        { name: "托爾斯泰", desc: "戰爭與和平俄國文學巨擘" }, { name: "陀思妥耶夫斯基", desc: "罪與罰靈魂拷問大師" },
+        { name: "契訶夫", desc: "世界短篇小說之王" }, { name: "狄更斯", desc: "雙城記文學大師" },
+        { name: "柯南道爾", desc: "福爾摩斯小說作者" }, { name: "阿嘉莎克莉絲蒂", desc: "推理女王" },
+        { name: "托爾金", desc: "魔戒奇幻文學之父" }, { name: "路易斯", desc: "納尼亞傳奇奇幻大師" },
+        { name: "喬治歐威爾", desc: "1984與動物農莊作者" }, { name: "卡夫卡", desc: "變形記荒謬文學大師" },
+        { name: "馬奎斯", desc: "百年孤寂魔幻寫實大師" }, { name: "博爾赫斯", desc: "沙之書迷宮文學大師" },
+        { name: "泰戈爾", desc: "諾貝爾文學獎得主" }, { name: "川端康成", desc: "雪國日本文學得主" },
+        { name: "三島由紀夫", desc: "金閣寺唯美主義作家" }, { name: "村上春樹", desc: "挪威的森林當代作家" },
+        { name: "魯迅", desc: "阿Q正傳近代文學先驅" }, { name: "金庸", desc: "武俠小說泰斗" },
+        { name: "羅琳", desc: "哈利波特魔法世界創作者" }, { name: "海倫凱勒", desc: "奇蹟盲聾作家與教育家" },
+        { name: "林語堂", desc: "生活藝術幽默大師" }, { name: "胡適", desc: "新文化運動倡導者" },
+        { name: "紀伯倫", desc: "先知黎巴嫩詩人" }, { name: "歌德", desc: "浮士德作者" },
+        { name: "席勒", desc: "歡樂頌詩人劇作家" }, { name: "尼采", desc: "上帝已死超人哲學家" },
+        { name: "叔本華", desc: "悲觀主義意志哲學家" }, { name: "康德", desc: "三大批判三大哲學巨人" },
+        { name: "黑格爾", desc: "辯證法唯心主義大師" }, { name: "馬克思", desc: "影響世界深遠的哲學家" },
+        { name: "笛卡兒", desc: "我思故我在近代哲學之父" }, { name: "盧梭", desc: "民約論法國啟蒙思想家" },
+        { name: "伏爾泰", desc: "捍衛言論自由的啟蒙大師" }, { name: "孟德斯鳩", desc: "三權分立學說" },
+        { name: "培根", desc: "知識就是力量經驗論先驅" }, { name: "休姆", desc: "懷疑主義哲學家" },
+        { name: "洛克", desc: "自由主義之父" }, { name: "亞當斯密", desc: "現代經濟學之父" },
+        { name: "凱因斯", desc: "總體經濟學大師" }, { name: "佛洛伊德", desc: "精神分析學之父" },
+        { name: "榮格", desc: "分析心理學與原型理論大師" }, { name: "阿德勒", desc: "被討厭的勇氣先驅" },
+        { name: "皮亞傑", desc: "兒童認知發展心理學大師" }, { name: "馬斯洛", desc: "人類需求層次理論" },
+        { name: "史金納", desc: "行為主義心理學大師" }, { name: "巴夫洛夫", desc: "制約狗實驗科學家" },
+        { name: "蒙特梭利", desc: "啟發式幼兒教育先驅" }, { name: "福祿貝爾", desc: "幼稚園創辦人教育家" },
+        { name: "杜威", desc: "實用主義教育大師" }, { name: "墨子", desc: "兼愛非攻平民哲學家" },
+        { name: "韓非子", desc: "法家思想集大成者" }, { name: "荀子", desc: "性惡論儒家大師" },
+        { name: "孟子", desc: "性善論亞聖儒家巨人" }, { name: "王陽明", desc: "知行合一心學大師" },
+        { name: "朱熹", desc: "理學集大成者" }, { name: "曾國藩", desc: "晚清家書修身名臣" },
+        { name: "孫中山", desc: "創立中華民國的先行者" }, { name: "甘迺迪", desc: "美國總統" },
+        { name: "柯林頓", desc: "美國總統" }, { name: "歐巴馬", desc: "首位非裔美國總統" },
+        { name: "柴契爾夫人", desc: "鐵娘子英國首位女首相" }, { name: "默克爾", desc: "德國傳奇鐵娘子總理" },
+        { name: "李光耀", desc: "新加坡國父" }, { name: "馬哈迪", desc: "馬來西亞現代化之父" },
+        { name: "貝隆夫人", desc: "阿根廷永遠的玫瑰" }, { name: "克麗奧佩脫拉", desc: "埃及豔后傳奇女王" },
+        { name: "漢摩拉比", desc: "漢摩拉比法典國王" }, { name: "大流士一世", desc: "波斯帝國鐵血國王" },
+        { name: "阿育王", desc: "推廣佛教的孔雀國王" }, { name: "君士坦丁大帝", desc: "羅馬皇帝" },
+        { name: "查理曼大帝", desc: "紅心K皇帝" }, { name: "彼得大帝", desc: "開啟俄羅斯現代化的沙皇" },
+        { name: "凱薩琳大帝", desc: "俄羅斯傳奇女沙皇" }, { name: "明治天皇", desc: "推動明治維新的日本天皇" },
+        { name: "李舜臣", desc: "韓國民族抗倭英雄" }, { name: "切格瓦拉", desc: "浪漫革命象徵英雄" },
+        { name: "卡斯楚", desc: "古巴傳奇領袖" }, { name: "阿拉法特", desc: "巴勒斯坦運動領袖" },
+        { name: "卓別林", desc: "默片時代喜劇大師" }, { name: "奧黛麗赫本", desc: "優雅銀幕女神與天使" },
+        { name: "瑪麗蓮夢露", desc: "好萊塢永恆性感符號" }, { name: "貓王", desc: "搖滾樂之王普里斯萊" },
+        { name: "約翰藍儂", desc: "披頭四樂團靈魂歌手" }, { name: "麥可傑克森", desc: "流行音樂之王" },
+        { name: "瑪丹娜", desc: "流行樂壇百變天后" }, { name: "大衛鮑伊", desc: "華麗搖滾傳奇樂手" },
+        { name: "李小龍", desc: "截拳道創始人世界武打巨星" }, { name: "成龍", desc: "動作巨星" },
+        { name: "周星馳", desc: "華語影壇喜劇之王" }, { name: "李安", desc: "雙座奧斯卡金像獎導演之光" },
+        { name: "希區考克", desc: "驚悚電影大師" }, { name: "史匹柏", desc: "侏羅紀公園票房大導" },
+        { name: "盧卡斯", desc: "星際大戰世界締造者" }, { name: "詹姆斯卡麥隆", desc: "阿凡達神級導演" },
+        { name: "克里斯多福諾蘭", desc: "全面啟動燒腦大導" }, { name: "馬里奧普佐", desc: "教父小說原著作者" },
+        { name: "貝利", desc: "巴西世紀球王貝利" }, { name: "馬拉度納", desc: "上帝之手阿根廷足球金童" },
+        { name: "C羅", desc: "葡萄牙進球機器" }, { name: "舒馬克", desc: "F1賽車七屆不敗車神" },
+        { name: "洗拿", desc: "巴西傳奇一級方程式車手" }, { name: "路易斯漢米爾頓", desc: "現代F1多屆世界冠軍" },
+        { name: "費爾普斯", desc: "奧運史上最多金牌飛魚" }, { name: "尤塞恩博爾特", desc: "世界百米短跑紀錄保持人" },
+        { name: "穆罕默德阿里", desc: "最偉大的拳王" }, { name: "泰森", desc: "鐵拳最年輕重量級拳王" },
+        { name: "布萊恩", desc: "黑曼巴永恆精神籃球巨星" }, { name: "詹姆斯", desc: "小皇帝NBA歷史得分王" },
+        { name: "庫里", desc: "三分球革命現代籃球神射手" }, { name: "老虎伍茲", desc: "高爾夫球歷史傳奇" },
+        { name: "莎拉波娃", desc: "網球大滿貫得主" }, { name: "小威廉絲", desc: "網壇歷史統治級女皇" },
+        { name: "羽生結弦", desc: "滑冰王子連霸奧運傳奇" }, { name: "李昌鎬", desc: "圍棋石佛傳奇九段" },
+        { name: "深藍", desc: "擊敗人類世界西洋棋冠軍的IBM超級電腦" }, { name: "AlphaGo", desc: "擊敗圍棋世界冠軍的人工智慧傳奇" }
     ];
 
     const monthsData = [
@@ -339,30 +520,44 @@
         }
 
         if (availableDays.length === 0) {
-            document.getElementById('celebrity-display').innerHTML = "🎉 太驚人了！365天已經全數存滿！全家都是存錢超人！";
+            document.getElementById('celebrity-display').innerHTML = "🎉 太厲害了！365天已經全數存滿囉！";
             return;
         }
 
         const randomDayIdx = Math.floor(Math.random() * availableDays.length);
         const selectedDay = availableDays[randomDayIdx];
 
-        // 挑選金句
-        const randomQuoteIdx = Math.floor(Math.random() * quotesDatabase.length);
-        let quote = quotesDatabase[randomQuoteIdx];
+        // 決定今天是隨機「名人」還是「笑話金句」 (50% 50%)
+        const isQuote = Math.random() < 0.5;
+        let displayContent = "";
 
-        // 針對大金額/小金額客製化一點碎碎念
+        // 客製化大金額小金額的小碎念
         let dynamicTip = "";
         if (selectedDay >= 300) {
-            dynamicTip = " (哇！今天抽到大魔王！咬牙存下來，你就是勇者！🦁)";
+            dynamicTip = " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(抽到大魔王啦！🦁)</span>";
         } else if (selectedDay <= 30) {
-            dynamicTip = " (太輕鬆了吧！這個金額根本無痛，秒殺它！⚡)";
+            dynamicTip = " <span style='color:#16a34a; font-size:0.85rem; font-weight:bold;'>(秒殺它！⚡)</span>";
         }
 
-        // 顯示結果 (黃底黑字更好看)
-        document.getElementById('celebrity-display').innerHTML = `
-            <span style="font-size:1.1rem; color:#15803d; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-            <span style="font-size:0.88rem; color:#4a5568; font-style:italic; display:inline-block; margin-top:6px;">💬 ${quote}</span>
-        `;
+        if (isQuote) {
+            // 抽笑話金句
+            const randomQuoteIdx = Math.floor(Math.random() * quotesDatabase.length);
+            const quote = quotesDatabase[randomQuoteIdx];
+            displayContent = `
+                <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 ${quote}</span>
+            `;
+        } else {
+            // 抽歷史名人
+            const randomCelebIdx = Math.floor(Math.random() * celebrityDatabase.length);
+            const celeb = celebrityDatabase[randomCelebIdx];
+            displayContent = `
+                <span style="font-size:1.1rem; color:#0369a1; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                <span style="font-size:0.9rem; color:#1e293b; margin-top:6px; display:inline-block;">👤 特派員：<strong>${celeb.name}</strong> (${celeb.desc}) 派任務給你囉！</span>
+            `;
+        }
+
+        document.getElementById('celebrity-display').innerHTML = displayContent;
 
         const targetCell = cellsMap[selectedDay];
         if (targetCell) {
