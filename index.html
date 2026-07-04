@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祈祈星星的小小存錢計劃</title>
+    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --primary-color: #0077b6;
@@ -47,7 +49,6 @@
             margin: 0;
         }
 
-        /* 統計面板 */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -77,7 +78,7 @@
             color: var(--primary-color);
         }
 
-        /* 隨機驚喜抽籤區 */
+        /* 經典黃藍漸層，外觀毫無異狀，安全偽裝 */
         .random-box {
             background: linear-gradient(135deg, #fef08a 0%, #bae6fd 100%);
             border: 1px solid #bae6fd;
@@ -112,20 +113,14 @@
             background-color: #0284c7;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 25px;
             font-size: 0.95rem;
             font-weight: bold;
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: background 0.2s;
         }
 
-        .random-btn:active {
-            background-color: #0369a1;
-        }
-
-        /* 月份排版 */
         .grid-container {
             display: flex;
             flex-direction: column;
@@ -205,7 +200,6 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
-    <!-- 隨機驚喜抽籤區 -->
     <div class="random-box">
         <div class="random-title">🎲 歡樂存錢雙重盲盒</div>
         <div class="celebrity-info" id="celebrity-display">今天會抽到大名人，還是超級冷笑話呢？快按下按鈕解鎖！</div>
@@ -231,9 +225,8 @@
 </div>
 
 <script>
-    // 幽默與鼓勵金句庫
     const quotesDatabase = [
-        "存錢就像減肥，只要不去看存款和體重，就覺得自己很成功！🤣",
+        "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
         "今天不花錢，明天變富豪！就算變不成富豪，至少離夢想更近了一步。🌟",
         "錢沒有消失，只是變成了你們未來更喜歡的亮晶晶模樣！✨",
         "你知道什麼動物最喜歡存錢嗎？答案是：壁虎（必富）！🦎",
@@ -246,7 +239,7 @@
         "加油！今天的努力，未來的你一定會打電話回來跟你說謝謝！📞",
         "每存下一筆錢，就像是在地圖上往夢想前進了一大步！🗺️",
         "你知道小明為什麼存錢快嗎？分享給你知道，因為他很『省』思。大冷笑話！",
-        "存錢的過程雖然有點辛苦，但看到總金額啪啪啪往上漲的時候，真的超級爽！",
+        "存錢的過程雖然有點辛苦，開心地看總金額啪啪啪往上漲吧！",
         "請問世界上哪裡的手機訊號最好？答案是：阿富汗（阿，富，汗）！📱",
         "今天偷懶不存錢，明天小豬撲滿就會對你嘆氣喔！哼哼～🐖",
         "今天的任務金額是宇宙給領的神秘考驗，接招吧！💪",
@@ -259,7 +252,6 @@
         "別看今天只有一點點，365天後這可是一筆能帶大家去大冒險的寶藏呢！"
     ];
 
-    // 365位世界名人資料庫
     const celebrityDatabase = [
         { name: "愛因斯坦", desc: "相對論物理學家" }, { name: "牛頓", desc: "萬有引力發現者" },
         { name: "達文西", desc: "文藝復興全才藝術家" }, { name: "莫札特", desc: "音樂神童" },
@@ -283,7 +275,7 @@
         { name: "阿姆斯壯", desc: "第一位登陸月球的人" }, { name: "加加林", desc: "第一位進入太空的人" },
         { name: "諾貝爾", desc: "炸藥發明家" }, { name: "萊布尼茲", desc: "微積分發明者之一" },
         { name: "高斯", desc: "數學王子" }, { name: "歐拉", desc: "偉大的瑞士數學家" },
-        { name: "孟德爾", desc: "遺傳學之父" }, { name: "法拉第", desc: "電磁感應發現者" },
+        { name: "開德爾", desc: "遺傳學之父" }, { name: "法拉第", desc: "電磁感應發現者" },
         { name: "馬克士威", desc: "電磁學大師" }, { name: "普朗克", desc: "量子力學之父" },
         { name: "費曼", desc: "幽默的量子物理學家" }, { name: "鮑林", desc: "雙料諾貝爾獎得主" },
         { name: "歐本海默", desc: "原子彈之父" }, { name: "圖靈", desc: "電腦科學之父" },
@@ -381,14 +373,14 @@
         { name: "泰戈爾", desc: "諾貝爾文學獎得主" }, { name: "川端康成", desc: "雪國日本文學得主" },
         { name: "三島由紀夫", desc: "金閣寺唯美主義作家" }, { name: "村上春樹", desc: "挪威的森林當代作家" },
         { name: "魯迅", desc: "阿Q正傳近代文學先驅" }, { name: "金庸", desc: "武俠小說泰斗" },
-        { name: "羅琳", desc: "ハリー・ポッター魔法世界創作者" }, { name: "海倫凱勒", desc: "奇蹟盲聾作家與教育家" },
+        { name: "羅琳", desc: "魔法世界創作者" }, { name: "海倫凱勒", desc: "奇蹟盲聾作家與教育家" },
         { name: "林語堂", desc: "生活藝術幽默大師" }, { name: "胡適", desc: "新文化運動倡導者" },
         { name: "紀伯倫", desc: "先知黎巴嫩詩人" }, { name: "歌德", desc: "浮士德作者" },
         { name: "席勒", desc: "歡樂頌詩人劇作家" }, { name: "尼采", desc: "上帝已死超人哲學家" },
         { name: "叔本華", desc: "悲觀主義意志哲學家" }, { name: "康德", desc: "三大批判三大哲學巨人" },
         { name: "黑格爾", desc: "辯證法唯心主義大師" }, { name: "馬克思", desc: "影響世界深遠的哲學家" },
-        { name: "笛卡兒", desc: "我思故我在近代哲學之父" }, { name: "盧梭", desc: "民約論法國啟蒙思想家" },
-        { name: "伏爾泰", desc: "捍衛言論自由的啟盟大師" }, { name: "孟德斯鳩", desc: "三權分立學說" },
+        { name: "笛卡兒", desc: "我思故我在近代哲學之父" }, { name: "盧梭", desc: "民約論法國啟盟思想家" },
+        { name: "伏爾泰", desc: "捍衛言論自由的啟盟大師" }, { name: "開德斯鳩", desc: "三權分立學說" },
         { name: "培根", desc: "知識就是力量經驗論先驅" }, { name: "休姆", desc: "懷疑主義哲學家" },
         { name: "洛克", desc: "自由主義之父" }, { name: "亞當斯密", desc: "現代經濟學之父" },
         { name: "凱因斯", desc: "總體經濟學大師" }, { name: "佛洛伊德", desc: "精神分析學之父" },
@@ -398,7 +390,7 @@
         { name: "蒙特梭利", desc: "啟發式幼兒教育先驅" }, { name: "福祿貝爾", desc: "幼稚園創辦人教育家" },
         { name: "杜威", desc: "實用主義教育大師" }, { name: "墨子", desc: "兼愛非攻平民哲學家" },
         { name: "韓非子", desc: "法家思想集大成者" }, { name: "荀子", desc: "性惡論儒家大師" },
-        { name: "孟子", desc: "性善論亞聖儒家巨人" }, { name: "王陽明", desc: "知行合一心學大師" },
+        { name: "開子", desc: "性善論亞聖儒家巨人" }, { name: "王陽明", desc: "知行合一心學大師" },
         { name: "朱熹", desc: "理學集大成者" }, { name: "曾國藩", desc: "晚清家書修身名臣" },
         { name: "孫中山", desc: "創立中華民國的先行者" }, { name: "甘迺迪", desc: "美國總統" },
         { name: "柯林頓", desc: "美國總統" }, { name: "歐巴馬", desc: "首位非裔美國總統" },
@@ -413,7 +405,7 @@
         { name: "卡斯楚", desc: "古巴傳奇領袖" }, { name: "阿拉法特", desc: "巴勒斯坦運動領袖" },
         { name: "卓別林", desc: "默片時代喜劇大師" }, { name: "奧黛麗赫本", desc: "優雅銀幕女神與天使" },
         { name: "瑪麗蓮夢露", desc: "好萊塢永恆性感符號" }, { name: "貓王", desc: "搖滾樂之王普里斯萊" },
-        { name: "約翰藍儂", desc: "披頭四樂團靈魂歌手" }, { name: "麥可傑克森", desc: "流行音樂之王" },
+        { name: "約翰藍儂", desc: "披頭四樂團靈魂歌手" }, { name: "麥克傑克森", desc: "流行音樂之王" },
         { name: "瑪丹娜", desc: "流行樂壇百變天后" }, { name: "大衛鮑伊", desc: "華麗搖滾傳奇樂手" },
         { name: "李小龍", desc: "截拳道創始人世界武打巨星" }, { name: "成龍", desc: "動作巨星" },
         { name: "周星馳", desc: "華語影壇喜劇之王" }, { name: "李安", desc: "雙座奧斯卡金像獎導演之光" },
@@ -490,9 +482,12 @@
 
     function toggleDay(dayAmount, element) {
         const index = checkedDays.indexOf(dayAmount);
+        let isAdding = false;
+
         if (index === -1) {
             checkedDays.push(dayAmount);
             element.classList.add('checked');
+            isAdding = true;
         } else {
             checkedDays.splice(index, 1);
             element.classList.remove('checked');
@@ -500,6 +495,30 @@
         
         localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays));
         updateDashboard();
+
+        // 🎉 隱形拉炮里程碑爆發
+        if (isAdding) {
+            const currentCount = checkedDays.length;
+            let milestoneReached = false;
+            let title = "";
+
+            if (currentCount === 10) { title = "🎖️ 存錢小幼苗 🎖️"; milestoneReached = true; }
+            else if (currentCount === 20) { title = "🥈 存錢小達人 🥈"; milestoneReached = true; }
+            else if (currentCount === 50) { title = "🥇 銅板終結者 🥇"; milestoneReached = true; }
+            else if (currentCount === 100) { title = "💎 破百大英豪 💎"; milestoneReached = true; }
+            else if (currentCount === 200) { title = "👑 黃金大富翁 👑"; milestoneReached = true; }
+            else if (currentCount === 300) { title = "🦁 傳奇大金庫 🦁"; milestoneReached = true; }
+            else if (currentCount === 365) { title = "🏆 365天滿貫大終結者 🏆"; milestoneReached = true; }
+
+            if (milestoneReached) {
+                confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
+                confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
+
+                setTimeout(() => {
+                    alert(`🎉 恭喜達成里程碑！\n目前已堅持存錢達 ${currentCount} 天！\n恭喜榮獲稱號：【${title}】！🔥✨`);
+                }, 400);
+            }
+        }
     }
 
     function updateDashboard() {
@@ -509,7 +528,7 @@
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
-        document.getElementById('progress-percent').innerText = `${progressPercentPercent}%`;
+        document.getElementById('progress-percent').innerText = `${progressPercent}%`;
     }
 
     function pickCelebrity() {
@@ -529,22 +548,23 @@
         const selectedDay = availableDays[randomDayIdx];
 
         let displayContent = "";
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const hour = now.getHours();
 
-        // ======= 🚀 【1月19日 佳祈生日專屬超級彩蛋判定】 🚀 =======
+        // 1/19 佳祈生日大彩蛋
         if (selectedDay === 19) {
             displayContent = `
-                <div style="background: linear-gradient(45deg, #f43f5e, #fb7185); color: white; padding: 12px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%;">
-                    <span style="font-size:1.3rem; font-weight:bold; display:block; margin-bottom:4px;">🎂 佳祈生日快樂！！ 🎂</span>
-                    <span style="font-size:1.1rem; font-weight:bold; display:block; background-color:rgba(255,255,255,0.2); padding:6px; border-radius:6px; margin-bottom:6px;">
-                        今日特殊任務：存下原本的 $19 元 + 額外多存 $1,000 元！ (共 $1,019 元)
+                <div style="background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(236,72,153,0.3); width: 100%; text-align: center; box-sizing: border-box;">
+                    <span style="font-size:1.4rem; font-weight:bold; display:block; margin-bottom:6px; letter-spacing:1px;">🎂 佳祈生日快樂！！ 🎉</span>
+                    <span style="font-size:1.05rem; font-weight:bold; display:block; background-color:rgba(255,255,255,0.2); padding:8px 12px; border-radius:6px; margin-bottom:8px; line-height:1.4;">
+                        🎁 今日特殊任務：存下原本的 $19 元<br>＋ 額外挑戰多存 $1,000 元！(共 $1,019 元)
                     </span>
-                    <span style="font-size:0.9rem; font-style:italic;">💬 在這個超級特別又溫馨的日子裡，祝佳祈心想事成、天天開心！💐✨</span>
+                    <span style="font-size:0.85rem; font-style:italic; opacity:0.9;">💬 在這個超級特別又溫馨的日子裡，祝佳祈心想事成、天天開心！💐✨</span>
                 </div>
             `;
         } else {
-            // 原本的隨機雙重盲盒邏輯
-            const isQuote = Math.random() < 0.5;
-            
             let dynamicTip = "";
             if (selectedDay >= 300) {
                 dynamicTip = " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(抽到大魔王啦！🦁)</span>";
@@ -552,20 +572,82 @@
                 dynamicTip = " <span style='color:#16a34a; font-size:0.85rem; font-weight:bold;'>(秒殺它！⚡)</span>";
             }
 
-            if (isQuote) {
-                const randomQuoteIdx = Math.floor(Math.random() * quotesDatabase.length);
-                const quote = quotesDatabase[randomQuoteIdx];
+            // ======= 🕒 隱形時空節慶金句覆蓋 (外觀藍白偽裝，唯獨文字隨節日變化) =======
+            
+            // 1. 七夕情人節 (8/16 ~ 8/22)
+            if (month === 8 && date >= 16 && date <= 22) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 ${quote}</span>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎋 織女偷偷跟牛郎說：『看！祈祈和星星今天又存了 $${selectedDay} 元，以後喜鵲橋可以蓋得更華麗了！』✨</span>
                 `;
-            } else {
-                const randomCelebIdx = Math.floor(Math.random() * celebrityDatabase.length);
-                const celeb = celebrityDatabase[randomCelebIdx];
+            }
+            // 2. 中秋節 (9/22 ~ 9/27)
+            else if (month === 9 && date >= 22 && date <= 27) {
                 displayContent = `
-                    <span style="font-size:1.1rem; color:#0369a1; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-                    <span style="font-size:0.9rem; color:#1e293b; margin-top:6px; display:inline-block;">👤 特派員：<strong>${celeb.name}</strong> (${celeb.desc}) 派任務給你囉！</span>
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🥮 月亮圓圓，錢包鼓鼓！嫦娥跟玉兔說：『今天存下 $${selectedDay} 元，中秋夜烤肉香氣加倍！』🐇</span>
                 `;
+            }
+            // 3. 萬聖節 (10/28 ~ 11/1)
+            else if ((month === 10 && date >= 28) || (month === 11 && date <= 1)) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">👻 不給錢就搗蛋！今天小鬼們看到你存了 $${selectedDay} 元，嚇得把糖果都留下來落跑了！🎃</span>
+                `;
+            }
+            // 4. 聖誕節 (12/23 ~ 12/27)
+            else if (month === 12 && date >= 23 && date <= 27) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎄 叮叮噹！聖誕老公公從煙囪看進來：『祈祈和星星今天存了 $${selectedDay} 元，真乖！禮物準備加碼囉！』🎁</span>
+                `;
+            }
+            // 5. 元旦跨年 (12/31 ~ 1/3)
+            else if ((month === 12 && date === 31) || (month === 1 && date <= 3)) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">新年新氣象：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎉 5、4、3、2、1！跨年煙火秀開跑！新的一年用這筆 $${selectedDay} 元開啟滿滿財運！✨</span>
+                `;
+            }
+            // 6. 農曆新年 (1/25 ~ 2/5)
+            else if ((month === 1 && date >= 25) || (month === 2 && date <= 5)) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">🧧 吉利開運數：$${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🏮 財神爺敲門送福報！新春開運存下這筆錢，代表新的一年全家大吉大利、財源廣進！💰</span>
+                `;
+            }
+            // 7. 兒童節 (4/2 ~ 4/5)
+            else if (month === 4 && date >= 2 && date <= 5) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">🧸 兒童節快樂：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎈 祈祈和星星的專屬節日！今天存下快樂的 $${selectedDay} 元，未來的夢想一定會變得超級大！🦖</span>
+                `;
+            }
+            // 8. 常態深夜模式 (00:00 - 05:00)
+            else if (hour >= 0 && hour < 5) {
+                displayContent = `
+                    <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                    <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💤 太晚了～小豬撲滿睡著了，明天再存吧，快去睡覺！💤</span>
+                `;
+            }
+            // 9. 常態無節慶盲盒
+            else {
+                const isQuote = Math.random() < 0.5;
+                if (isQuote) {
+                    const randomQuoteIdx = Math.floor(Math.random() * quotesDatabase.length);
+                    const quote = quotesDatabase[randomQuoteIdx];
+                    displayContent = `
+                        <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                        <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 ${quote}</span>
+                    `;
+                } else {
+                    const randomCelebIdx = Math.floor(Math.random() * celebrityDatabase.length);
+                    const celeb = celebrityDatabase[randomCelebIdx];
+                    displayContent = `
+                        <span style="font-size:1.1rem; color:#0369a1; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+                        <span style="font-size:0.9rem; color:#1e293b; margin-top:6px; display:inline-block;">👤 特派員：<strong>${celeb.name}</strong> (${celeb.desc}) 派任務給你囉！</span>
+                    `;
+                }
             }
         }
 
