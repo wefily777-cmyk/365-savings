@@ -475,9 +475,9 @@
         "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
         "今天不花錢，明天變富豪！就算變不成富豪，至少離夢想更近了一步。🌟",
         "錢沒有消失，只是變成了你們未來更喜歡的亮晶晶模樣！✨",
-        "你知道什麼動物最喜歡存錢嗎？答案 es 答案是：壁虎（必富）！🦎",
+        "你知道什麼動物最喜歡存錢嗎？答案是：壁虎（必富）！🦎",
         "今天省下一杯飲料錢，以後就能換來好大一個驚喜！一杯飲料算什麼，衝啊！",
-        "有一隻魚在散步，走著走著突然大喊：『我手腳好冰！』因為他是冷血動物。🥶",
+        "有一隻魚在散步，走著走著就突然大喊：『我手腳好冰！』因為他是冷血動物。🥶",
         "最厲害的存錢大師不是存得多，而是天天都在堅持！祈祈星星今天也超棒！",
         "小豬撲滿今天拍拍肚子說：『今天的主人好大方，謝謝招待！』🐷",
         "世界上最遙遠的距離，是想買的東西在購物車，而錢包在裝睡. 快把它搖醒！",
@@ -579,7 +579,7 @@
         { name: "洛克菲勒", desc: "石油大亨與慈善家" }, { name: "卡內基", desc: "鋼鐵大王與圖書館資助者" },
         { name: "摩根", desc: "華爾街金融巨擘" }, { name: "巴菲特", desc: "奧馬哈股神投資大師" },
         { name: "索羅斯", desc: "著名的金融巨鱷與慈善家" }, { name: "馬斯克", desc: "特斯拉與SpaceX創辦人" },
-        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞過遜Amazon創辦人" },
+        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞馬遜Amazon創辦人" },
         { name: "佩吉", desc: "Google共同創辦人" }, { name: "布林", desc: "Google共同創辦人" },
         { name: "黃仁勳", desc: "輝達NVIDIA人工智慧教父" }, { name: "蘇姿丰", desc: "超微AMD半導體女王" },
         { name: "張忠謀", desc: "台積電晶圓代工之父" }, { name: "薩姆奧特曼", desc: "OpenAI與ChatGPT核心推動者" },
@@ -593,7 +593,7 @@
         { name: "拉赫曼尼諾夫", desc: "俄羅斯浪漫鋼琴大師" }, { name: "德布西", desc: "印象主義音樂先驅" },
         { name: "拉威爾", desc: "波麗露舞曲作曲家" }, { name: "史特拉汶斯基", desc: "春之祭現代音樂先驅" },
         { name: "普羅高菲夫", desc: "彼得與狼作曲家" }, { name: "蓋希文", desc: "藍色狂想曲大師" },
-        { name: "皮亞佐拉", desc: "新探戈音樂之父" }, { name: "久石讓", desc: "吉卜力經典配樂大師" },
+        { name: "皮亞佐拉", desc: "新探延音樂之父" }, { name: "久石讓", desc: "吉卜力經典配樂大師" },
         { name: "約翰威廉斯", desc: "星際大戰與哈利波特配樂" }, { name: "漢斯季默", desc: "星際效應電影配樂大師" },
         { name: "拉斐爾", desc: "文藝復興三傑畫家" }, { name: "羅丹", desc: "沉思者偉大雕塑家" },
         { name: "林布蘭", desc: "光影魔術師荷蘭畫家" }, { name: "維梅爾", desc: "戴珍珠耳環的少女畫家" },
@@ -707,6 +707,7 @@
         document.getElementById('custom-modal-layer').classList.remove('active');
     }
 
+    // 載入自訂目標與選定主題
     function loadTargetGoal() {
         const savedGoal = localStorage.getItem('365_savings_goal') || '一起大冒險';
         document.getElementById('target-saving-input').value = savedGoal;
@@ -815,9 +816,9 @@
         const totalSaved = checkedDays.reduce((sum, val) => sum + val, 0);
         const daysCount = checkedDays.length;
         
-        // 🎯 核心修正：完美回歸天數制百分比！(格數 ÷ 365天)
+        // 🎯 核心：精確的天數百分比邏輯
         const percentNum = (daysCount / 365) * 100;
-        const progressPercent = percentNum.toFixed(2); // 每一天代表增加 0.27% 
+        const progressPercent = percentNum.toFixed(2); // 顯示 0.00% 
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
@@ -840,40 +841,41 @@
         let runnerIcon = "🚀";
         let statusString = "";
 
+        // ======= 📈 解放死板數字！直接將最精準的 progressPercent 融合進文字中！ =======
         if (currentTheme === 'travel') {
             runnerIcon = "✈️";
             if (percentNum === 0) statusString = `🗺️ 許願瓶空空的～正在描繪前往【${goalText}】的旅行藍圖！`;
-            else if (percentNum <= 25) statusString = `🛂 [水位 25%]：注入旅行能量！【護照與簽證】已經在瓶底成功辦理好囉！`;
-            else if (percentNum <= 50) statusString = `🧳 [水位 50%]：能量過半！水面上浮現【專屬行李箱】，塞滿了漂亮衣服！`;
-            else if (percentNum <= 75) statusString = `🎫 [水位 75%]：水位高漲！【來回機票】劃位完成，在許願瓶裡閃閃發光！`;
-            else if (percentNum < 100) statusString = `🏪 [水位 ${progressPercent}%]：即將裝滿！已經抵達航廈【準備登機】，大冒險輪廓超清晰！`;
+            else if (percentNum <= 25) statusString = `🛂 [進度 ${progressPercent}%]：注入旅行能量！【護照與簽證】已經在瓶底成功辦理好囉！`;
+            else if (percentNum <= 50) statusString = `🧳 [進度 ${progressPercent}%]：能量過半！水面上浮現【專屬行李箱】，塞滿了漂亮衣服！`;
+            else if (percentNum <= 75) statusString = `🎫 [進度 ${progressPercent}%]：水位高漲！【來回機票】劃位完成，在許願瓶裡閃閃發光！`;
+            else if (percentNum < 100) statusString = `🏪 [進度 ${progressPercent}%]：即將裝滿！已經抵達航廈【準備登機】，大冒險輪廓超清晰！`;
             else statusString = `🎉 [100% 滿載]：許願瓶完全裝滿！飛機順利起飛，開心地前往【${goalText}】大玩特玩啦！🏆`;
         } 
         else if (currentTheme === 'perfume') {
             runnerIcon = "🧴";
             if (percentNum === 0) statusString = `✨ 許願瓶空空的～正在調配屬於【${goalText}】的神祕香氣藍圖...`;
-            else if (percentNum <= 25) statusString = `💎 [水位 25%]：注入香氣精華！瓶底已成功收集到【亮晶晶的精緻瓶蓋】！`;
-            else if (percentNum <= 50) statusString = `🧪 [水位 50%]：形狀出來了！【流線型高級玻璃瓶身】製作完工！`;
-            else if (percentNum <= 75) statusString = `🌸 [水位 75%]：好香呀！【珍貴的草本植物與花香】已完美融入整瓶液體中！`;
-            else if (percentNum < 100) statusString = `🏷️ [水位 ${progressPercent}%]：即將完工！正在進行最後微雕，貼上【夢幻燙金香氛標籤】！`;
+            else if (percentNum <= 25) statusString = `💎 [進度 ${progressPercent}%]：注入香氣精華！瓶底已成功收集到【亮晶晶的精緻瓶蓋】！`;
+            else if (percentNum <= 50) statusString = `🧪 [進度 ${progressPercent}%]：形狀出來了！【流線型高級玻璃瓶身】製作完工！`;
+            else if (percentNum <= 75) statusString = `🌸 [進度 ${progressPercent}%]：好香呀！【珍貴的草本植物與花香】已完美融入整瓶液體中！`;
+            else if (percentNum < 100) statusString = `🏷️ [進度 ${progressPercent}%]：最後修飾！正在進行最後微雕，貼上【夢幻燙金香氛標籤】！`;
             else statusString = `🎉 [100% 滿載]：香氣大噴發！【${goalText}】夢幻調配成功，整瓶裝滿幸福亮晶晶的優雅味道！✨`;
         }
         else if (currentTheme === 'lego') {
             runnerIcon = "🧱";
             if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的藍圖說明書準備動手！`;
-            else if (percentNum <= 25) statusString = `📦 [水位 25%]：注入拼裝能量！零件拆袋，【全套樂高零件積木】沉入瓶底！`;
-            else if (percentNum <= 50) statusString = `🧱 [水位 50%]：結構搭建中！玩具的【第一層厚實地基與城堡骨架】成型！`;
-            else if (percentNum <= 75) statusString = `👑 [水位 75%]：水位湧上！最厲害的【隱藏機關公仔與核心角色】組裝上陣！`;
-            else if (percentNum < 100) statusString = `🎨 [水位 ${progressPercent}%]：就差一滴！【精細防偽貼紙】全數貼齊，城堡剪影完全顯現！`;
+            else if (percentNum <= 25) statusString = `📦 [進度 ${progressPercent}%]：注入拼裝能量！零件拆袋，【全套樂高零件積木】沉入瓶底！`;
+            else if (percentNum <= 50) statusString = `🧱 [進度 ${progressPercent}%]：結構搭建中！玩具的【第一層厚實地基與城堡骨架】成型！`;
+            else if (percentNum <= 75) statusString = `👑 [進度 ${progressPercent}%]：水位湧上！最厲害的【隱藏機關公仔與核心角色】組裝上陣！`;
+            else if (percentNum < 100) statusString = `🎨 [進度 ${progressPercent}%]：就差一滴！【精細防偽貼紙】全數貼齊，城堡剪影完全顯現！`;
             else statusString = `🏆 [100% 滿載]：萬貫合體！【${goalText}】大功告成！變成精緻無比、值得炫耀的彩色大成品！`;
         }
         else {
             runnerIcon = "🚀";
             if (percentNum === 0) statusString = `🌌 許願瓶空空的～發動機組裝中，等待祈祈星星注入神祕宇宙能量！`;
-            else if (percentNum <= 25) statusString = `⛽ [水位 25%]：注入星際燃料！發動機建造完畢，【固態能量水】充滿 25%！`;
-            else if (percentNum <= 50) statusString = `☁️ [水位 50%]：火箭衝鋒！【成功升空、突破厚厚雲朵】進入溫暖陽光層！`;
-            else if (percentNum <= 75) statusString = `🪐 [水位 75%]：潮汐引力！火箭【漂進神祕浪漫的外太空】，繁星在水面閃爍！`;
-            else if (percentNum < 100) statusString = `👑 [水位 ${progressPercent}%]：看見地平線！遠方逐漸顯現出【${goalText} 夢想星球】的壯麗輪廓！`;
+            else if (percentNum <= 25) statusString = `⛽ [進度 ${progressPercent}%]：注入星際燃料！發動機建造完畢，【固態能量水】充滿燃料！`;
+            else if (percentNum <= 50) statusString = `☁️ [進度 ${progressPercent}%]：火箭衝鋒！【成功升空、突破厚厚雲朵】進入溫暖陽光層！`;
+            else if (percentNum <= 75) statusString = `🪐 [進度 ${progressPercent}%]：潮汐引力！火箭【漂進神祕浪漫的外太空】，繁星在水面閃爍！`;
+            else if (percentNum < 100) statusString = `👑 [進度 ${progressPercent}%]：看見地平線！遠方逐漸顯現出【${goalText} 夢想星球】的壯麗輪廓！`;
             else statusString = `🏆 [100% 滿載]：奇蹟登陸！順利在【${goalText} 星球】插上星際旗幟，解鎖終極大金庫！🎉`;
         }
 
