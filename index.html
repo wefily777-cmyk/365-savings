@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祈祈星星的小小存錢計劃</title>
+    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -14,6 +15,25 @@
             --checked-bg: #a7c957;
             --checked-text: #386641;
             --text-color: #333333;
+            --border-color: #e2e8f0;
+            --header-bg: #e0f2fe;
+            --header-text: #0369a1;
+            --cell-bg: #f8fafc;
+        }
+
+        /* 🌙 深夜模式變暗變色色票 (00:00-05:00 自動隱形切換) */
+        body.midnight-mode {
+            --primary-color: #90e0ef;
+            --accent-color: #00b4d8;
+            --bg-color: #121824;
+            --card-bg: #1e2640;
+            --checked-bg: #2d4a22;
+            --checked-text: #a7c957;
+            --text-color: #cbd5e1;
+            --border-color: #334155;
+            --header-bg: #0f172a;
+            --header-text: #38bdf8;
+            --cell-bg: #1e293b;
         }
 
         body {
@@ -23,6 +43,7 @@
             margin: 0;
             padding: 15px;
             -webkit-tap-highlight-color: transparent;
+            transition: background-color 0.5s, color 0.5s;
         }
 
         .container {
@@ -32,7 +53,7 @@
 
         header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         h1 {
@@ -47,6 +68,107 @@
             color: #666;
             margin: 0;
         }
+        body.midnight-mode header p {
+            color: #94a3b8;
+        }
+
+        /* 智慧目標與進度條區塊 */
+        .target-progress-box {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .target-input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            gap: 8px;
+        }
+
+        .target-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            white-space: nowrap;
+        }
+
+        .target-input {
+            flex: 1;
+            border: 1px dashed var(--accent-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            background-color: rgba(0, 180, 216, 0.08);
+            font-weight: bold;
+            outline: none;
+            text-align: center;
+        }
+
+        body.midnight-mode .target-input {
+            background-color: rgba(144, 224, 239, 0.05);
+        }
+
+        .target-input:focus {
+            border-style: solid;
+            background-color: var(--card-bg);
+        }
+
+        /* 進度條外殼 */
+        .progress-container {
+            position: relative;
+            background-color: var(--border-color);
+            height: 14px;
+            border-radius: 7px;
+            margin: 25px 0 10px 0;
+            overflow: visible;
+        }
+
+        /* 真正前進的進度條 */
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00b4d8 0%, var(--primary-color) 100%);
+            border-radius: 7px;
+            width: 0%;
+            transition: width 0.4s ease;
+            position: relative;
+        }
+
+        /* 跟著進度跑的圖示 */
+        .progress-runner {
+            position: absolute;
+            right: -12px;
+            top: -22px;
+            font-size: 1.3rem;
+            transition: all 0.4s ease;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+        }
+
+        /* 藍圖輪廓提示文字 */
+        .blueprint-status {
+            font-size: 0.85rem;
+            color: var(--text-color);
+            text-align: center;
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.03);
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            min-height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
+            border-left: 4px solid var(--accent-color);
+        }
+        body.midnight-mode .blueprint-status {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
 
         .dashboard {
             display: grid;
@@ -57,6 +179,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
             margin-bottom: 15px;
+            border: 1px solid var(--border-color);
         }
 
         .stat-card {
@@ -69,6 +192,9 @@
             font-size: 0.8rem;
             color: #777;
         }
+        body.midnight-mode .stat-card h3 {
+            color: #94a3b8;
+        }
 
         .stat-card p {
             margin: 0;
@@ -77,7 +203,7 @@
             color: var(--primary-color);
         }
 
-        /* 經典黃藍漸層，安全偽裝 */
+        /* 經典黃藍漸層盒 */
         .random-box {
             background: linear-gradient(135deg, #fef08a 0%, #bae6fd 100%);
             border: 1px solid #bae6fd;
@@ -87,12 +213,19 @@
             text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.02);
         }
+        body.midnight-mode .random-box {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
 
         .random-title {
             font-size: 0.9rem;
             font-weight: bold;
             color: #0369a1;
             margin-bottom: 8px;
+        }
+        body.midnight-mode .random-title {
+            color: #38bdf8;
         }
 
         .celebrity-info {
@@ -106,6 +239,9 @@
             justify-content: center;
             font-weight: 500;
             line-height: 1.4;
+        }
+        body.midnight-mode .celebrity-info {
+            color: #cbd5e1;
         }
 
         .random-btn {
@@ -130,18 +266,18 @@
             background: var(--card-bg);
             border-radius: 10px;
             box-shadow: 0 2px 6px rgba(0,0,0,0.03);
-            border: 1px solid #e1e8ed;
+            border: 1px solid var(--border-color);
             overflow: hidden;
         }
 
         .month-header {
-            background: #e0f2fe;
-            color: #0369a1;
+            background: var(--header-bg);
+            color: var(--header-text);
             padding: 12px;
             text-align: center;
             font-weight: bold;
             font-size: 1rem;
-            border-bottom: 1px solid #bae6fd;
+            border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -149,7 +285,7 @@
 
         .month-target {
             font-size: 0.8rem;
-            color: #0e7490;
+            color: var(--primary-color);
             font-weight: 500;
         }
 
@@ -163,12 +299,12 @@
         .day-cell {
             padding: 12px 0;
             text-align: center;
-            background-color: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background-color: var(--cell-bg);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 0.95rem;
             font-weight: bold;
-            color: #475569;
+            color: var(--text-color);
             transition: all 0.1s ease;
             user-select: none;
         }
@@ -187,7 +323,42 @@
         }
         .target-flash {
             animation: highlight 0.5s ease 3;
-            border-color: #0284c7 !important;
+            border-color: var(--primary-color) !important;
+        }
+
+        /* 🤫 網頁自製專業隱形彈窗系統 (無網址帳號外漏) */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .custom-modal-overlay.active {
+            opacity: 1; pointer-events: auto;
+        }
+        .custom-modal {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px; width: 85%; max-width: 320px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center; transform: scale(0.8);
+            transition: transform 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+        .custom-modal-overlay.active .custom-modal {
+            transform: scale(1);
+        }
+        .custom-modal-text {
+            font-size: 1rem; line-height: 1.5;
+            color: var(--text-color); margin-bottom: 20px;
+            white-space: pre-line; font-weight: 500;
+        }
+        .custom-modal-btn {
+            background-color: #0284c7; color: white; border: none;
+            padding: 10px 30px; font-size: 0.95rem; font-weight: bold;
+            border-radius: 20px; cursor: pointer; width: 100%;
         }
     </style>
 </head>
@@ -199,6 +370,22 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
+    <!-- 🏆 智慧百變進度箱 🏆 -->
+    <div class="target-progress-box">
+        <div class="target-input-group">
+            <span class="target-label">🎯 目前存錢目標：</span>
+            <input type="text" id="target-saving-input" class="target-input" placeholder="點擊輸入目標(例如：出國、香水、樂高)" oninput="saveTargetGoal(); updateDashboard();">
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="dynamic-progress-bar">
+                <span class="progress-runner" id="dynamic-runner">🚀</span>
+            </div>
+        </div>
+        <div class="blueprint-status" id="blueprint-status-text">
+            正在載入神奇藍圖進度...
+        </div>
+    </div>
+
     <div class="random-box">
         <div class="random-title">🎲 歡樂存錢雙重盲盒</div>
         <div class="celebrity-info" id="celebrity-display">今天會抽到大名人，還是超級冷笑話呢？快按下按鈕解鎖！</div>
@@ -206,7 +393,7 @@
     </div>
 
     <div class="dashboard">
-        <div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px;">
+        <div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;">
             <h3>目前已存總金額</h3>
             <p id="total-saved" style="font-size: 1.8rem; color: #059669;">$0</p>
         </div>
@@ -223,6 +410,14 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
+<!-- 🤫 專業隱形內部彈窗 -->
+<div class="custom-modal-overlay" id="custom-modal-layer">
+    <div class="custom-modal">
+        <div class="custom-modal-text" id="custom-modal-msg">通知內容</div>
+        <button class="custom-modal-btn" onclick="closeCustomModal()">確定</button>
+    </div>
+</div>
+
 <script {__id__="script-block"}>
     const quotesDatabase = [
         "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
@@ -233,7 +428,7 @@
         "有一隻魚在散步，走著走著突然大喊：『我手腳好冰！』因為他是冷血動物。🥶",
         "最厲害的存錢大師不是存得多，而是天天都在堅持！祈祈星星今天也超棒！",
         "小豬撲滿今天拍拍肚子說：『今天的主人好大方，謝謝招待！』🐷",
-        "世界上最遙遠的距離，是想買的東西在購物車，而錢包在裝睡。快把它搖醒！",
+        "世界上最遙遠的距離，是想買的東西在購物車，而錢包在裝睡. 快把它搖醒！",
         "每天給未來存一粒沙，一年後我們就有一座漂亮的沙灘可以度假了！🏖️",
         "加油！今天的努力，未來的你一定會打電話回來跟你說謝謝！📞",
         "每存下一筆錢，就像是在地圖上往夢想前進了一大步！🗺️",
@@ -247,7 +442,7 @@
         "把手放進口袋，摸摸有沒有零錢？有的話，今天就是你的幸幸運日！🍀",
         "一兩銀子買不到時間，但一兩銀子存起來，以後可以買大玩具！🧸",
         "有隻鴨子叫小明，他走著走著就變成『歪果鴨』了。🦆",
-        "聽說愛存錢的小朋友，長大以後都會變得特別聰明跟幸運喔！",
+        "聽說愛存錢的小官方，長大以後都會變得特別聰明跟幸運喔！",
         "別看今天只有一點點，365天後這可是一筆能帶大家去大冒險的寶藏呢！"
     ];
 
@@ -313,7 +508,7 @@
         { name: "查德威克", desc: "中子發現者" }, { name: "湯姆森", desc: "電子發現者" },
         { name: "拉瑟福", desc: "近代原子核物理學之父" }, { name: "密立根", desc: "測出電子電荷的物理學家" },
         { name: "巴斯德", desc: "微生物學與疫苗先驅" }, { name: "科赫", desc: "細菌學奠基人" },
-        { name: "哈維", desc: "發現血液循環的生理學家" }, { name: "林奈", desc: "現代生物分類學之父" },
+        { name: "哈威", desc: "發現血液循環的生理學家" }, { name: "林奈", desc: "現代生物分類學之父" },
         { name: "威爾遜", desc: "社會生物學與螞蟻研究大師" }, { name: "珍古德", desc: "黑猩猩研究與保育專家" },
         { name: "法布爾", desc: "昆蟲記作者" }, { name: "魏格納", desc: "大陸漂移學說提出者" },
         { name: "萊爾", desc: "近代地質學之父" }, { name: "鮑威爾", desc: "大峽谷探險地質學家" },
@@ -433,7 +628,7 @@
         { name: "七月", target: "存下 6107 元", start: 182, end: 212 },
         { name: "八月", target: "存下 7068 元", start: 213, end: 243 },
         { name: "九月", target: "存下 7755 元", start: 244, end: 273 },
-        { name: "十月", target: "存下 8959 元", start: 274, block: true, end: 304 },
+        { name: "十月", target: "存下 8959 元", start: 274, end: 304 },
         { name: "十一月", target: "存下 9585 元", start: 305, end: 334 },
         { name: "十二月", target: "存下 10850 元", start: 335, end: 365 }
     ];
@@ -442,7 +637,39 @@
     const gridContainer = document.getElementById('months-grid');
     const cellsMap = {};
 
+    // 🕒 深夜變暗模式核心自動檢查
+    function checkMidnightMode() {
+        const hour = new Date().getHours();
+        // 深夜 00:00 - 05:00
+        if (hour >= 0 && hour < 5) {
+            document.body.classList.add('midnight-mode');
+        } else {
+            document.body.classList.remove('midnight-mode');
+        }
+    }
+
+    // 🤫 自製隱形內建彈窗核心
+    function showCustomModal(msg) {
+        document.getElementById('custom-modal-msg').innerText = msg;
+        document.getElementById('custom-modal-layer').classList.add('active');
+    }
+
+    function closeCustomModal() {
+        document.getElementById('custom-modal-layer').classList.remove('active');
+    }
+
+    function loadTargetGoal() {
+        const savedGoal = localStorage.getItem('365_savings_goal') || '一起大冒險';
+        document.getElementById('target-saving-input').value = savedGoal;
+    }
+
+    function saveTargetGoal() {
+        const goalVal = document.getElementById('target-saving-input').value;
+        localStorage.setItem('365_savings_goal', goalVal);
+    }
+
     function renderGrid() {
+        checkMidnightMode(); // 初始化檢查深夜模式
         gridContainer.innerHTML = '';
         
         monthsData.forEach(month => {
@@ -476,6 +703,7 @@
             gridContainer.appendChild(col);
         });
 
+        loadTargetGoal();
         updateDashboard();
     }
 
@@ -483,7 +711,6 @@
         const index = checkedDays.indexOf(dayAmount);
         let isAdding = false;
 
-        // 先執行格子狀態變更
         if (index === -1) {
             checkedDays.push(dayAmount);
             element.classList.add('checked');
@@ -496,40 +723,91 @@
         localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays));
         updateDashboard();
 
-        // ======= 🎉 【第 11、21 天新章節拉炮判定核心】 🎉 =======
         if (isAdding) {
-            const currentCount = checkedDays.length; // 當前勾選的總天數
+            const currentCount = checkedDays.length; 
             let milestoneReached = false;
             let title = "";
 
-            // 當點下格子讓總天數達到 11 天時（代表已滿 10 天，邁入第 11 天章節），觸發拉炮！
-            if (currentCount === 11) { title = "邁向新篇章：🎖️ 存錢小幼苗 🎖️"; milestoneReached = true; }
-            else if (currentCount === 21) { title = "邁向新篇章：🥈 存錢小達人 🥈"; milestoneReached = true; }
-            else if (currentCount === 51) { title = "邁向新篇章：🥇 銅板終結者 🥇"; milestoneReached = true; }
-            else if (currentCount === 101) { title = "邁向新篇章：💎 破百大英豪 💎"; milestoneReached = true; }
-            else if (currentCount === 201) { title = "邁向新篇章：👑 黃金大富翁 👑"; milestoneReached = true; }
-            else if (currentCount === 301) { title = "邁向新篇章：👑 傳奇大金庫 👑"; milestoneReached = true; }
-            else if (currentCount === 365) { title = "🏆 終極大圓滿：365天滿手寶藏！ 🏆"; milestoneReached = true; }
+            if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestoneReached = true; }
+            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestoneReached = true; }
+            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestoneReached = true; }
+            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestoneReached = true; }
+            else if (currentCount === 201) { title = "👑 黃金大富翁 👑"; milestoneReached = true; }
+            else if (currentCount === 301) { title = "👑 傳奇大金庫 👑"; milestoneReached = true; }
+            else if (currentCount === 365) { title = "🏆 365天滿貫大終結者 🏆"; milestoneReached = true; }
 
             if (milestoneReached) {
                 confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
                 confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
 
                 setTimeout(() => {
-                    alert(`🎉 哇！太厲害了！\n累積進度已滿滿邁入第 ${currentCount} 天！\n恭喜榮獲全新章節稱號：【${title}】！🔥✨`);
+                    // 使用內部專屬彈窗，完美割捨掉網址抬頭！🤫
+                    showCustomModal(`🎉 哇！太厲害了！\n累積進度已滿滿邁入第 ${currentCount} 天！\n恭喜榮獲全新章節稱號：\n【邁向新篇章：${title}】！🔥✨`);
                 }, 400);
             }
         }
     }
 
     function updateDashboard() {
+        checkMidnightMode(); // 隨時點擊時也校正時間狀態
         const totalSaved = checkedDays.reduce((sum, val) => sum + val, 0);
         const daysCount = checkedDays.length;
-        const progressPercent = ((daysCount / 365) * 100).toFixed(1);
+        const percentNum = (daysCount / 365) * 100;
+        const progressPercent = percentNum.toFixed(1);
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
         document.getElementById('progress-percent').innerText = `${progressPercent}%`;
+
+        const progressBar = document.getElementById('dynamic-progress-bar');
+        const runner = document.getElementById('dynamic-runner');
+        progressBar.style.width = `${percentNum}%`;
+
+        const goalText = document.getElementById('target-saving-input').value || "大冒險";
+        const statusBox = document.getElementById('blueprint-status-text');
+
+        let runnerIcon = "🚀";
+        let statusString = "";
+
+        if (goalText.includes("出國") || goalText.includes("旅行") || goalText.includes("去")) {
+            runnerIcon = "✈️";
+            if (percentNum === 0) statusString = `🗺️ 正在策劃前往【${goalText}】的精彩路線，大冒險即將起航！`;
+            else if (percentNum <= 25) statusString = `🛂 [進度 25%]：耶！照片拍好，【護照與簽證】已經成功辦理完成囉！`;
+            else if (percentNum <= 50) statusString = `🧳 [進度 50%]：過了一半了！【專屬行李箱】已經準備好，塞滿漂亮衣服！`;
+            else if (percentNum <= 75) statusString = `🎫 [進度 75%]：太震撼了！【來回機票】順利劃位訂好，準備飛高高！`;
+            else if (percentNum < 100) statusString = `🏪 [進度 ${progressPercent}%]：看見地平線了！已經抵達航廈【準備登機】，輪廓越來越清晰！`;
+            else statusString = `🎉 [100% 滿載]：恭喜大圓滿！飛機順利降落，開心地前往【${goalText}】大玩特玩啦！🏆`;
+        } 
+        else if (goalText.includes("香水") || goalText.includes("精油") || goalText.includes("化妝品")) {
+            runnerIcon = "🧴";
+            if (percentNum === 0) statusString = `✨ 正在尋找屬於【${goalText}】的神祕香氣配方...`;
+            else if (percentNum <= 25) statusString = `💎 [進度 25%]：精美藍圖開啟！已成功收集到【亮晶晶的精緻瓶蓋】！`;
+            else if (percentNum <= 50) statusString = `🧪 [進度 50%]：形狀出來了！【高質感的流線玻璃瓶身】製作完工！`;
+            else if (percentNum <= 75) statusString = `🌸 [進度 75%]：好香呀！【珍貴的花草植物精華】已經完美注入香水瓶！`;
+            else if (percentNum < 100) statusString = `🏷️ [進度 ${progressPercent}%]：最後修飾！正在貼上【夢幻燙金標籤】，香氣即將封存！`;
+            else statusString = `🎉 [100% 滿載]：太完美了！【${goalText}】全面解鎖，噴一下，全身都是幸福的亮晶晶香氣！✨`;
+        }
+        else if (goalText.includes("樂高") || goalText.includes("玩具") || goalText.includes("娃娃") || goalText.includes("禮物")) {
+            runnerIcon = "🧸";
+            if (percentNum === 0) statusString = `🎁 盯著【${goalText}】的玩具工廠精美包裝盒，準備動手！`;
+            else if (percentNum <= 25) statusString = `📦 [進度 25%]：剪影揭曉！剪開了外盒，【倒出全套滿滿的零件積木袋】！`;
+            else if (percentNum <= 50) statusString = `🧱 [進度 50%]：搭建順利！玩具的【第一層地基與主體鋼骨】全部拼好！`;
+            else if (percentNum <= 75) statusString = `👑 [進度 75%]：太厲害了！最關鍵的【公仔角色與華麗機關】組裝上陣！`;
+            else if (percentNum < 100) statusString = `🎨 [進度 ${progressPercent}%]：就差一點點！【精細炫彩貼紙】全數貼上，輪廓超完整！`;
+            else statusString = `🏆 [100% 滿載]：大功告成！【${goalText}】完全合體！現在它是屬於你們最驕傲的戰利品！`;
+        }
+        else {
+            runnerIcon = "🚀";
+            if (percentNum === 0) statusString = `🌌 目標【${goalText}】發布！發動機組裝中，等待祈祈星星點亮格子！`;
+            else if (percentNum <= 25) statusString = `⛽ [進度 25%]：藍圖啟動！發動機建造完畢，【終極固態燃料】充滿 25%！`;
+            else if (percentNum <= 50) statusString = `☁️ [進度 50%]：轟隆一聲！火箭【成功升空、衝破厚厚的雲朵】看見陽光！`;
+            else if (percentNum <= 75) statusString = `🪐 [進度 75%]：太酷了！擺脫重力【飄進神祕浪漫的外太空】，繁星閃爍！`;
+            else if (percentNum < 100) statusString = `👑 [進度 ${progressPercent}%]：就在前方！遠遠看到【${goalText} 夢想星球】的美麗輪廓囉！`;
+            else statusString = `🏆 [100% 滿載]：奇蹟降落！順利登陸【${goalText} 星球】，插上旗幟解鎖終極大寶藏！🎉`;
+        }
+
+        runner.innerText = runnerIcon;
+        statusBox.innerHTML = statusString;
     }
 
     function pickCelebrity() {
@@ -554,7 +832,6 @@
         const date = now.getDate();
         const hour = now.getHours();
 
-        // 1/19 佳祈生日大彩蛋
         if (selectedDay === 19) {
             displayContent = `
                 <div style="background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(236,72,153,0.3); width: 100%; text-align: center; box-sizing: border-box;">
@@ -572,66 +849,55 @@
             } else if (selectedDay <= 30) {
                 dynamicTip = " <span style='color:#16a34a; font-size:0.85rem; font-weight:bold;'>(秒殺它！⚡)</span>";
             }
-
-            // ======= 🕒 隱形時空節慶金句覆蓋 =======
             
-            // 1. 七夕情人節 (8/16 ~ 8/22)
             if (month === 8 && date >= 16 && date <= 22) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎋 織女偷偷跟牛郎說：『看！祈祈和星星今天又存了 $${selectedDay} 元，以後喜鵲橋可以蓋得更華麗了！』✨</span>
                 `;
             }
-            // 2. 中秋節 (9/22 ~ 9/27)
             else if (month === 9 && date >= 22 && date <= 27) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🥮 月亮圓圓，錢包鼓鼓！嫦娥跟玉兔說：『今天存下 $${selectedDay} 元，中秋夜烤肉香氣加倍！』擺脫重力奔向夢想！🐇</span>
                 `;
             }
-            // 3. 萬聖節 (10/28 ~ 11/1)
             else if ((month === 10 && date >= 28) || (month === 11 && date <= 1)) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">👻 不給錢就搗蛋！今天小鬼們看到你存了 $${selectedDay} 元，嚇得把糖果都留下來落跑了！🎃</span>
                 `;
             }
-            // 4. 聖誕節 (12/23 ~ 12/27)
             else if (month === 12 && date >= 23 && date <= 27) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎄 叮叮噹！聖誕老公公從煙囪看進來：『祈祈和星星今天存了 $${selectedDay} 元，真乖！禮物準備加碼囉！』🎁</span>
                 `;
             }
-            // 5. 元旦跨年 (12/31 ~ 1/3)
             else if ((month === 12 && date === 31) || (month === 1 && date <= 3)) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">新年新氣象：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎉 5、4、3、2、1！跨年煙火秀開跑！新的一年用這筆 $${selectedDay} 元開啟滿滿財運！✨</span>
                 `;
             }
-            // 6. 農曆新年 (1/25 ~ 2/5)
             else if ((month === 1 && date >= 25) || (month === 2 && date <= 5)) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">🧧 吉利開運數：$${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🏮 財神爺敲門送福報！新春開運存下這筆錢，代表新的一年全家大吉大利、財源廣進！💰</span>
                 `;
             }
-            // 7. 兒童節 (4/2 ~ 4/5)
             else if (month === 4 && date >= 2 && date <= 5) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">🧸 兒童節快樂：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">🎈 祈祈和星星的專屬節日！今天存下快樂的 $${selectedDay} 元，未來的夢想一定會變得超級大！🦖</span>
                 `;
             }
-            // 8. 常態深夜模式 (00:00 - 05:00)
             else if (hour >= 0 && hour < 5) {
                 displayContent = `
                     <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
                     <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💤 太晚了～小豬撲滿睡著了，明天再存吧，快去睡覺！💤</span>
                 `;
             }
-            // 9. 常態無節慶盲盒
             else {
                 const isQuote = Math.random() < 0.5;
                 if (isQuote) {
@@ -657,7 +923,6 @@
         const targetCell = cellsMap[selectedDay];
         if (targetCell) {
             targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
             document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
             targetCell.classList.add('target-flash');
         }
