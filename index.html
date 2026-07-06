@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祈祈星星的小小存錢計劃</title>
-    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -416,14 +415,12 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
-    <!-- 🏆 智慧許願能量水瓶箱 🏆 -->
     <div class="target-progress-box">
         <div class="target-input-group">
             <span class="target-label">🎯 存錢目標：</span>
             <input type="text" id="target-saving-input" class="target-input" placeholder="點擊輸入目標內容" oninput="saveTargetGoal(); updateDashboard();">
         </div>
 
-        <!-- 👋 手動點擊切換主題按鈕組 -->
         <div class="theme-selector">
             <button class="theme-btn" id="btn-travel" onclick="switchTheme('travel')">✈️ 出國</button>
             <button class="theme-btn" id="btn-perfume" onclick="switchTheme('perfume')">🧴 香水</button>
@@ -431,7 +428,6 @@
             <button class="theme-btn" id="btn-space" onclick="switchTheme('space')">🚀 太空</button>
         </div>
 
-        <!-- 🍶 透明裝水瓶進度條 -->
         <div class="water-bottle-container">
             <div class="water-fluid" id="dynamic-water-fluid">
                 <span class="water-floating-runner" id="dynamic-water-runner">🚀</span>
@@ -467,7 +463,6 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
-<!-- 🤫 專業隱形內部彈窗 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
         <div class="custom-modal-text" id="custom-modal-msg">通知內容</div>
@@ -476,12 +471,11 @@
 </div>
 
 <script {__id__="script-block"}>
-    // 盲盒與名人庫保持不變
     const quotesDatabase = [
         "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
         "今天不花錢，明天變富豪！就算變不成富豪，至少離夢想更近了一步。🌟",
         "錢沒有消失，只是變成了你們未來更喜歡的亮晶晶模樣！✨",
-        "你知道什麼動物最喜歡存錢嗎？答案是：壁虎（必富）！🦎",
+        "你知道什麼動物最喜歡存錢嗎？答案 es 答案是：壁虎（必富）！🦎",
         "今天省下一杯飲料錢，以後就能換來好大一個驚喜！一杯飲料算什麼，衝啊！",
         "有一隻魚在散步，走著走著突然大喊：『我手腳好冰！』因為他是冷血動物。🥶",
         "最厲害的存錢大師不是存得多，而是天天都在堅持！祈祈星星今天也超棒！",
@@ -585,7 +579,7 @@
         { name: "洛克菲勒", desc: "石油大亨與慈善家" }, { name: "卡內基", desc: "鋼鐵大王與圖書館資助者" },
         { name: "摩根", desc: "華爾街金融巨擘" }, { name: "巴菲特", desc: "奧馬哈股神投資大師" },
         { name: "索羅斯", desc: "著名的金融巨鱷與慈善家" }, { name: "馬斯克", desc: "特斯拉與SpaceX創辦人" },
-        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞馬遜Amazon創辦人" },
+        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞過遜Amazon創辦人" },
         { name: "佩吉", desc: "Google共同創辦人" }, { name: "布林", desc: "Google共同創辦人" },
         { name: "黃仁勳", desc: "輝達NVIDIA人工智慧教父" }, { name: "蘇姿丰", desc: "超微AMD半導體女王" },
         { name: "張忠謀", desc: "台積電晶圓代工之父" }, { name: "薩姆奧特曼", desc: "OpenAI與ChatGPT核心推動者" },
@@ -691,7 +685,6 @@
         { name: "十二月", target: "存下 10850 元", start: 335, end: 365 }
     ];
 
-    const MAX_SAVING_AMOUNT = 66795;
     let checkedDays = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     const gridContainer = document.getElementById('months-grid');
     const cellsMap = {};
@@ -718,7 +711,6 @@
         const savedGoal = localStorage.getItem('365_savings_goal') || '一起大冒險';
         document.getElementById('target-saving-input').value = savedGoal;
         
-        // 載入手動選取的主題類型，沒選過的話預設是 space (太空)
         const savedTheme = localStorage.getItem('365_savings_theme') || 'space';
         switchTheme(savedTheme);
     }
@@ -728,18 +720,15 @@
         localStorage.setItem('365_savings_goal', goalVal);
     }
 
-    // 🌟 手動切換主題核心函數
     function switchTheme(themeType) {
         localStorage.setItem('365_savings_theme', themeType);
         
-        // 切換按鈕亮暗狀態
         document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
         if (themeType === 'travel') document.getElementById('btn-travel').classList.add('active');
         if (themeType === 'perfume') document.getElementById('btn-perfume').classList.add('active');
         if (themeType === 'lego') document.getElementById('btn-lego').classList.add('active');
         if (themeType === 'space') document.getElementById('btn-space').classList.add('active');
 
-        // 重新調用儀表板，刷新對應水面漂浮精靈與藍圖文字
         updateDashboard();
     }
 
@@ -826,14 +815,14 @@
         const totalSaved = checkedDays.reduce((sum, val) => sum + val, 0);
         const daysCount = checkedDays.length;
         
-        const percentNum = (totalSaved / MAX_SAVING_AMOUNT) * 100;
-        const progressPercent = percentNum.toFixed(2);
+        // 🎯 核心修正：完美回歸天數制百分比！(格數 ÷ 365天)
+        const percentNum = (daysCount / 365) * 100;
+        const progressPercent = percentNum.toFixed(2); // 每一天代表增加 0.27% 
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
         document.getElementById('progress-percent').innerText = `${progressPercent}%`;
 
-        // 📈 許願液體容器水位更新
         const waterFluid = document.getElementById('dynamic-water-fluid');
         const waterRunner = document.getElementById('dynamic-water-runner');
         
@@ -844,7 +833,6 @@
             waterFluid.classList.remove('full');
         }
 
-        // 讀取當下選定的手動主題
         const currentTheme = localStorage.getItem('365_savings_theme') || 'space';
         const goalText = document.getElementById('target-saving-input').value || "大冒險";
         const statusBox = document.getElementById('blueprint-status-text');
@@ -852,7 +840,6 @@
         let runnerIcon = "🚀";
         let statusString = "";
 
-        // 依據手動點選的主題，給予完全不同維度的液體藍圖提示文字
         if (currentTheme === 'travel') {
             runnerIcon = "✈️";
             if (percentNum === 0) statusString = `🗺️ 許願瓶空空的～正在描繪前往【${goalText}】的旅行藍圖！`;
@@ -866,7 +853,7 @@
             runnerIcon = "🧴";
             if (percentNum === 0) statusString = `✨ 許願瓶空空的～正在調配屬於【${goalText}】的神祕香氣藍圖...`;
             else if (percentNum <= 25) statusString = `💎 [水位 25%]：注入香氣精華！瓶底已成功收集到【亮晶晶的精緻瓶蓋】！`;
-            else if (percentNum <= 50) statusString = `🧪 [水位 50%]：水位過半！液體逐漸凝聚出【流線型高級玻璃瓶身】的模樣！`;
+            else if (percentNum <= 50) statusString = `🧪 [水位 50%]：形狀出來了！【流線型高級玻璃瓶身】製作完工！`;
             else if (percentNum <= 75) statusString = `🌸 [水位 75%]：好香呀！【珍貴的草本植物與花香】已完美融入整瓶液體中！`;
             else if (percentNum < 100) statusString = `🏷️ [水位 ${progressPercent}%]：即將完工！正在進行最後微雕，貼上【夢幻燙金香氛標籤】！`;
             else statusString = `🎉 [100% 滿載]：香氣大噴發！【${goalText}】夢幻調配成功，整瓶裝滿幸福亮晶晶的優雅味道！✨`;
@@ -875,13 +862,12 @@
             runnerIcon = "🧱";
             if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的藍圖說明書準備動手！`;
             else if (percentNum <= 25) statusString = `📦 [水位 25%]：注入拼裝能量！零件拆袋，【全套樂高零件積木】沉入瓶底！`;
-            else if (percentNum <= 50) statusString = `🧱 [水位 50%]：結構搭建中！玩具的【第一層厚實地基與城堡城堡骨架】成型！`;
+            else if (percentNum <= 50) statusString = `🧱 [水位 50%]：結構搭建中！玩具的【第一層厚實地基與城堡骨架】成型！`;
             else if (percentNum <= 75) statusString = `👑 [水位 75%]：水位湧上！最厲害的【隱藏機關公仔與核心角色】組裝上陣！`;
             else if (percentNum < 100) statusString = `🎨 [水位 ${progressPercent}%]：就差一滴！【精細防偽貼紙】全數貼齊，城堡剪影完全顯現！`;
             else statusString = `🏆 [100% 滿載]：萬貫合體！【${goalText}】大功告成！變成精緻無比、值得炫耀的彩色大成品！`;
         }
         else {
-            // 太空模式 (Space)
             runnerIcon = "🚀";
             if (percentNum === 0) statusString = `🌌 許願瓶空空的～發動機組裝中，等待祈祈星星注入神祕宇宙能量！`;
             else if (percentNum <= 25) statusString = `⛽ [水位 25%]：注入星際燃料！發動機建造完畢，【固態能量水】充滿 25%！`;
