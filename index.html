@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祈祈星星的小小存錢計劃</title>
-    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -370,7 +369,6 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
-    <!-- 🏆 智慧百變進度箱 🏆 -->
     <div class="target-progress-box">
         <div class="target-input-group">
             <span class="target-label">🎯 目前存錢目標：</span>
@@ -410,7 +408,6 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
-<!-- 🤫 專業隱形內部彈窗 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
         <div class="custom-modal-text" id="custom-modal-msg">通知內容</div>
@@ -437,7 +434,7 @@
         "請問世界上哪裡的手機訊號最好？答案是：阿富汗（阿，富，汗）！📱",
         "今天偷懶不存錢，明天小豬撲滿就會對你嘆氣喔！哼哼～🐖",
         "今天的任務金額是宇宙給領的神秘考驗，接招吧！💪",
-        "你知道什麼刀最長嗎？答案是：千刀萬剮（刮）！哈哈哈哈！",
+        "你知道什麼刀最長嗎？答案是：千刀萬刻（刮）！哈哈哈哈！",
         "沒關係，大錢大存，小錢小存. 只要動手點亮格子，就是最棒的！🎨",
         "把手放進口袋，摸摸有沒有零錢？有的話，今天就是你的幸幸運日！🍀",
         "一兩銀子買不到時間，但一兩銀子存起來，以後可以買大玩具！🧸",
@@ -597,7 +594,7 @@
         { name: "凱薩琳大帝", desc: "俄羅斯傳奇女沙皇" }, { name: "明治天皇", desc: "推動明治維新的日本天皇" },
         { name: "李舜臣", desc: "韓國民族抗倭英雄" }, { name: "切格瓦拉", desc: "浪漫革命象徵英雄" },
         { name: "卡斯楚", desc: "古巴傳奇領袖" }, { name: "阿拉法特", desc: "巴勒斯坦運動領袖" },
-        { name: "卓別林", desc: "默片時代喜劇大師" }, { name: "奧黛麗赫本", desc: "優雅銀幕女神與天使" },
+        { name: "卓擺林", desc: "默片時代喜劇大師" }, { name: "奧黛麗赫本", desc: "優雅銀幕女神與天使" },
         { name: "瑪麗蓮夢露", desc: "好萊塢永恆性感符號" }, { name: "貓王", desc: "搖滾樂之王普里斯萊" },
         { name: "約翰藍儂", desc: "披頭四樂團靈魂歌手" }, { name: "麥克傑克森", desc: "流行音樂之王" },
         { name: "瑪丹娜", desc: "流行樂壇百變天后" }, { name: "大衛鮑伊", desc: "華麗搖滾傳奇樂手" },
@@ -633,6 +630,9 @@
         { name: "十二月", target: "存下 10850 元", start: 335, end: 365 }
     ];
 
+    // 🎯 365天全存滿的理論總金額 ($1 + $2 + ... + $365 = 66,795)
+    const MAX_SAVING_AMOUNT = 66795;
+
     let checkedDays = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     const gridContainer = document.getElementById('months-grid');
     const cellsMap = {};
@@ -640,7 +640,6 @@
     // 🕒 深夜變暗模式核心自動檢查
     function checkMidnightMode() {
         const hour = new Date().getHours();
-        // 深夜 00:00 - 05:00
         if (hour >= 0 && hour < 5) {
             document.body.classList.add('midnight-mode');
         } else {
@@ -669,7 +668,7 @@
     }
 
     function renderGrid() {
-        checkMidnightMode(); // 初始化檢查深夜模式
+        checkMidnightMode();
         gridContainer.innerHTML = '';
         
         monthsData.forEach(month => {
@@ -741,7 +740,6 @@
                 confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
 
                 setTimeout(() => {
-                    // 使用內部專屬彈窗，完美割捨掉網址抬頭！🤫
                     showCustomModal(`🎉 哇！太厲害了！\n累積進度已滿滿邁入第 ${currentCount} 天！\n恭喜榮獲全新章節稱號：\n【邁向新篇章：${title}】！🔥✨`);
                 }, 400);
             }
@@ -749,11 +747,13 @@
     }
 
     function updateDashboard() {
-        checkMidnightMode(); // 隨時點擊時也校正時間狀態
+        checkMidnightMode();
         const totalSaved = checkedDays.reduce((sum, val) => sum + val, 0);
         const daysCount = checkedDays.length;
-        const percentNum = (daysCount / 365) * 100;
-        const progressPercent = percentNum.toFixed(1);
+        
+        // 📈 核心修改：將進度百分比改由「當前已存金額 ÷ 總存滿金額」來精細計算
+        const percentNum = (totalSaved / MAX_SAVING_AMOUNT) * 100;
+        const progressPercent = percentNum.toFixed(2); // 提升到小數點後兩位，讓微小幅度的累積也清晰可見！
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
@@ -788,7 +788,7 @@
             else statusString = `🎉 [100% 滿載]：太完美了！【${goalText}】全面解鎖，噴一下，全身都是幸福的亮晶晶香氣！✨`;
         }
         else if (goalText.includes("樂高") || goalText.includes("玩具") || goalText.includes("娃娃") || goalText.includes("禮物")) {
-            runnerIcon = "🧸";
+            runnerIcon = "🧱";
             if (percentNum === 0) statusString = `🎁 盯著【${goalText}】的玩具工廠精美包裝盒，準備動手！`;
             else if (percentNum <= 25) statusString = `📦 [進度 25%]：剪影揭曉！剪開了外盒，【倒出全套滿滿的零件積木袋】！`;
             else if (percentNum <= 50) statusString = `🧱 [進度 50%]：搭建順利！玩具的【第一層地基與主體鋼骨】全部拼好！`;
