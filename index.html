@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>祈祈星星的小小存錢計劃</title>
+    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -18,6 +19,7 @@
             --header-bg: #e0f2fe;
             --header-text: #0369a1;
             --cell-bg: #f8fafc;
+            --water-color: linear-gradient(180deg, #4ea8de 0%, #0077b6 100%);
         }
 
         /* 🌙 深夜模式變暗變色色票 (00:00-05:00 自動隱形切換) */
@@ -33,6 +35,7 @@
             --header-bg: #0f172a;
             --header-text: #38bdf8;
             --cell-bg: #1e293b;
+            --water-color: linear-gradient(180deg, #00b4d8 0%, #03045e 100%);
         }
 
         body {
@@ -71,7 +74,7 @@
             color: #94a3b8;
         }
 
-        /* 智慧目標與進度條區塊 */
+        /* 智慧目標與許願水瓶區塊 */
         .target-progress-box {
             background: var(--card-bg);
             padding: 15px;
@@ -108,44 +111,89 @@
             outline: none;
             text-align: center;
         }
-
         body.midnight-mode .target-input {
             background-color: rgba(144, 224, 239, 0.05);
         }
 
-        .target-input:focus {
-            border-style: solid;
+        /* 手動切換主題按鈕組 */
+        .theme-selector {
+            display: flex;
+            justify-content: space-around;
+            background-color: var(--cell-bg);
+            padding: 6px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .theme-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            padding: 6px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            opacity: 0.4;
+        }
+
+        .theme-btn.active {
+            opacity: 1;
             background-color: var(--card-bg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+            transform: scale(1.05);
         }
 
-        /* 進度條外殼 */
-        .progress-container {
+        /* 🍶 透明容器裝水瓶外殼 */
+        .water-bottle-container {
             position: relative;
-            background-color: var(--border-color);
-            height: 14px;
-            border-radius: 7px;
-            margin: 25px 0 10px 0;
+            background-color: rgba(226, 232, 240, 0.4);
+            border: 3px solid #bde0fe;
+            height: 38px;
+            border-radius: 12px;
+            margin: 20px 0 10px 0;
             overflow: visible;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        body.midnight-mode .water-bottle-container {
+            background-color: rgba(51, 65, 85, 0.3);
+            border-color: #334155;
         }
 
-        /* 真正前進的進度條 */
-        .progress-bar {
+        /* 水平面 (真正裝水進度) */
+        .water-fluid {
             height: 100%;
-            background: linear-gradient(90deg, #00b4d8 0%, var(--primary-color) 100%);
-            border-radius: 7px;
+            background: var(--water-color);
+            border-radius: 8px 0 0 8px;
             width: 0%;
-            transition: width 0.4s ease;
+            transition: width 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
             position: relative;
+            box-shadow: 0 0 10px rgba(0, 180, 216, 0.3);
         }
 
-        /* 跟著進度跑的圖示 */
-        .progress-runner {
+        /* 水滿時修正圓角 */
+        .water-fluid.full {
+            border-radius: 8px;
+        }
+
+        /* 🌊 漂浮在水面上的小精靈圖示 */
+        .water-floating-runner {
             position: absolute;
-            right: -12px;
-            top: -22px;
-            font-size: 1.3rem;
-            transition: all 0.4s ease;
+            right: -14px;
+            top: -24px;
+            font-size: 1.4rem;
+            transition: all 0.6s cubic-bezier(0.1, 0.8, 0.3, 1);
             filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+            animation: floatingWave 2s ease-in-out infinite;
+        }
+
+        @keyframes floatingWave {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-4px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
         }
 
         /* 藍圖輪廓提示文字 */
@@ -155,7 +203,7 @@
             text-align: center;
             font-weight: bold;
             background-color: rgba(0, 0, 0, 0.03);
-            padding: 8px;
+            padding: 10px;
             border-radius: 6px;
             margin-top: 8px;
             min-height: 36px;
@@ -202,7 +250,6 @@
             color: var(--primary-color);
         }
 
-        /* 經典黃藍漸層盒 */
         .random-box {
             background: linear-gradient(135deg, #fef08a 0%, #bae6fd 100%);
             border: 1px solid #bae6fd;
@@ -369,18 +416,30 @@
         <p>每天一點點，積少成多，一起實現夢想！💪</p>
     </header>
 
+    <!-- 🏆 智慧許願能量水瓶箱 🏆 -->
     <div class="target-progress-box">
         <div class="target-input-group">
-            <span class="target-label">🎯 目前存錢目標：</span>
-            <input type="text" id="target-saving-input" class="target-input" placeholder="點擊輸入目標(例如：出國、香水、樂高)" oninput="saveTargetGoal(); updateDashboard();">
+            <span class="target-label">🎯 存錢目標：</span>
+            <input type="text" id="target-saving-input" class="target-input" placeholder="點擊輸入目標內容" oninput="saveTargetGoal(); updateDashboard();">
         </div>
-        <div class="progress-container">
-            <div class="progress-bar" id="dynamic-progress-bar">
-                <span class="progress-runner" id="dynamic-runner">🚀</span>
+
+        <!-- 👋 手動點擊切換主題按鈕組 -->
+        <div class="theme-selector">
+            <button class="theme-btn" id="btn-travel" onclick="switchTheme('travel')">✈️ 出國</button>
+            <button class="theme-btn" id="btn-perfume" onclick="switchTheme('perfume')">🧴 香水</button>
+            <button class="theme-btn" id="btn-lego" onclick="switchTheme('lego')">🧱 樂高</button>
+            <button class="theme-btn" id="btn-space" onclick="switchTheme('space')">🚀 太空</button>
+        </div>
+
+        <!-- 🍶 透明裝水瓶進度條 -->
+        <div class="water-bottle-container">
+            <div class="water-fluid" id="dynamic-water-fluid">
+                <span class="water-floating-runner" id="dynamic-water-runner">🚀</span>
             </div>
         </div>
+
         <div class="blueprint-status" id="blueprint-status-text">
-            正在載入神奇藍圖進度...
+            正在裝填神奇的水分藍圖...
         </div>
     </div>
 
@@ -408,6 +467,7 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
+<!-- 🤫 專業隱形內部彈窗 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
         <div class="custom-modal-text" id="custom-modal-msg">通知內容</div>
@@ -416,6 +476,7 @@
 </div>
 
 <script {__id__="script-block"}>
+    // 盲盒與名人庫保持不變
     const quotesDatabase = [
         "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
         "今天不花錢，明天變富豪！就算變不成富豪，至少離夢想更近了一步。🌟",
@@ -630,14 +691,11 @@
         { name: "十二月", target: "存下 10850 元", start: 335, end: 365 }
     ];
 
-    // 🎯 365天全存滿的理論總金額 ($1 + $2 + ... + $365 = 66,795)
     const MAX_SAVING_AMOUNT = 66795;
-
     let checkedDays = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     const gridContainer = document.getElementById('months-grid');
     const cellsMap = {};
 
-    // 🕒 深夜變暗模式核心自動檢查
     function checkMidnightMode() {
         const hour = new Date().getHours();
         if (hour >= 0 && hour < 5) {
@@ -647,7 +705,6 @@
         }
     }
 
-    // 🤫 自製隱形內建彈窗核心
     function showCustomModal(msg) {
         document.getElementById('custom-modal-msg').innerText = msg;
         document.getElementById('custom-modal-layer').classList.add('active');
@@ -660,11 +717,30 @@
     function loadTargetGoal() {
         const savedGoal = localStorage.getItem('365_savings_goal') || '一起大冒險';
         document.getElementById('target-saving-input').value = savedGoal;
+        
+        // 載入手動選取的主題類型，沒選過的話預設是 space (太空)
+        const savedTheme = localStorage.getItem('365_savings_theme') || 'space';
+        switchTheme(savedTheme);
     }
 
     function saveTargetGoal() {
         const goalVal = document.getElementById('target-saving-input').value;
         localStorage.setItem('365_savings_goal', goalVal);
+    }
+
+    // 🌟 手動切換主題核心函數
+    function switchTheme(themeType) {
+        localStorage.setItem('365_savings_theme', themeType);
+        
+        // 切換按鈕亮暗狀態
+        document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
+        if (themeType === 'travel') document.getElementById('btn-travel').classList.add('active');
+        if (themeType === 'perfume') document.getElementById('btn-perfume').classList.add('active');
+        if (themeType === 'lego') document.getElementById('btn-lego').classList.add('active');
+        if (themeType === 'space') document.getElementById('btn-space').classList.add('active');
+
+        // 重新調用儀表板，刷新對應水面漂浮精靈與藍圖文字
+        updateDashboard();
     }
 
     function renderGrid() {
@@ -703,7 +779,6 @@
         });
 
         loadTargetGoal();
-        updateDashboard();
     }
 
     function toggleDay(dayAmount, element) {
@@ -751,62 +826,72 @@
         const totalSaved = checkedDays.reduce((sum, val) => sum + val, 0);
         const daysCount = checkedDays.length;
         
-        // 📈 核心修改：將進度百分比改由「當前已存金額 ÷ 總存滿金額」來精細計算
         const percentNum = (totalSaved / MAX_SAVING_AMOUNT) * 100;
-        const progressPercent = percentNum.toFixed(2); // 提升到小數點後兩位，讓微小幅度的累積也清晰可見！
+        const progressPercent = percentNum.toFixed(2);
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
         document.getElementById('progress-percent').innerText = `${progressPercent}%`;
 
-        const progressBar = document.getElementById('dynamic-progress-bar');
-        const runner = document.getElementById('dynamic-runner');
-        progressBar.style.width = `${percentNum}%`;
+        // 📈 許願液體容器水位更新
+        const waterFluid = document.getElementById('dynamic-water-fluid');
+        const waterRunner = document.getElementById('dynamic-water-runner');
+        
+        waterFluid.style.width = `${percentNum}%`;
+        if (percentNum >= 98) {
+            waterFluid.classList.add('full');
+        } else {
+            waterFluid.classList.remove('full');
+        }
 
+        // 讀取當下選定的手動主題
+        const currentTheme = localStorage.getItem('365_savings_theme') || 'space';
         const goalText = document.getElementById('target-saving-input').value || "大冒險";
         const statusBox = document.getElementById('blueprint-status-text');
 
         let runnerIcon = "🚀";
         let statusString = "";
 
-        if (goalText.includes("出國") || goalText.includes("旅行") || goalText.includes("去")) {
+        // 依據手動點選的主題，給予完全不同維度的液體藍圖提示文字
+        if (currentTheme === 'travel') {
             runnerIcon = "✈️";
-            if (percentNum === 0) statusString = `🗺️ 正在策劃前往【${goalText}】的精彩路線，大冒險即將起航！`;
-            else if (percentNum <= 25) statusString = `🛂 [進度 25%]：耶！照片拍好，【護照與簽證】已經成功辦理完成囉！`;
-            else if (percentNum <= 50) statusString = `🧳 [進度 50%]：過了一半了！【專屬行李箱】已經準備好，塞滿漂亮衣服！`;
-            else if (percentNum <= 75) statusString = `🎫 [進度 75%]：太震撼了！【來回機票】順利劃位訂好，準備飛高高！`;
-            else if (percentNum < 100) statusString = `🏪 [進度 ${progressPercent}%]：看見地平線了！已經抵達航廈【準備登機】，輪廓越來越清晰！`;
-            else statusString = `🎉 [100% 滿載]：恭喜大圓滿！飛機順利降落，開心地前往【${goalText}】大玩特玩啦！🏆`;
+            if (percentNum === 0) statusString = `🗺️ 許願瓶空空的～正在描繪前往【${goalText}】的旅行藍圖！`;
+            else if (percentNum <= 25) statusString = `🛂 [水位 25%]：注入旅行能量！【護照與簽證】已經在瓶底成功辦理好囉！`;
+            else if (percentNum <= 50) statusString = `🧳 [水位 50%]：能量過半！水面上浮現【專屬行李箱】，塞滿了漂亮衣服！`;
+            else if (percentNum <= 75) statusString = `🎫 [水位 75%]：水位高漲！【來回機票】劃位完成，在許願瓶裡閃閃發光！`;
+            else if (percentNum < 100) statusString = `🏪 [水位 ${progressPercent}%]：即將裝滿！已經抵達航廈【準備登機】，大冒險輪廓超清晰！`;
+            else statusString = `🎉 [100% 滿載]：許願瓶完全裝滿！飛機順利起飛，開心地前往【${goalText}】大玩特玩啦！🏆`;
         } 
-        else if (goalText.includes("香水") || goalText.includes("精油") || goalText.includes("化妝品")) {
+        else if (currentTheme === 'perfume') {
             runnerIcon = "🧴";
-            if (percentNum === 0) statusString = `✨ 正在尋找屬於【${goalText}】的神祕香氣配方...`;
-            else if (percentNum <= 25) statusString = `💎 [進度 25%]：精美藍圖開啟！已成功收集到【亮晶晶的精緻瓶蓋】！`;
-            else if (percentNum <= 50) statusString = `🧪 [進度 50%]：形狀出來了！【高質感的流線玻璃瓶身】製作完工！`;
-            else if (percentNum <= 75) statusString = `🌸 [進度 75%]：好香呀！【珍貴的花草植物精華】已經完美注入香水瓶！`;
-            else if (percentNum < 100) statusString = `🏷️ [進度 ${progressPercent}%]：最後修飾！正在貼上【夢幻燙金標籤】，香氣即將封存！`;
-            else statusString = `🎉 [100% 滿載]：太完美了！【${goalText}】全面解鎖，噴一下，全身都是幸福的亮晶晶香氣！✨`;
+            if (percentNum === 0) statusString = `✨ 許願瓶空空的～正在調配屬於【${goalText}】的神祕香氣藍圖...`;
+            else if (percentNum <= 25) statusString = `💎 [水位 25%]：注入香氣精華！瓶底已成功收集到【亮晶晶的精緻瓶蓋】！`;
+            else if (percentNum <= 50) statusString = `🧪 [水位 50%]：水位過半！液體逐漸凝聚出【流線型高級玻璃瓶身】的模樣！`;
+            else if (percentNum <= 75) statusString = `🌸 [水位 75%]：好香呀！【珍貴的草本植物與花香】已完美融入整瓶液體中！`;
+            else if (percentNum < 100) statusString = `🏷️ [水位 ${progressPercent}%]：即將完工！正在進行最後微雕，貼上【夢幻燙金香氛標籤】！`;
+            else statusString = `🎉 [100% 滿載]：香氣大噴發！【${goalText}】夢幻調配成功，整瓶裝滿幸福亮晶晶的優雅味道！✨`;
         }
-        else if (goalText.includes("樂高") || goalText.includes("玩具") || goalText.includes("娃娃") || goalText.includes("禮物")) {
+        else if (currentTheme === 'lego') {
             runnerIcon = "🧱";
-            if (percentNum === 0) statusString = `🎁 盯著【${goalText}】的玩具工廠精美包裝盒，準備動手！`;
-            else if (percentNum <= 25) statusString = `📦 [進度 25%]：剪影揭曉！剪開了外盒，【倒出全套滿滿的零件積木袋】！`;
-            else if (percentNum <= 50) statusString = `🧱 [進度 50%]：搭建順利！玩具的【第一層地基與主體鋼骨】全部拼好！`;
-            else if (percentNum <= 75) statusString = `👑 [進度 75%]：太厲害了！最關鍵的【公仔角色與華麗機關】組裝上陣！`;
-            else if (percentNum < 100) statusString = `🎨 [進度 ${progressPercent}%]：就差一點點！【精細炫彩貼紙】全數貼上，輪廓超完整！`;
-            else statusString = `🏆 [100% 滿載]：大功告成！【${goalText}】完全合體！現在它是屬於你們最驕傲的戰利品！`;
+            if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的藍圖說明書準備動手！`;
+            else if (percentNum <= 25) statusString = `📦 [水位 25%]：注入拼裝能量！零件拆袋，【全套樂高零件積木】沉入瓶底！`;
+            else if (percentNum <= 50) statusString = `🧱 [水位 50%]：結構搭建中！玩具的【第一層厚實地基與城堡城堡骨架】成型！`;
+            else if (percentNum <= 75) statusString = `👑 [水位 75%]：水位湧上！最厲害的【隱藏機關公仔與核心角色】組裝上陣！`;
+            else if (percentNum < 100) statusString = `🎨 [水位 ${progressPercent}%]：就差一滴！【精細防偽貼紙】全數貼齊，城堡剪影完全顯現！`;
+            else statusString = `🏆 [100% 滿載]：萬貫合體！【${goalText}】大功告成！變成精緻無比、值得炫耀的彩色大成品！`;
         }
         else {
+            // 太空模式 (Space)
             runnerIcon = "🚀";
-            if (percentNum === 0) statusString = `🌌 目標【${goalText}】發布！發動機組裝中，等待祈祈星星點亮格子！`;
-            else if (percentNum <= 25) statusString = `⛽ [進度 25%]：藍圖啟動！發動機建造完畢，【終極固態燃料】充滿 25%！`;
-            else if (percentNum <= 50) statusString = `☁️ [進度 50%]：轟隆一聲！火箭【成功升空、衝破厚厚的雲朵】看見陽光！`;
-            else if (percentNum <= 75) statusString = `🪐 [進度 75%]：太酷了！擺脫重力【飄進神祕浪漫的外太空】，繁星閃爍！`;
-            else if (percentNum < 100) statusString = `👑 [進度 ${progressPercent}%]：就在前方！遠遠看到【${goalText} 夢想星球】的美麗輪廓囉！`;
-            else statusString = `🏆 [100% 滿載]：奇蹟降落！順利登陸【${goalText} 星球】，插上旗幟解鎖終極大寶藏！🎉`;
+            if (percentNum === 0) statusString = `🌌 許願瓶空空的～發動機組裝中，等待祈祈星星注入神祕宇宙能量！`;
+            else if (percentNum <= 25) statusString = `⛽ [水位 25%]：注入星際燃料！發動機建造完畢，【固態能量水】充滿 25%！`;
+            else if (percentNum <= 50) statusString = `☁️ [水位 50%]：火箭衝鋒！【成功升空、突破厚厚雲朵】進入溫暖陽光層！`;
+            else if (percentNum <= 75) statusString = `🪐 [水位 75%]：潮汐引力！火箭【漂進神祕浪漫的外太空】，繁星在水面閃爍！`;
+            else if (percentNum < 100) statusString = `👑 [水位 ${progressPercent}%]：看見地平線！遠方逐漸顯現出【${goalText} 夢想星球】的壯麗輪廓！`;
+            else statusString = `🏆 [100% 滿載]：奇蹟登陸！順利在【${goalText} 星球】插上星際旗幟，解鎖終極大金庫！🎉`;
         }
 
-        runner.innerText = runnerIcon;
+        waterRunner.innerText = runnerIcon;
         statusBox.innerHTML = statusString;
     }
 
