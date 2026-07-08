@@ -65,7 +65,7 @@
             letter-spacing: 1px;
         }
 
-        /* 👑 萬用存錢大廳模式切換器外殼 */
+        /* 🎰 萬用存錢大廳模式切換器外殼 */
         .mode-selector-box {
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
             padding: 12px;
@@ -73,9 +73,15 @@
             margin-bottom: 15px;
             box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
             display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .mode-row {
+            display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
+            width: 100%;
         }
         .mode-label {
             color: white;
@@ -97,7 +103,39 @@
             font-weight: bold;
             outline: none;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        /* 自訂固定金額輸入區 */
+        .custom-amt-config-panel {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 8px 12px;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .custom-amt-input {
+            width: 80px;
+            border: none;
+            border-radius: 4px;
+            padding: 6px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.95rem;
+            outline: none;
+        }
+        .custom-amt-btn {
+            background-color: #bae6fd;
+            color: #0369a1;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
         }
 
         .target-progress-box {
@@ -369,6 +407,31 @@
             text-decoration: line-through;
         }
 
+        /* 🤫 內置自製特殊輸入彈窗系統 */
+        .prompt-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000; opacity: 0; pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .prompt-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .prompt-modal {
+            background-color: var(--card-bg); border-radius: 16px;
+            padding: 20px; width: 85%; max-width: 300px; text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .prompt-title { font-weight: bold; margin-bottom: 12px; color: var(--primary-color); }
+        .prompt-input-box {
+            width: 90%; padding: 10px; border: 1px solid var(--accent-color);
+            border-radius: 6px; font-size: 1.1rem; text-align: center;
+            font-weight: bold; margin-bottom: 15px; outline: none;
+        }
+        .prompt-btn-group { display: flex; gap: 10px; }
+        .prompt-btn-confirm { background-color: #0284c7; color: white; border: none; flex: 1; padding: 10px; border-radius: 8px; font-weight: bold;}
+        .prompt-btn-cancel { background-color: #cbd5e1; color: #333; border: none; padding: 10px; border-radius: 8px; font-weight: bold;}
+
         @keyframes highlight {
             0% { transform: scale(1); background-color: #fef08a; }
             50% { transform: scale(1.1); background-color: #bae6fd; }
@@ -387,31 +450,15 @@
             z-index: 9999; opacity: 0; pointer-events: none;
             transition: opacity 0.3s ease;
         }
-        .custom-modal-overlay.active {
-            opacity: 1; pointer-events: auto;
-        }
+        .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
         .custom-modal {
-            background-color: var(--card-bg);
-            border-radius: 16px;
+            background-color: var(--card-bg); border-radius: 16px;
             padding: 20px; width: 85%; max-width: 320px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center; transform: scale(0.8);
-            transition: transform 0.3s ease;
-            border: 1px solid var(--border-color);
+            text-align: center; border: 1px solid var(--border-color);
         }
-        .custom-modal-overlay.active .custom-modal {
-            transform: scale(1);
-        }
-        .custom-modal-text {
-            font-size: 1rem; line-height: 1.5;
-            color: var(--text-color); margin-bottom: 20px;
-            white-space: pre-line; font-weight: 500;
-        }
-        .custom-modal-btn {
-            background-color: #0284c7; color: white; border: none;
-            padding: 10px 30px; font-size: 0.95rem; font-weight: bold;
-            border-radius: 20px; cursor: pointer; width: 100%;
-        }
+        .custom-modal-text { font-size: 1rem; line-height: 1.5; color: var(--text-color); margin-bottom: 20px; white-space: pre-line; font-weight: 500;}
+        .custom-modal-btn { background-color: #0284c7; color: white; border: none; padding: 10px 30px; font-size: 0.95rem; font-weight: bold; border-radius: 20px; cursor: pointer; width: 100%;}
     </style>
 </head>
 <body>
@@ -421,13 +468,26 @@
         <h1>✨ 祈祈星星的萬用百變存錢大廳 ✨</h1>
     </header>
 
-    <!-- 👑 萬用大廳：模式切換下拉選單 -->
+    <!-- 🎰 萬用大廳：五合一模式大下拉選單 -->
     <div class="mode-selector-box">
-        <span class="mode-label">🎰 選擇你的存錢法：</span>
-        <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
-            <option value="365_阶梯">💎 365天階梯存錢法 ($1 ~ $365)</option>
-            <option value="fixed_50">🪙 天天固定 50 元大銅板法</option>
-        </select>
+        <div class="mode-row">
+            <span class="mode-label">🎰 儲蓄模式大廳：</span>
+            <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
+                <option value="365_阶梯">💎 365天階梯存錢法 ($1 ~ $365)</option>
+                <option value="fixed_50">🪙 天天固定 50 元大銅板法</option>
+                <option value="custom_fixed">📊 萬用自訂固定金額法</option>
+                <option value="week_52">📈 52週階梯存錢法 (每週增加)</option>
+                <option value="隨喜">💖 自由隨喜無壓力存錢法</option>
+            </select>
+        </div>
+        <!-- 自訂模式專屬的面額配置面板 -->
+        <div class="custom-amt-config-panel" id="custom-amt-panel">
+            <span style="color: white; font-size: 0.85rem; font-weight: bold;">🔧 設定你每天想存的金額：</span>
+            <div>
+                <input type="number" id="custom-fixed-amt-input" class="custom-amt-input" value="100">
+                <button class="custom-amt-btn" onclick="applyCustomFixedAmount()">套用變身</button>
+            </div>
+        </div>
     </div>
 
     <!-- 🏆 智慧許願能量水瓶箱 🏆 -->
@@ -437,7 +497,6 @@
             <input type="text" id="target-saving-input" class="target-input" placeholder="點擊輸入目標內容" oninput="saveTargetGoal(); updateDashboard();">
         </div>
 
-        <!-- 👋 手動點擊切換主題按鈕組 -->
         <div class="theme-selector">
             <button class="theme-btn" id="btn-travel" onclick="switchTheme('travel')">✈️ 出國</button>
             <button class="theme-btn" id="btn-perfume" onclick="switchTheme('perfume')">🧴 香水</button>
@@ -445,21 +504,18 @@
             <button class="theme-btn" id="btn-space" onclick="switchTheme('space')">🚀 太空</button>
         </div>
 
-        <!-- 🍶 透明裝水瓶進度條 -->
         <div class="water-bottle-container">
             <div class="water-fluid" id="dynamic-water-fluid">
                 <span class="water-floating-runner" id="dynamic-water-runner">🚀</span>
             </div>
         </div>
 
-        <div class="blueprint-status" id="blueprint-status-text">
-            正在裝填神奇的水分藍圖...
-        </div>
+        <div class="blueprint-status" id="blueprint-status-text">正在裝填藍圖...</div>
     </div>
 
     <div class="random-box">
         <div class="random-title">🎲 歡樂存錢雙重盲盒</div>
-        <div class="celebrity-info" id="celebrity-display">今天會抽到大名人，還是超級冷笑話呢？快按下按鈕解鎖！</div>
+        <div class="celebrity-info" id="celebrity-display">點擊抽盲盒...</div>
         <button class="random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
     </div>
 
@@ -469,7 +525,7 @@
             <p id="total-saved" style="font-size: 1.8rem; color: #059669;">$0</p>
         </div>
         <div class="stat-card" style="margin-top: 5px;">
-            <h3>已完成天數</h3>
+            <h3 id="label-completed-unit">已完成天數</h3>
             <p id="days-count">0 / 365 天</p>
         </div>
         <div class="stat-card" style="margin-top: 5px;">
@@ -484,127 +540,24 @@
 <!-- 🤫 專業隱形內部彈窗 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
-        <div class="custom-modal-text" id="custom-modal-msg">通知內容</div>
+        <div class="custom-modal-text" id="custom-modal-msg"></div>
         <button class="custom-modal-btn" onclick="closeCustomModal()">確定</button>
     </div>
 </div>
 
+<!-- 🤫 內建隨喜專用密閉輸入彈窗 -->
+<div class="prompt-modal-overlay" id="custom-prompt-layer">
+    <div class="prompt-modal">
+        <div class="prompt-title" id="prompt-modal-title">自由隨喜</div>
+        <input type="number" id="prompt-modal-input" class="prompt-input-box" placeholder="請輸入金額">
+        <div class="prompt-btn-group">
+            <button class="prompt-btn-confirm" onclick="confirmPromptModal()">放入許願瓶</button>
+            <button class="prompt-btn-cancel" onclick="closePromptModal()">取消</button>
+        </div>
+    </div>
+</div>
+
 <script {__id__="script-block"}>
-    // 盲盒與名人庫維持不變
-    const quotesDatabase = [
-        "存錢就像減肥，只要不去看存款 and 體重，就覺得自己很成功！🤣",
-        "今天不花錢，明天變富豪！就算變不成富豪，至少離夢想更近了一步。🌟",
-        "錢沒有消失，只是變成了你們未來更喜歡的亮晶晶模樣！✨",
-        "你知道什麼動物最喜歡存錢嗎？答案是：壁虎（必富）！🦎",
-        "今天省下一杯飲料錢，以後就能換來好大一個驚喜！一杯飲料算什麼，衝啊！",
-        "有一隻魚在散步，走著走著就突然大喊：『我手腳好冰！』因為他是冷血動物。🥶",
-        "最厲害的存錢大師不是存得多，而是天天都在堅持！祈祈星星今天也超棒！",
-        "小豬撲滿今天拍拍肚子說：『今天的主人好大方，謝謝招待！』🐷",
-        "世界上最遙遠的距離，是想買的東西在購物車，而錢包在裝睡. 快把它搖醒！",
-        "每天給未來存一粒沙，一年後我們就有一座漂亮的沙灘可以度假了！🏖️",
-        "加油！今天的努力，未來的你一定會打電話回來跟你說謝謝！📞",
-        "每存下一筆錢，就像是在地圖上往夢想前進了一大步！🗺️",
-        "你知道小明為什麼存錢快嗎？分享給你知道，因為他很『省』思。大冷笑話！",
-        "存錢的過程雖然有點辛苦，開心地看總金額啪啪啪往上漲吧！",
-        "請問世界上哪裡的手機訊號最好？答案是：阿富汗（阿，富，汗）！📱",
-        "今天偷懶不存錢，明天小豬撲滿就會對你嘆氣喔！哼哼～🐖",
-        "今天的任務金額是宇宙給領的神秘考驗，接招吧！💪",
-        "你知道什麼刀最長嗎？答案是：千刀萬刻（刮）！哈哈哈哈！",
-        "沒關係，大錢大存，小錢小存. 只要動手點亮格子，就是最棒的！🎨",
-        "把手放進口袋，摸摸有沒有零錢？有的話，今天就是你的幸幸運日！🍀",
-        "一兩銀子買不到時間，但一兩銀子存起來，以後可以買大玩具！🧸",
-        "有隻鴨子叫小明，他走著走著就變成『歪果鴨』了。🦆",
-        "聽說愛存錢的小官方，長大以後都會變得特別聰明跟幸運喔！",
-        "別看今天只有一點點，365天後這可是一筆能帶大家去大冒險的寶藏呢！"
-    ];
-
-    const celebrityDatabase = [
-        { name: "愛因斯坦", desc: "相對論物理學家" }, { name: "牛頓", desc: "萬有引力發現者" },
-        { name: "達文西", desc: "文藝復興全才藝術家" }, { name: "莫札特", desc: "音樂神童" },
-        { name: "貝多芬", desc: "樂聖鋼琴家" }, { name: "莎士比亞", desc: "偉大劇作家" },
-        { name: "居禮夫人", desc: "放射性物理學家" }, { name: "特斯拉", desc: "交流電發明家" },
-        { name: "愛迪生", desc: "發明大王" }, { name: "賈伯斯", desc: "蘋果公司創辦人" },
-        { name: "比爾蓋茲", desc: "微軟創辦人" }, { name: "華特迪士尼", desc: "迪士尼王國創辦人" },
-        { name: "孔子", desc: "至聖先師" }, { name: "宮崎駿", desc: "動畫大師" },
-        { name: "安徒生", desc: "童話大師" }, { name: "萊特兄弟", desc: "飛機發明家" },
-        { name: "麥可喬丹", desc: "籃球之神" }, { name: "梵谷", desc: "印象派畫家" },
-        { name: "畢卡索", desc: "立體派藝術大師" }, { name: "伽利略", desc: "現代觀測天文學之父" },
-        { name: "霍金", desc: "黑洞理論物理學家" }, { name: "達爾文", desc: "演化論生物學家" },
-        { name: "馬克吐溫", desc: "湯姆歷險記作者" }, { name: "海明威", desc: "老人與海作者" },
-        { name: "巴哈", desc: "音樂之父" }, { name: "蕭邦", desc: "鋼琴詩人" },
-        { name: "舒伯特", desc: "歌曲之王" }, { name: "米開朗基羅", desc: "大衛像雕塑大師" },
-        { name: "莫內", desc: "印象派大師" }, { name: "安迪沃荷", desc: "普普藝術大師" },
-        { name: "亞里斯多德", desc: "古希臘大哲學家" }, { name: "蘇格拉底", desc: "西方哲學奠基者" },
-        { name: "諸葛亮", desc: "三國傳奇軍師" }, { name: "李白", desc: "唐朝詩仙" },
-        { name: "杜甫", desc: "唐朝詩聖" }, { name: "馬克波羅", desc: "東方見聞錄旅行家" },
-        { name: "哥倫布", desc: "新大陸發現者" }, { name: "麥哲倫", desc: "首次環球航海家" },
-        { name: "阿姆斯壯", desc: "第一位登陸月球的人" }, { name: "加加林", desc: "第一位進入太空的人" },
-        { name: "諾貝爾", desc: "炸藥發明家" }, { name: "萊布尼茲", desc: "微積分發明者之一" },
-        { name: "高斯", desc: "數學王子" }, { name: "歐拉", desc: "偉大的瑞士數學家" },
-        { name: "開德爾", desc: "遺傳學之父" }, { name: "法拉第", desc: "電磁感應發現者" },
-        { name: "馬克士威", desc: "電磁學大師" }, { name: "普朗克", desc: "量子力學之父" },
-        { name: "費曼", desc: "幽默的量子物理學家" }, { name: "鮑林", desc: "雙料諾貝爾獎得主" },
-        { name: "歐本海默", desc: "原子彈之父" }, { name: "圖靈", desc: "電腦科學之父" },
-        { name: "馮紐曼", desc: "現代電腦架構之父" }, { name: "大谷翔平", desc: "現代棒球二刀流傳奇" },
-        { name: "梅西", desc: "當代世界足球球王" }, { name: "費德勒", desc: "網球優雅天王" },
-        { name: "納達爾", desc: "網球紅土之王" }, { name: "黑澤明", desc: "世界級電影導演大師" },
-        { name: "手塚治虫", desc: "日本漫畫之神" }, { name: "柏拉圖", desc: "古希臘哲學巨人" },
-        { name: "老子", desc: "道家學派創始人" }, { name: "莊子", desc: "浪漫主義哲學大師" },
-        { name: "司馬遷", desc: "史記作者" }, { name: "祖沖之", desc: "圓周率數學家" },
-        { name: "張衡", desc: "地動儀發明家" }, { name: "華佗", desc: "外科鼻祖神醫" },
-        { name: "孫武", desc: "孫子兵法作者" }, { name: "秦始皇", desc: "統一中國的第一位皇帝" },
-        { name: "漢武帝", desc: "開闢絲路的重要皇帝" }, { name: "唐太宗", desc: "貞觀之治的盛世明君" },
-        { name: "成吉思汗", desc: "橫跨歐亞的蒙古大汗" }, { name: "康熙帝", desc: "奠定清朝盛世的皇帝" },
-        { name: "林肯", desc: "解放黑奴的美國總統" }, { name: "華盛頓", desc: "美國國父" },
-        { name: "羅斯福", desc: "帶領美國度過二戰的總統" }, { name: "邱吉爾", desc: "英國鐵血首相" },
-        { name: "戴高樂", desc: "現代法國奠基將軍" }, { name: "甘地", desc: "印度非暴力獨立之父" },
-        { name: "曼德拉", desc: "南非反種族隔離領袖" }, { name: "聖女貞德", desc: "法國傳奇女英雄" },
-        { name: "伊莉莎白一世", desc: "英國黃金時代女王" }, { name: "維多利亞女王", desc: "英國日不落帝國女王" },
-        { name: "凱薩大帝", desc: "羅馬帝國奠基者" }, { name: "亞歷山大大帝", desc: "征服歐亞非的傳奇國王" },
-        { name: "拿破崙", desc: "橫掃歐洲的法國皇帝" }, { name: "織田信長", desc: "日本戰國三傑之一" },
-        { name: "豐臣秀吉", desc: "日本戰國時代終結者之一" }, { name: "德川家康", desc: "江戶幕府創始人" },
-        { name: "馬丁路德金", desc: "我有一個夢想演說家" }, { name: "德蕾莎修女", desc: "諾貝爾和平獎慈善家" },
-        { name: "南丁格爾", desc: "現代護理學先驅" }, { name: "馬克尼", desc: "無線電通信發明家" },
-        { name: "貝爾", desc: "電話發明家" }, { name: "瓦特", desc: "改良蒸汽機的工業先驅" },
-        { name: "史蒂芬生", desc: "蒸汽機車火車之父" }, { name: "富爾頓", desc: "蒸汽輪船發明家" },
-        { name: "福特", desc: "汽車流水線生產先驅" }, { name: "班茲", desc: "現代汽車發明者" },
-        { name: "齊柏林", desc: "硬式飛船發明家" }, { name: "海利", desc: "發現哈雷彗星的天文學家" },
-        { name: "克卜勒", desc: "行星運動定律發現者" }, { name: "哥白尼", desc: "日心說提出者" },
-        { name: "布魯諾", desc: "捍衛宇宙無限論的烈士" }, { name: "哈伯", desc: "發現宇宙膨脹的天文學家" },
-        { name: "勒梅特", desc: "大霹靂理論提出者" }, { name: "卡爾薩根", desc: "偉大的天文科普作家" },
-        { name: "道爾頓", desc: "近代原子論提出者" }, { name: "門得列夫", desc: "化學元素週期表發明者" },
-        { name: "拉瓦節", desc: "近代化學之父" }, { name: "波以耳", desc: "近代科學化學奠基者" },
-        { name: "海森堡", desc: "量子力學測不準原理" }, { name: "薛丁格", desc: "量子力學波動方程發明者" },
-        { name: "波耳", desc: "量子力學哥本哈根學派領袖" }, { name: "狄拉克", desc: "預言反物質存在的物理學家" },
-        { name: "倫琴", desc: "X光射線發現者" }, { name: "貝克勒", desc: "天然放射性發現者" },
-        { name: "查德威克", desc: "中子發現者" }, { name: "湯姆森", desc: "電子發現者" },
-        { name: "拉瑟福", desc: "近代原子核物理學之父" }, { name: "密立根", desc: "測出電子電荷的物理學家" },
-        { name: "巴斯德", desc: "微生物學與疫苗先驅" }, { name: "科赫", desc: "細菌學奠基人" },
-        { name: "哈威", desc: "發現血液循環的生理學家" }, { name: "林奈", desc: "現代生物分類學之父" },
-        { name: "威爾遜", desc: "社會生物學與螞蟻研究大師" }, { name: "珍古德", desc: "黑猩猩研究與保育專家" },
-        { name: "法布爾", desc: "昆蟲記作者" }, { name: "魏格納", desc: "大陸漂移學說提出者" },
-        { name: "萊爾", desc: "近代地質學之父" }, { name: "鮑威爾", desc: "大峽谷探險地質學家" },
-        { name: "庫克船長", desc: "太平洋偉大航海探險家" }, { name: "鄭和", desc: "明朝七下西洋的航海家" },
-        { name: "玄奘", desc: "前往印度取經的傳奇高僧" }, { name: "伊本巴圖塔", desc: "中世紀最偉大的旅行家" },
-        { name: "利瑪竇", desc: "明朝東西文化交流使者" }, { name: "徐霞客", desc: "中國古代地理名著作者" },
-        { name: "沈括", desc: "夢溪筆談全才科學家" }, { name: "郭守敬", desc: "元代天文學家" },
-        { name: "畢昇", desc: "活字印刷術發明家" }, { name: "蔡倫", desc: "造紙術重要改良者" },
-        { name: "狄賽爾", desc: "柴油引擎發明家" }, { name: "奧托", desc: "四行程內燃機發明家" },
-        { name: "吉列", desc: "安全剃刀發明家" }, { name: "固特異", desc: "硫化橡膠發明家" },
-        { name: "鄧祿普", desc: "充氣輪胎發明家" }, { name: "米其林兄弟", desc: "可拆卸輪胎發明家" },
-        { name: "斯賓塞", desc: "微波爐發明家" }, { name: "卡利瑟斯", desc: "現代冷氣空調發明家" },
-        { name: "鳥井信治郎", desc: "東方威士忌先驅" }, { name: "安藤百福", desc: "方便麵泡麵發明家" },
-        { name: "盛田昭夫", desc: "索尼隨身聽Walkman推動者" }, { name: "本田宗一郎", desc: "本田汽車創辦人" },
-        { name: "豐田喜一郎", desc: "豐田汽車創辦人" }, { name: "松下幸之助", desc: "日本經營之神" },
-        { name: "洛克菲勒", desc: "石油大亨與慈善家" }, { name: "卡內基", desc: "鋼鐵大王與圖書館資助者" },
-        { name: "摩根", desc: "華爾街金融巨擘" }, { name: "巴菲特", desc: "奧馬哈股神投資大師" },
-        { name: "索羅斯", desc: "著名的金融巨鱷與慈善家" }, { name: "馬斯克", desc: "特斯拉與SpaceX創辦人" },
-        { name: "祖克柏", desc: "臉書Facebook創辦人" }, { name: "貝佐斯", desc: "亞馬遜Amazon創辦人" },
-        { name: "佩吉", desc: "Google共同創辦人" }, { name: "布林", desc: "Google共同創辦人" },
-        { name: "黃仁勳", desc: "輝達NVIDIA人工智慧教父" }, { name: "蘇姿丰", desc: "超微AMD半導體女王" },
-        { name: "張忠謀", desc: "台積電晶圓代工之父" }, { name: "薩姆奧特曼", desc: "OpenAI與ChatGPT核心推動者" }
-    ];
-
     const monthsData = [
         { name: "一月", start: 1, end: 31 }, { name: "二月", start: 32, end: 59 },
         { name: "三月", start: 60, end: 90 }, { name: "四月", start: 91, end: 120 },
@@ -614,69 +567,76 @@
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
-    // 🛡️ 雙軌制核心數據保護盾！
+    // 🛡️ 五軌數據絕對獨立保險箱！
     let currentMode = localStorage.getItem('global_saving_mode') || '365_阶梯';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     let checkedDays50 = JSON.parse(localStorage.getItem('fixed_50_savings_progress')) || [];
+    let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
+    let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
+    
+    // 隨喜模式：用物件記錄格子索引與金額的映射關係 { "1": 150, "15": 300 }
+    let隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
 
+    let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
     const gridContainer = document.getElementById('months-grid');
     const cellsMap = {};
+    let promptCallback = null;
 
     function checkMidnightMode() {
         const hour = new Date().getHours();
-        if (hour >= 0 && hour < 5) {
-            document.body.classList.add('midnight-mode');
-        } else {
-            document.body.classList.remove('midnight-mode');
-        }
+        if (hour >= 0 && hour < 5) document.body.classList.add('midnight-mode');
+        else document.body.classList.remove('midnight-mode');
     }
 
     function showCustomModal(msg) {
         document.getElementById('custom-modal-msg').innerText = msg;
         document.getElementById('custom-modal-layer').classList.add('active');
     }
+    function closeCustomModal() { document.getElementById('custom-modal-layer').classList.remove('active'); }
 
-    function closeCustomModal() {
-        document.getElementById('custom-modal-layer').classList.remove('active');
+    // 內建安全輸入框控制
+    function openPromptModal(title, defaultVal, callback) {
+        document.getElementById('prompt-modal-title').innerText = title;
+        document.getElementById('prompt-modal-input').value = defaultVal;
+        document.getElementById('custom-prompt-layer').classList.add('active');
+        promptCallback = callback;
+    }
+    function closePromptModal() { document.getElementById('custom-prompt-layer').classList.remove('active'); }
+    function confirmPromptModal() {
+        const val = document.getElementById('prompt-modal-input').value;
+        closePromptModal();
+        if(promptCallback) promptCallback(val);
     }
 
-    // 🎰 模式大廳切換中心
     function changeSavingMode(newMode) {
         currentMode = newMode;
         localStorage.setItem('global_saving_mode', newMode);
-        
-        // 重新繪製日曆大廳
+        renderGrid();
+    }
+
+    function applyCustomFixedAmount() {
+        const amt = parseInt(document.getElementById('custom-fixed-amt-input').value) || 100;
+        currentCustomFixedAmt = amt;
+        localStorage.setItem('custom_fixed_config_amt', amt);
         renderGrid();
     }
 
     function loadTargetGoal() {
-        // 目標文字根據模式各自獨立儲存
-        const goalKey = currentMode === '365_阶梯' ? '365_savings_goal' : 'fixed_50_savings_goal';
-        const defaultGoal = currentMode === '365_阶梯' ? '一起大冒險' : '儲蓄金幣箱';
+        const goalKey = `goal_${currentMode}`;
+        document.getElementById('target-saving-input').value = localStorage.getItem(goalKey) || '我的新計劃';
         
-        document.getElementById('target-saving-input').value = localStorage.getItem(goalKey) || defaultGoal;
-        
-        const themeKey = currentMode === '365_阶梯' ? '365_savings_theme' : 'fixed_50_savings_theme';
-        const savedTheme = localStorage.getItem(themeKey) || 'space';
-        switchTheme(savedTheme);
+        const themeKey = `theme_${currentMode}`;
+        switchTheme(localStorage.getItem(themeKey) || 'space');
     }
 
     function saveTargetGoal() {
-        const goalVal = document.getElementById('target-saving-input').value;
-        const goalKey = currentMode === '365_阶梯' ? '365_savings_goal' : 'fixed_50_savings_goal';
-        localStorage.setItem(goalKey, goalVal);
+        localStorage.setItem(`goal_${currentMode}`, document.getElementById('target-saving-input').value);
     }
 
     function switchTheme(themeType) {
-        const themeKey = currentMode === '365_阶梯' ? '365_savings_theme' : 'fixed_50_savings_theme';
-        localStorage.setItem(themeKey, themeType);
-        
+        localStorage.setItem(`theme_${currentMode}`, themeType);
         document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-        if (themeType === 'travel') document.getElementById('btn-travel').classList.add('active');
-        if (themeType === 'perfume') document.getElementById('btn-perfume').classList.add('active');
-        if (themeType === 'lego') document.getElementById('btn-lego').classList.add('active');
-        if (themeType === 'space') document.getElementById('btn-space').classList.add('active');
-
+        if (document.getElementById(`btn-${themeType}`)) document.getElementById(`btn-${themeType}`).classList.add('active');
         updateDashboard();
     }
 
@@ -685,260 +645,266 @@
         document.getElementById('main-saving-mode-select').value = currentMode;
         gridContainer.innerHTML = '';
         
-        // 讀取當前模式對應的完成陣列
-        let activeCheckedArr = currentMode === '365_阶梯' ? checkedDays365 : checkedDays50;
+        // 自訂模式面板顯示開關
+        document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
+        document.getElementById('custom-fixed-amt-input').value = currentCustomFixedAmt;
 
-        monthsData.forEach(month => {
+        // 🧠 52週模式大變身：日曆隱形，改渲染 52 週大步道！
+        if (currentMode === 'week_52') {
+            document.getElementById('label-completed-unit').innerText = "已完成週數";
             const col = document.createElement('div');
             col.className = 'month-column';
-
-            // 動態計算月目標文字
-            let monthTargetText = "";
-            let totalDaysInMonth = month.end - month.start + 1;
-            if (currentMode === '365_阶梯') {
-                let sum = 0; for(let d=month.start; d<=month.end; d++) sum += d;
-                monthTargetText = `存下 ${sum} 元`;
-            } else {
-                monthTargetText = `存下 ${totalDaysInMonth * 50} 元`;
-            }
-
+            
             const header = document.createElement('div');
             header.className = 'month-header';
-            header.innerHTML = `<span>${month.name}</span><span class="month-target">${monthTargetText}</span>`;
+            header.innerHTML = `<span>📅 52週階梯挑戰步道</span><span class="month-target">總目標 $13,780 元</span>`;
             col.appendChild(header);
 
             const daysList = document.createElement('div');
             daysList.className = 'days-list';
+            daysList.style.gridTemplateColumns = "repeat(4, 1fr)"; // 四格一排更寬敞
 
-            for (let i = month.start; i <= month.end; i++) {
+            for (let w = 1; w <= 52; w++) {
                 const cell = document.createElement('div');
                 cell.className = 'day-cell';
+                cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.6; display:block;">第${w}週</span>$${w * 10}`;
+                cell.id = `week-${w}`;
                 
-                // 🌟 核心視覺變身：如果是固定 50 元模式，格子全部顯示 $50！
-                if (currentMode === '365_阶梯') {
-                    cell.innerText = i;
-                } else {
-                    cell.innerText = "$50";
-                }
-                
-                cell.id = `day-${i}`;
-                
-                if (activeCheckedArr.includes(i)) {
-                    cell.classList.add('checked');
-                }
-
-                cell.addEventListener('click', () => toggleDay(i, cell));
+                if (checkedWeeks52.includes(w)) cell.classList.add('checked');
+                cell.addEventListener('click', () => toggleDayOrWeek(w, cell));
                 daysList.appendChild(cell);
-                cellsMap[i] = cell;
+                cellsMap[w] = cell;
             }
-
             col.appendChild(daysList);
             gridContainer.appendChild(col);
-        });
+        } else {
+            // 365天制度的四種模式日曆渲染
+            document.getElementById('label-completed-unit').innerText = "已完成天數";
+            
+            monthsData.forEach(month => {
+                const col = document.createElement('div');
+                col.className = 'month-column';
 
+                let monthTargetText = "正在計算...";
+                let totalDaysInMonth = month.end - month.start + 1;
+                
+                if (currentMode === '365_阶梯') {
+                    let sum = 0; for(let d=month.start; d<=month.end; d++) sum += d;
+                    monthTargetText = `存下 ${sum} 元`;
+                } else if (currentMode === 'fixed_50') {
+                    monthTargetText = `存下 ${totalDaysInMonth * 50} 元`;
+                } else if (currentMode === 'custom_fixed') {
+                    monthTargetText = `存下 ${totalDaysInMonth * currentCustomFixedAmt} 元`;
+                } else {
+                    monthTargetText = `自由存無上限`;
+                }
+
+                const header = document.createElement('div');
+                header.className = 'month-header';
+                header.innerHTML = `<span>${month.name}</span><span class="month-target">${monthTargetText}</span>`;
+                col.appendChild(header);
+
+                const daysList = document.createElement('div');
+                daysList.className = 'days-list';
+
+                for (let i = month.start; i <= month.end; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'day-cell';
+                    cell.id = `day-${i}`;
+                    
+                    // 根據模式賦予日曆格子不同的金額視覺
+                    if (currentMode === '365_阶梯') {
+                        cell.innerText = i;
+                        if (checkedDays365.includes(i)) cell.classList.add('checked');
+                    } else if (currentMode === 'fixed_50') {
+                        cell.innerText = "$50";
+                        if (checkedDays50.includes(i)) cell.classList.add('checked');
+                    } else if (currentMode === 'custom_fixed') {
+                        cell.innerText = `$${currentCustomFixedAmt}`;
+                        if (checkedDaysCustom.includes(i)) cell.classList.add('checked');
+                    } else {
+                        // 隨喜模式
+                        if (隨喜Map[i]) {
+                            cell.innerHTML = `<span style="font-size:0.75rem; color:#15803d; display:block;">第${i}天</span>$${隨喜Map[i]}`;
+                            cell.classList.add('checked');
+                        } else {
+                            cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.5; display:block;">第${i}天</span>💸`;
+                        }
+                    }
+
+                    cell.addEventListener('click', () => toggleDayOrWeek(i, cell));
+                    daysList.appendChild(cell);
+                    cellsMap[i] = cell;
+                }
+                col.appendChild(daysList);
+                gridContainer.appendChild(col);
+            });
+        }
         loadTargetGoal();
     }
 
-    function toggleDay(dayId, element) {
-        let activeCheckedArr = currentMode === '365_阶梯' ? checkedDays365 : checkedDays50;
-        const index = activeCheckedArr.indexOf(dayId);
-        let isAdding = false;
+    function toggleDayOrWeek(id, element) {
+        // 隨喜模式單獨處理跳窗輸入
+        if (currentMode === '隨喜') {
+            if (隨喜Map[id]) {
+                delete 隨喜Map[id];
+                element.innerHTML = `<span style="font-size:0.75rem; opacity:0.5; display:block;">第${id}天</span>💸`;
+                element.classList.remove('checked');
+                localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map));
+                updateDashboard();
+            } else {
+                openPromptModal(`💖 第 ${id} 天自由隨喜`, "100", function(inputAmt) {
+                    let amt = parseInt(inputAmt) || 0;
+                    if (amt > 0) {
+                        隨喜Map[id] = amt;
+                        element.innerHTML = `<span style="font-size:0.75rem; color:#15803d; display:block;">第${id}天</span>$${amt}`;
+                        element.classList.add('checked');
+                        localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map));
+                        updateDashboard();
+                    }
+                });
+            }
+            return;
+        }
 
-        if (index === -1) {
-            activeCheckedArr.push(dayId);
-            element.classList.add('checked');
-            isAdding = true;
-        } else {
-            activeCheckedArr.splice(index, 1);
-            element.classList.remove('checked');
-        }
+        // 其餘常規勾選陣列處理
+        let arr = [];
+        let key = "";
+        if (currentMode === '365_阶梯') { arr = checkedDays365; key = '365_savings_progress'; }
+        else if (currentMode === 'fixed_50') { arr = checkedDays50; key = 'fixed_50_savings_progress'; }
+        else if (currentMode === 'custom_fixed') { arr = checkedDaysCustom; key = 'custom_fixed_savings_progress'; }
+        else if (currentMode === 'week_52') { arr = checkedWeeks52; key = 'week_52_savings_progress'; }
+
+        const idx = arr.indexOf(id);
+        let isAdding = false;
+        if (idx === -1) { arr.push(id); element.classList.add('checked'); isAdding = true; }
+        else { arr.splice(idx, 1); element.classList.remove('checked'); }
         
-        // 分別存在各自的保險箱裡
-        if (currentMode === '365_阶梯') {
-            localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays365));
-        } else {
-            localStorage.setItem('fixed_50_savings_progress', JSON.stringify(checkedDays50));
-        }
-        
+        localStorage.setItem(key, JSON.stringify(arr));
         updateDashboard();
 
         if (isAdding) {
-            const currentCount = activeCheckedArr.length; 
-            let milestoneReached = false;
-            let title = "";
-
-            if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestoneReached = true; }
-            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestoneReached = true; }
-            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestoneReached = true; }
-            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestoneReached = true; }
-            else if (currentCount === 201) { title = "👑 黃金大富翁 👑"; milestoneReached = true; }
-            else if (currentCount === 301) { title = "👑 傳奇大金庫 👑"; milestoneReached = true; }
-            else if (currentCount === 365) { title = "🏆 365天滿貫終結者 🏆"; milestoneReached = true; }
-
-            if (milestoneReached) {
+            const currentCount = arr.length;
+            let title = ""; let milestone = false;
+            if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestone = true; }
+            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestone = true; }
+            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestone = true; }
+            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestone = true; }
+            
+            if (milestone) {
                 confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
                 confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
-
-                setTimeout(() => {
-                    showCustomModal(`🎉 哇！太厲害了！\n累積進度已滿滿邁入第 ${currentCount} 天！\n恭喜榮獲全新章節稱號：\n【邁向新篇章：${title}】！🔥✨`);
-                }, 400);
+                setTimeout(() => { showCustomModal(`🎉 太厲害了！\n累積進度已邁入第 ${currentCount} 步！\n榮獲全新章節稱號：\n【${title}】！🔥✨`); }, 400);
             }
         }
     }
 
     function updateDashboard() {
         checkMidnightMode();
-        
-        // 根據模式計算當前總金額
-        let totalSaved = 0;
-        let daysCount = 0;
+        let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
         
         if (currentMode === '365_阶梯') {
             totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0);
             daysCount = checkedDays365.length;
+        } else if (currentMode === 'fixed_50') {
+            totalSaved = checkedDays50.length * 50; daysCount = checkedDays50.length;
+        } else if (currentMode === 'custom_fixed') {
+            totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length;
+        } else if (currentMode === 'week_52') {
+            totalSaved = checkedWeeks52.reduce((sum, w) => sum + (w * 10), 0);
+            daysCount = checkedWeeks52.length; maxUnits = 52; // 52週分母
         } else {
-            totalSaved = checkedDays50.length * 50; // 固定50元模式
-            daysCount = checkedDays50.length;
+            // 隨喜模式
+            for (let k in 隨喜Map) { totalSaved += 隨喜Map[k]; daysCount++; }
         }
         
-        // 百分比一律精準回歸天數制邏輯 (天數 ÷ 365)
-        const percentNum = (daysCount / 365) * 100;
+        // 📈 天天或週週大平分的水位百分比
+        const percentNum = (daysCount / maxUnits) * 100;
         const progressPercent = percentNum.toFixed(2);
 
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
-        document.getElementById('days-count').innerText = `${daysCount} / 365 天`;
+        document.getElementById('days-count').innerText = `${daysCount} / ${maxUnits} ${maxUnits===52?'週':'天'}`;
         document.getElementById('progress-percent').innerText = `${progressPercent}%`;
 
         const waterFluid = document.getElementById('dynamic-water-fluid');
         const waterRunner = document.getElementById('dynamic-water-runner');
-        
         waterFluid.style.width = `${percentNum}%`;
-        if (percentNum >= 98) {
-            waterFluid.classList.add('full');
-        } else {
-            waterFluid.classList.remove('full');
-        }
+        if (percentNum >= 98) waterFluid.classList.add('full'); else waterFluid.classList.remove('full');
 
-        const themeKey = currentMode === '365_阶梯' ? '365_savings_theme' : 'fixed_50_savings_theme';
+        const themeKey = `theme_${currentMode}`;
         const currentTheme = localStorage.getItem(themeKey) || 'space';
         const goalText = document.getElementById('target-saving-input').value || "夢想";
         const statusBox = document.getElementById('blueprint-status-text');
 
-        let runnerIcon = "🚀";
-        let statusString = "";
+        let runnerIcon = "🚀"; let statusString = "";
 
         if (currentTheme === 'travel') {
             runnerIcon = "✈️";
             if (percentNum === 0) statusString = `🗺️ 許願瓶空空的～正在描繪前往【${goalText}】的旅行藍圖！`;
-            else if (percentNum <= 25) statusString = `🛂 [進度 ${progressPercent}%]：注入旅行能量！【護照與簽證】已經在瓶底成功辦理好囉！`;
-            else if (percentNum <= 50) statusString = `🧳 [進度 ${progressPercent}%]：能量過半！水面上浮現【專屬行李箱】，塞滿了漂亮衣服！`;
-            else if (percentNum <= 75) statusString = `🎫 [進度 ${progressPercent}%]：水位高漲！【來回機票】劃位完成，在許願瓶裡閃閃發光！`;
-            else if (percentNum < 100) statusString = `🏪 [進度 ${progressPercent}%]：即將裝滿！已經抵達航廈【準備登機】，大冒險輪廓超清晰！`;
-            else statusString = `🎉 [100% 滿載]：許願瓶完全裝滿！飛機順利起飛，開心地前往【${goalText}】大玩特玩啦！🏆`;
-        } 
-        else if (currentTheme === 'perfume') {
+            else statusString = `🧳 [進度 ${progressPercent}%]：旅行能量注入中！漂浮的水面上，正帶領著全家一步步往【${goalText}】飛高高前進！✈️`;
+        } else if (currentTheme === 'perfume') {
             runnerIcon = "🧴";
             if (percentNum === 0) statusString = `✨ 許願瓶空空的～正在調配屬於【${goalText}】的神祕香氣藍圖...`;
-            else if (percentNum <= 25) statusString = `💎 [進度 ${progressPercent}%]：注入香氣精華！瓶底已成功收集到【亮晶晶的精緻瓶蓋】！`;
-            else if (percentNum <= 50) statusString = `🧪 [進度 ${progressPercent}%]：形狀出來了！【流線型高級玻璃瓶身】製作完工！`;
-            else if (percentNum <= 75) statusString = `🌸 [進度 ${progressPercent}%]：好香呀！【珍貴的草本植物與花香】已完美融入整瓶液體中！`;
-            else if (percentNum < 100) statusString = `🏷️ [進度 ${progressPercent}%]：最後修飾！正在進行最後微雕，貼上【夢幻燙金香氛標籤】！`;
-            else statusString = `🎉 [100% 滿載]：香氣大噴發！【${goalText}】夢幻調配成功，整瓶裝滿幸福亮晶晶的優雅味道！✨`;
-        }
-        else if (currentTheme === 'lego') {
+            else statusString = `🧪 [進度 ${progressPercent}%]：好香呀！【${goalText}】的夢幻液體精華隨著每天的努力，在瓶中越聚越多囉！🧴`;
+        } else if (currentTheme === 'lego') {
             runnerIcon = "🧱";
-            if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的藍圖說明書準備動手！`;
-            else if (percentNum <= 25) statusString = `📦 [進度 ${progressPercent}%]：注入拼裝能量！零件拆袋，【全套樂高零件積木】沉入瓶底！`;
-            else if (percentNum <= 50) statusString = `🧱 [進度 ${progressPercent}%]：結構搭建中！玩具的【第一層厚實地基與城堡骨架】成型！`;
-            else if (percentNum <= 75) statusString = `👑 [進度 ${progressPercent}%]：水位湧上！最厲害的【隱藏機關公仔與核心角色】組裝上陣！`;
-            else if (percentNum < 100) statusString = `🎨 [進度 ${progressPercent}%]：就差一滴！【精細防偽貼紙】全數貼齊，城堡剪影完全顯現！`;
-            else statusString = `🏆 [100% 滿載]：萬貫合體！【${goalText}】大功告成！變成精緻無比、值得炫耀的彩色大成品！`;
-        }
-        else {
+            if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的積木包裝盒準備動手！`;
+            else statusString = `🧱 [進度 ${progressPercent}%]：城堡合體中！【${goalText}】的精細彩色積木塊，正在瓶中拼出美麗外型！`;
+        } else {
             runnerIcon = "🚀";
-            if (percentNum === 0) statusString = `🌌 許願瓶空空的～發動機組裝中，等待祈祈星星注入神祕宇宙能量！`;
-            else if (percentNum <= 25) statusString = `⛽ [進度 ${progressPercent}%]：注入星際燃料！發動機建造完畢，【固態能量水】充滿燃料！`;
-            else if (percentNum <= 50) statusString = `☁️ [進度 ${progressPercent}%]：火箭衝鋒！【成功升空、突破厚厚雲朵】進入溫暖陽光層！`;
-            else if (percentNum <= 75) statusString = `🪐 [進度 ${progressPercent}%]：潮汐引力！火箭【漂進神祕浪漫的外太空】，繁星在水面閃爍！`;
-            else if (percentNum < 100) statusString = `👑 [進度 ${progressPercent}%]：看見地平線！遠方逐漸顯現出【${goalText} 夢想星球】的壯麗輪廓！`;
-            else statusString = `🏆 [100% 滿載]：奇蹟登陸！順利在【${goalText} 星球】插上星際旗幟，解鎖終極大金庫！🎉`;
+            if (percentNum === 0) statusString = `🌌 許願瓶空空的～等待注入神祕宇宙能量！`;
+            else statusString = `🚀 [進度 ${progressPercent}%]：引擎全開！火箭正載著滿滿的儲蓄能量，航向【${goalText}】夢想星球！✨`;
         }
-
         waterRunner.innerText = runnerIcon;
         statusBox.innerHTML = statusString;
     }
 
     function pickCelebrity() {
-        let activeCheckedArr = currentMode === '365_阶梯' ? checkedDays365 : checkedDays50;
-        const availableDays = [];
-        for (let i = 1; i <= 365; i++) {
-            if (!activeCheckedArr.includes(i)) {
-                availableDays.push(i);
-            }
-        }
-
-        if (availableDays.length === 0) {
-            document.getElementById('celebrity-display').innerHTML = "🎉 太厲害了！本模式的 365 天已經全數存滿囉！";
+        let displayContent = "";
+        if (currentMode === '隨喜') {
+            displayContent = `
+                <span style="font-size: 1.1rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br>
+                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 隨便選一格灰色有緣的格子，放進你今天皮夾裡的任意硬幣或鈔票，給許願瓶加水吧！</span>
+            `;
+            document.getElementById('celebrity-display').innerHTML = displayContent;
+            return;
+        } else if (currentMode === 'fixed_50') {
+            displayContent = `
+                <span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：存下一個 $50 元金幣大銅板！🪙</span><br>
+                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 天天大銅板，生活超簡單！點亮一格立刻幫水瓶注入 0.27% 能量！</span>
+            `;
+            document.getElementById('celebrity-display').innerHTML = displayContent;
+            return;
+        } else if (currentMode === 'custom_fixed') {
+            displayContent = `
+                <span style="font-size: 1.1rem; color: #059669; font-weight: bold;">今日任務：存下你的自訂款 $${currentCustomFixedAmt} 元！📊</span><br>
+                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 這是屬於你最驕傲的專屬紀律面額！點亮一格，水分精準跳動！</span>
+            `;
+            document.getElementById('celebrity-display').innerHTML = displayContent;
+            return;
+        } else if (currentMode === 'week_52') {
+            displayContent = `
+                <span style="font-size: 1.1rem; color: #d97706; font-weight: bold;">今日任務：挑戰本週的 52 週步道！📈</span><br>
+                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 一週只要點亮一格，小數點後兩位％數字就會以接近 1.92% 的巨大水流往上衝喔！</span>
+            `;
+            document.getElementById('celebrity-display').innerHTML = displayContent;
             return;
         }
 
-        const randomDayIdx = Math.floor(Math.random() * availableDays.length);
-        const selectedDay = availableDays[randomDayIdx];
-
-        let displayContent = "";
-        const now = new Date();
-        const month = now.getMonth() + 1;
-        const date = now.getDate();
-        const hour = now.getHours();
-
-        // 🌟 模式判斷：如果是固定 50 元模式，任務文字全面覆寫為 $50
-        if (currentMode === 'fixed_50') {
-            displayContent = `
-                <span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：存下一個 $50 元金幣大銅板！🪙</span><br>
-                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 叮咚！存下這枚大金幣，許願瓶的水位又會非常公平地往上增加 0.27% 喔！衝啊！</span>
-            `;
-        } else {
-            // 原本的 365 隨機任務庫
-            if (selectedDay === 19) {
-                displayContent = `
-                    <div style="background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%); color: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 10px rgba(236,72,153,0.3); width: 100%; text-align: center; box-sizing: border-box;">
-                        <span style="font-size:1.4rem; font-weight:bold; display:block; margin-bottom:6px; letter-spacing:1px;">🎂 佳祈生日快樂！！ 🎉</span>
-                        <span style="font-size:1.05rem; font-weight:bold; display:block; background-color:rgba(255,255,255,0.2); padding:8px 12px; border-radius:6px; margin-bottom:8px; line-height:1.4;">
-                            🎁 今日特殊任務：存下原本的 $19 元<br>＋ 額外挑戰多存 $1,000 元！(共 $1,019 元)
-                        </span>
-                    </div>
-                `;
-            } else {
-                let dynamicTip = "";
-                if (selectedDay >= 300) dynamicTip = " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(抽到大魔王啦！🦁)</span>";
-                else if (selectedDay <= 30) dynamicTip = " <span style='color:#16a34a; font-size:0.85rem; font-weight:bold;'>(秒殺它！⚡)</span>";
-                
-                const isQuote = Math.random() < 0.5;
-                if (isQuote) {
-                    const randomQuoteIdx = Math.floor(Math.random() * quotesDatabase.length);
-                    displayContent = `
-                        <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-                        <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 ${quotesDatabase[randomQuoteIdx]}</span>
-                    `;
-                } else {
-                    const randomCelebIdx = Math.floor(Math.random() * celebrityDatabase.length);
-                    const celeb = celebrityDatabase[randomCelebIdx];
-                    displayContent = `
-                        <span style="font-size:1.1rem; color:#0369a1; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-                        <span style="font-size:0.9rem; color:#1e293b; margin-top:6px; display:inline-block;">👤 特派員：<strong>${celeb.name}</strong> (${celeb.desc}) 派任務給你囉！</span>
-                    `;
-                }
-            }
-        }
-
+        // 原本經典 365 階梯模式盲盒
+        let arr = checkedDays365;
+        const available = []; for (let i = 1; i <= 365; i++) { if (!arr.includes(i)) available.push(i); }
+        if (available.length === 0) { document.getElementById('celebrity-display').innerText = "🎉 滿貫全乾！"; return; }
+        const selectedDay = available[Math.floor(Math.random() * available.length)];
+        
+        let dynamicTip = "";
+        if (selectedDay >= 300) dynamicTip = " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(大魔王🦁)</span>";
+        
+        displayContent = `
+            <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
+            <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 365階梯特派任務！存下這格，水分公平前進！</span>
+        `;
         document.getElementById('celebrity-display').innerHTML = displayContent;
-
-        const targetCell = cellsMap[selectedDay];
-        if (targetCell) {
-            targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
-            targetCell.classList.add('target-flash');
-        }
     }
 
     renderGrid();
