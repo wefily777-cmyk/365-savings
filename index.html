@@ -575,7 +575,7 @@
     let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
     
     // 隨喜模式：用物件記錄格子索引與金額的映射關係 { "1": 150, "15": 300 }
-    let隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
+    let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
 
     let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
     const gridContainer = document.getElementById('months-grid');
@@ -649,7 +649,7 @@
         document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
         document.getElementById('custom-fixed-amt-input').value = currentCustomFixedAmt;
 
-        // 🧠 52週模式大變身：日曆隱形，改渲染 52 週大步道！
+        // 🧠 52週模式大變身
         if (currentMode === 'week_52') {
             document.getElementById('label-completed-unit').innerText = "已完成週數";
             const col = document.createElement('div');
@@ -662,7 +662,7 @@
 
             const daysList = document.createElement('div');
             daysList.className = 'days-list';
-            daysList.style.gridTemplateColumns = "repeat(4, 1fr)"; // 四格一排更寬敞
+            daysList.style.gridTemplateColumns = "repeat(4, 1fr)";
 
             for (let w = 1; w <= 52; w++) {
                 const cell = document.createElement('div');
@@ -678,7 +678,6 @@
             col.appendChild(daysList);
             gridContainer.appendChild(col);
         } else {
-            // 365天制度的四種模式日曆渲染
             document.getElementById('label-completed-unit').innerText = "已完成天數";
             
             monthsData.forEach(month => {
@@ -696,7 +695,7 @@
                 } else if (currentMode === 'custom_fixed') {
                     monthTargetText = `存下 ${totalDaysInMonth * currentCustomFixedAmt} 元`;
                 } else {
-                    monthTargetText = `自由存無上限`;
+                    monthTargetText = `自由存無壓力`;
                 }
 
                 const header = document.createElement('div');
@@ -712,7 +711,6 @@
                     cell.className = 'day-cell';
                     cell.id = `day-${i}`;
                     
-                    // 根據模式賦予日曆格子不同的金額視覺
                     if (currentMode === '365_阶梯') {
                         cell.innerText = i;
                         if (checkedDays365.includes(i)) cell.classList.add('checked');
@@ -744,7 +742,6 @@
     }
 
     function toggleDayOrWeek(id, element) {
-        // 隨喜模式單獨處理跳窗輸入
         if (currentMode === '隨喜') {
             if (隨喜Map[id]) {
                 delete 隨喜Map[id];
@@ -767,7 +764,6 @@
             return;
         }
 
-        // 其餘常規勾選陣列處理
         let arr = [];
         let key = "";
         if (currentMode === '365_阶梯') { arr = checkedDays365; key = '365_savings_progress'; }
@@ -787,9 +783,9 @@
             const currentCount = arr.length;
             let title = ""; let milestone = false;
             if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestone = true; }
-            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestone = true; }
-            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestone = true; }
-            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestone = true; }
+            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestoneReached = true; }
+            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestoneReached = true; }
+            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestoneReached = true; }
             
             if (milestone) {
                 confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
@@ -803,22 +799,30 @@
         checkMidnightMode();
         let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
         
+        // 🛠️ 嚴格校正後的五軌純淨金額計算邏輯！
         if (currentMode === '365_阶梯') {
-            totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0);
+            totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0); // 格子編號 = 金額
             daysCount = checkedDays365.length;
         } else if (currentMode === 'fixed_50') {
-            totalSaved = checkedDays50.length * 50; daysCount = checkedDays50.length;
+            totalSaved = checkedDays50.length * 50; // 天數 * 50
+            daysCount = checkedDays50.length;
         } else if (currentMode === 'custom_fixed') {
-            totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length;
+            totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; // 天數 * 自訂金額
+            daysCount = checkedDaysCustom.length;
         } else if (currentMode === 'week_52') {
+            // 修正 52 週金額加總：週編號 * 10
             totalSaved = checkedWeeks52.reduce((sum, w) => sum + (w * 10), 0);
-            daysCount = checkedWeeks52.length; maxUnits = 52; // 52週分母
+            daysCount = checkedWeeks52.length; 
+            maxUnits = 52;
         } else {
-            // 隨喜模式
-            for (let k in 隨喜Map) { totalSaved += 隨喜Map[k]; daysCount++; }
+            // 隨喜模式：精準加總 map 內的值，不再誤加 key
+            for (let k in 隨喜Map) { 
+                totalSaved += parseInt(隨喜Map[k]) || 0; 
+            }
+            daysCount = Object.keys(隨喜Map).length;
         }
         
-        // 📈 天天或週週大平分的水位百分比
+        // 📈 百分比嚴格天數/週數平分制
         const percentNum = (daysCount / maxUnits) * 100;
         const progressPercent = percentNum.toFixed(2);
 
@@ -891,7 +895,6 @@
             return;
         }
 
-        // 原本經典 365 階梯模式盲盒
         let arr = checkedDays365;
         const available = []; for (let i = 1; i <= 365; i++) { if (!arr.includes(i)) available.push(i); }
         if (available.length === 0) { document.getElementById('celebrity-display').innerText = "🎉 滿貫全乾！"; return; }
