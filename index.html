@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>祈祈星星的萬用百變存錢大廳</title>
+    <title>祈星渡仁的萬用百變存錢大廳</title>
     <!-- 引入專業 3D 拉炮粒子動畫庫 -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --primary-color: #0077b6;
@@ -286,7 +286,7 @@
             font-size: 0.95rem;
         }
         
-        /* ➕ 手動多人補帳工具箱 */
+        /* ➕ 萬能多人補帳工具箱 */
         .manual-patch-box {
             background-color: var(--cell-bg);
             border: 1px dashed var(--accent-color);
@@ -548,7 +548,7 @@
             border-color: var(--primary-color) !important;
         }
 
-        /* 🤫 三大複合式隱形內部彈窗機制 */
+        /* 三大複合式內部彈窗 */
         .custom-modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -590,16 +590,16 @@
 
 <div class="container">
     <header>
-        <h1>✨ 祈祈星星的萬用百變存錢大廳 ✨</h1>
+        <!-- 🌟 全面蜕變大眾商用美學標題：祈星渡仁 🌟 -->
+        <h1>✨ 祈星渡仁 萬用百變存錢大廳 ✨</h1>
     </header>
 
-    <!-- 🎰 萬用大廳：智慧多合一模式選單 -->
+    <!-- 🎰 萬用大廳選單 -->
     <div class="mode-selector-box">
         <div class="mode-row">
             <span class="mode-label">🎰 儲蓄模式大廳：</span>
-            <!-- ⭐ 預設版本鎖定為 365_journal 手帳預設版 -->
             <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
-                <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [預設首頁版]</option>
+                <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [大眾預設版]</option>
                 <option value="365_阶梯">💎 365天階梯存錢法 (經典自選)</option>
                 <option value="fixed_50">🪙 天天固定 50 元大銅板法</option>
                 <option value="custom_fixed">📊 萬用自訂固定金額法</option>
@@ -652,16 +652,16 @@
         <div class="blueprint-status" id="blueprint-status-text">正在裝填藍圖...</div>
     </div>
 
-    <!-- 📱 現代記帳 App 流水帳面板區塊 (手帳專用) -->
+    <!-- 📱 現代記帳 App 流水帳面板區塊 -->
     <div class="app-journal-box" id="app-journal-ui-area">
         <div class="journal-title-bar">
             <span>📝 儲蓄流水手帳清單</span>
             <span id="journal-total-count-label" style="font-size:0.8rem; color:#64748b;">共 0 筆</span>
         </div>
 
-        <!-- ➕ 7.0 全新：萬能多人補帳工具箱 -->
+        <!-- ➕ 萬能多人補帳工具箱 -->
         <div class="manual-patch-box">
-            <div class="patch-title">➕ 多人同步 / 歷史補帳工具箱</div>
+            <div class="patch-title">➕ 歷史補帳 / 多人同步登載工具箱</div>
             <div class="patch-form">
                 <div>
                     <span style="font-size:0.8rem; color:#475569;">選擇日期：</span>
@@ -670,7 +670,6 @@
                 <div>
                     <span style="font-size:0.8rem; color:#475569;">補存面額：</span>
                     <select id="patch-amount-select" class="config-input" style="border:1px solid #cbd5e1; font-size:0.8rem; padding:4px; background:white; color:#333;">
-                        <!-- JS 會自動動態塞入 1~365 尚未被選過的面額 -->
                     </select>
                 </div>
                 <button class="patch-btn" onclick="executeManualPatch()">手動登載</button>
@@ -678,7 +677,6 @@
         </div>
 
         <div class="journal-container-list" id="journal-list-render-target">
-            <!-- 記帳卡片由 JS 動態塞入 -->
         </div>
     </div>
 
@@ -706,17 +704,16 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
-<!-- 🤫 專業二次確認與通知複合彈窗 -->
+<!-- 專業彈窗 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
         <div class="custom-modal-text" id="custom-modal-msg"></div>
         <div class="custom-modal-btn-group" id="custom-modal-buttons-area">
-            <!-- 動態注入確認或取消紐 -->
         </div>
     </div>
 </div>
 
-<!-- 🤫 隨喜專用輸入彈窗 -->
+<!-- 隨喜彈窗 -->
 <div class="prompt-modal-overlay" id="custom-prompt-layer">
     <div class="prompt-modal">
         <div class="prompt-title" id="prompt-modal-title">自由隨喜</div>
@@ -735,13 +732,11 @@
         { name: "一月", start: 1, end: 31 }, { name: "二月", start: 32, end: 59 },
         { name: "三月", start: 60, end: 90 }, { name: "四月", start: 91, end: 120 },
         { name: "五月", start: 121, end: 151 }, { name: "六月", start: 152, end: 181 },
-        { name: "七月", start: 182, gridEnd: 212, start: 182, end: 212 }, { name: "八月", start: 213, end: 243 },
+        { name: "七月", start: 182, end: 212 }, { name: "八月", start: 213, end: 243 },
         { name: "九月", start: 244, end: 273 }, { name: "十月", start: 274, end: 304 },
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
-    // 🛡️ 五軌數據絕對獨立保險箱！
-    // ⭐ 將初始預設載入模式鎖定為手帳版：'365_journal'
     let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     let checkedDays50 = JSON.parse(localStorage.getItem('fixed_50_savings_progress')) || [];
@@ -749,7 +744,6 @@
     let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
     let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
 
-    // 手帳卡片結構：{ dayIndex: 1, dateStr: "2026-07-09", amount: 125, isPatched: false }
     let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
     let journalStartDate = localStorage.getItem('365_journal_start_date') || DEFAULT_START_DATE;
 
@@ -764,7 +758,6 @@
         else document.body.classList.remove('midnight-mode');
     }
 
-    // 🌟 全新升級：支援二次彈窗確認的通知系統
     function showStandardAlert(msg) {
         document.getElementById('custom-modal-msg').innerText = msg;
         const btnArea = document.getElementById('custom-modal-buttons-area');
@@ -772,6 +765,7 @@
         document.getElementById('custom-modal-layer').classList.add('active');
     }
 
+    // 🌟 全球商用化精緻彈窗提示語調
     function showFlexibleConfirm(msg, onConfirm) {
         document.getElementById('custom-modal-msg').innerText = msg;
         const btnArea = document.getElementById('custom-modal-buttons-area');
@@ -849,16 +843,13 @@
         updateDashboard();
     }
 
-    // 🎰 7.0 渲染記帳清單，並動態補足補帳工具箱的面額下拉選單
     function renderJournalListUI() {
         const listContainer = document.getElementById('journal-list-render-target');
         listContainer.innerHTML = '';
         document.getElementById('journal-total-count-label').innerText = `共 ${journalListHistory.length} 筆`;
 
-        // 1. 蒐集已被佔用的面額
         const pulledAmounts = journalListHistory.map(card => card.amount);
         
-        // 2. 更新手動補帳選單的面額下拉選單（只塞入還沒被存過的面額）
         const patchSelect = document.getElementById('patch-amount-select');
         if (patchSelect) {
             patchSelect.innerHTML = '';
@@ -872,18 +863,16 @@
             }
         }
 
-        // 預設今日日期給補帳工具箱
         const patchDateInput = document.getElementById('patch-date-input');
         if (patchDateInput && !patchDateInput.value) {
             patchDateInput.value = new Date().toISOString().split('T')[0];
         }
 
         if (journalListHistory.length === 0) {
-            listContainer.innerHTML = `<div class="journal-empty-tip">🫙 帳本目前空空的，快抽盲盒或手動添加第一筆紀錄吧！</div>`;
+            listContainer.innerHTML = `<div class="journal-empty-tip">🫙 帳本目前空空的，快抽取盲盒或手動添加歷史紀錄吧！</div>`;
             return;
         }
 
-        // 最新加入的歷史排在最上面
         const displayArr = [...journalListHistory].reverse();
 
         displayArr.forEach(item => {
@@ -892,7 +881,7 @@
             
             const displayDate = item.dateStr.replace(/-/g, '/');
             const tagStyle = item.isPatched ? 'j-day-tag patch-tag' : 'j-day-tag';
-            const tagText = item.isPatched ? '多人補帳' : `第 ${item.dayIndex} 天`;
+            const tagText = item.isPatched ? '手動補帳' : `第 ${item.dayIndex} 天`;
 
             card.innerHTML = `
                 <div class="journal-left-info">
@@ -908,23 +897,20 @@
         });
     }
 
-    // 7.0 萬能手動補帳執行器
     function executeManualPatch() {
         const dateVal = document.getElementById('patch-date-input').value;
         const amtVal = parseInt(document.getElementById('patch-amount-select').value);
 
         if (!dateVal || !amtVal) {
-            showStandardAlert("❌ 請先選擇完整的補帳日期與金額！");
+            showStandardAlert("❌ 請選擇完整的補帳日期與金額！");
             return;
         }
 
-        // 檢查面額是否重複
         if (journalListHistory.some(card => card.amount === amtVal)) {
-            showStandardAlert(`❌ 面額 $${amtVal} 元之前已經存過了，請換一個面額！`);
+            showStandardAlert(`❌ 面額 $${amtVal} 元之前已經記錄過囉！`);
             return;
         }
 
-        // 寫入手帳歷史保險箱
         const newPatchCard = {
             dayIndex: journalListHistory.length + 1,
             dateStr: dateVal,
@@ -935,10 +921,8 @@
         journalListHistory.push(newPatchCard);
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
 
-        // 重新調校
         renderGrid();
         
-        // 觸發高質感反向點亮閃爍
         const targetCell = cellsMap[amtVal];
         if (targetCell) {
             targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -949,16 +933,12 @@
         confetti({ particleCount: 50, spread: 40 });
     }
 
-    // 7.0 流水帳單筆刪除修正器
     function deleteJournalItem(targetAmount) {
-        showFlexibleConfirm(`❓ 確定要刪除這筆 $${targetAmount} 元的儲蓄紀錄嗎？\n刪除後該面額格子會重新退回未存狀態。`, function() {
+        showFlexibleConfirm(`❓ 確定要刪除這筆 $${targetAmount} 元的儲蓄紀錄嗎？\n刪除後該面額會退回未存狀態。`, function() {
             journalListHistory = journalListHistory.filter(card => card.amount !== targetAmount);
-            
-            // 重新排列天數索引
             journalListHistory.forEach((card, idx) => {
                 if (!card.isPatched) card.dayIndex = idx + 1;
             });
-
             localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
             renderGrid();
         });
@@ -1042,7 +1022,7 @@
                     if (currentMode !== '365_journal') { cell.addEventListener('click', () => toggleDayOrWeek(i, cell)); }
                     daysList.appendChild(cell); cellsMap[i] = cell;
                 }
-                col.appendChild(daysList); gridContainer.appendChild(col);
+                col.appendChild(daysList); col.appendChild(daysList); gridContainer.appendChild(col);
             });
         }
         loadTargetGoal();
@@ -1089,8 +1069,8 @@
         if (isAdding) {
             const currentCount = arr.length;
             let title = ""; let milestone = false;
-            if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestone = true; }
-            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestone = true; }
+            if (currentCount === 11) { title = "🎖️ 儲蓄小幼苗 🎖️"; milestone = true; }
+            else if (currentCount === 21) { title = "🥈 儲蓄小達人 🥈"; milestone = true; }
             
             if (milestone) {
                 confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
@@ -1136,27 +1116,27 @@
 
         const themeKey = `theme_${currentMode}`;
         const currentTheme = localStorage.getItem(themeKey) || 'space';
-        const goalText = document.getElementById('target-saving-input').value || "夢想";
+        const goalText = document.getElementById('target-saving-input').value || "夢想計劃";
         const statusBox = document.getElementById('blueprint-status-text');
 
         let runnerIcon = "🚀"; let statusString = "";
 
         if (currentTheme === 'travel') {
             runnerIcon = "✈️";
-            if (percentNum === 0) statusString = `🗺️ 許願瓶空空的～正在描繪前往【${goalText}】的旅行藍圖！`;
-            else statusString = `🧳 [進度 ${progressPercent}%]：旅行能量注入中！正帶領著全家一步步往【${goalText}】飛高高前進！✈️`;
+            if (percentNum === 0) statusString = `🗺️ 正在描繪前往【${goalText}】的儲蓄能量藍圖...`;
+            else statusString = `🧳 [進度 ${progressPercent}%]：旅行能量穩定注入中！即將前往【${goalText}】啟航！✈️`;
         } else if (currentTheme === 'perfume') {
             runnerIcon = "🧴";
-            if (percentNum === 0) statusString = `✨ 許願瓶空空的～正在調配屬於【${goalText}】的神祕香氣藍圖...`;
-            else statusString = `🧪 [進度 ${progressPercent}%]：好香呀！【${goalText}】的夢幻液體精華在瓶中越聚越多囉！🧴`;
+            if (percentNum === 0) statusString = `✨ 正在調配屬於【${goalText}】的芬芳美學藍圖...`;
+            else statusString = `🧪 [進度 ${progressPercent}%]：夢幻香氣凝聚中！【${goalText}】的完美精華正隨儲蓄日漸充盈！🧴`;
         } else if (currentTheme === 'lego') {
             runnerIcon = "🧱";
-            if (percentNum === 0) statusString = `🎁 許願瓶空空的～正盯著【${goalText}】的積木包裝盒準備動手！`;
-            else statusString = `🧱 [進度 ${progressPercent}%]：城堡合體中！【${goalText}】的彩色積木塊，正在瓶中拼出美麗外型！`;
+            if (percentNum === 0) statusString = `🎁 盯著【${goalText}】的宏偉積木城堡，儲蓄骨架拼裝中...`;
+            else statusString = `🧱 [進度 ${progressPercent}%]：結構極致合體！【${goalText}】的彩色積木塊在瓶中拼出美麗外型！`;
         } else {
             runnerIcon = "🚀";
-            if (percentNum === 0) statusString = `🌌 許願瓶空空的～等待注入神祕宇宙能量！`;
-            else statusString = `🚀 [進度 ${progressPercent}%]：引擎全開！火箭正載著儲蓄能量，航向【${goalText}】夢想星球！✨`;
+            if (percentNum === 0) statusString = `🌌 蓄勢待發！等待注入宇宙級別的儲蓄星際能量！`;
+            else statusString = `🚀 [進度 ${progressPercent}%]：引擎全開！火箭正載著滿滿的意志力，航向【${goalText}】星系！✨`;
         }
         waterRunner.innerText = runnerIcon;
         statusBox.innerHTML = statusString;
@@ -1164,20 +1144,19 @@
 
     function pickCelebrity() {
         if (currentMode === '隨喜') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 隨便選一格灰色有緣的格子，放進皮夾裡的任意硬幣吧！</span>`;
+            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 隨心所欲將今日富餘的小銅板或鈔票存入吧！</span>`;
             return;
         } else if (currentMode === 'fixed_50') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：存下一個 $50 元大銅板！🪙</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 天天大銅板，生活超簡單！幫水瓶注入 0.27% 能量！</span>`;
+            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：固定存下大銅板！🪙</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 點亮任意格，為您的儲蓄瓶注入 0.27% 能量！</span>`;
             return;
         } else if (currentMode === 'custom_fixed') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #059669; font-weight: bold;">今日任務：存下自訂款 $${currentCustomFixedAmt} 元！📊</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 這是屬於你最驕傲的專屬紀律面額！</span>`;
+            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #059669; font-weight: bold;">今日任務：存下專屬配置款 $${currentCustomFixedAmt} 元！📊</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 這是屬於您最驕傲的專屬紀律面額！</span>`;
             return;
         } else if (currentMode === 'week_52') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #d97706; font-weight: bold;">今日任務：挑戰本週的 52 週步道！📈</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 一週點亮一格，水位大流往上衝！</span>`;
+            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.1rem; color: #d97706; font-weight: bold;">今日任務：挑戰本週 52 週階梯步道！📈</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 每週前進一格，輕鬆擁抱豐碩成果！</span>`;
             return;
         }
 
-        // 🛡️ 智慧手帳模式的隨機盲盒抽獎核心 + 7.0 彈窗二次確認
         const pulledAmounts = journalListHistory.map(card => card.amount);
         const availableAmounts = [];
         for (let i = 1; i <= 365; i++) {
@@ -1185,26 +1164,20 @@
         }
 
         if (availableAmounts.length === 0) {
-            document.getElementById('celebrity-display').innerHTML = "🎉 365天手帳帳本已全數大滿貫圓滿達成！🏆";
+            document.getElementById('celebrity-display').innerHTML = "🎉 恭喜！365天智慧手帳已全數圓滿大滿貫！🏆";
             return;
         }
 
         const selectedAmount = availableAmounts[Math.floor(Math.random() * availableAmounts.length)];
-        
-        // 🌟 7.0 升級：不直接寫入，先在盲盒顯示，並彈窗詢問確認
-        let dynamicTip = selectedAmount >= 300 ? " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(大魔王🦁)</span>" : "";
+        let dynamicTip = selectedAmount >= 300 ? " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(大魔王關卡🦁)</span>" : "";
         
         document.getElementById('celebrity-display').innerHTML = `
             <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日盲盒抽中：$${selectedAmount} 元！</span>${dynamicTip}<br>
-            <span style="font-size:0.9rem; color:#0369a1; font-weight:bold; margin-top:6px; display:inline-block;">📢 請查看下方跳出的確認視窗進行登載！</span>
+            <span style="font-size:0.9rem; color:#0369a1; font-weight:bold; margin-top:6px; display:inline-block;">📢 請查看下方跳出的確認視窗進行登載確認！</span>
         `;
 
-        // 彈出 7.0 核心二次確認窗
-        showFlexibleConfirm(`🎰 盲盒開箱結果：$${selectedAmount} 元！\n\n確定要把這一筆金額登載進今天的儲蓄手帳中嗎？\n(多人在存時，若金額不符可按取消重新抽取)`, function() {
-            // 用戶按下確認後，才真正執行寫入邏輯
+        showFlexibleConfirm(`🎰 盲盒開箱結果：$${selectedAmount} 元！\n\n確定要把這一筆金額登載進今天的儲蓄流水手帳中嗎？`, function() {
             const nextDayIndex = journalListHistory.length + 1;
-            
-            // 手帳預設抓今天日期
             const todayStr = new Date().toISOString().split('T')[0];
 
             const newJournalCard = {
