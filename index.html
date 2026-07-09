@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>祈星渡仁 — 萬用百變存錢大廳</title>
-    <!-- 引入專業 3D 拉炮粒子動畫庫 -->
+    <title>祈星渡仁 — 萬用百變存錢大廳 (網頁版)</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -24,9 +23,10 @@
             --water-color: linear-gradient(180deg, #4ea8de 0%, #0077b6 100%);
             --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
             --inner-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
+            --festival-overlay: transparent;
         }
 
-        /* 🌙 深夜模式變暗變色色票 (極致尊榮黑 00:00-05:00 自動切換) */
+        /* 🌙 深夜模式變暗變色色票 (00:00-05:00 自動切換) */
         body.midnight-mode {
             --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
             --btn-gradient: linear-gradient(135deg, #0284c7 0%, #075985 100%);
@@ -47,212 +47,49 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Icons", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             background-color: var(--bg-color);
+            background-image: var(--festival-overlay);
+            background-size: cover;
+            background-attachment: fixed;
             color: var(--text-color);
             margin: 0;
             padding: 20px 16px;
             -webkit-tap-highlight-color: transparent;
-            transition: background-color 0.6s cubic-bezier(0.4, 0, 0.2, 1), color 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.6s ease, color 0.6s ease;
             letter-spacing: -0.2px;
         }
 
-        .container {
-            max-width: 480px;
-            margin: 0 auto;
-        }
+        .container { max-width: 480px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 20px; }
+        h1 { font-size: 1.6rem; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
 
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            font-size: 1.6rem;
-            font-weight: 800;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-
-        /* 🎰 頂級智慧選單外殼 */
         .mode-selector-box {
-            background: var(--card-bg);
-            padding: 14px;
-            border-radius: 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--app-shadow);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            border: 1px solid var(--border-color);
+            background: var(--card-bg); padding: 14px; border-radius: 20px; margin-bottom: 16px;
+            box-shadow: var(--app-shadow); display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
-        .mode-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            width: 100%;
-        }
-        .mode-label {
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            font-weight: 700;
-            white-space: nowrap;
-        }
-        .mode-select {
-            flex: 1;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            padding: 10px 14px;
-            border-radius: 14px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            -webkit-appearance: none;
-        }
+        .mode-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+        .mode-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 700; white-space: nowrap; }
+        .mode-select { flex: 1; background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 700; outline: none; }
         
-        .config-sub-panel {
-            display: none;
-            background-color: var(--bg-color);
-            padding: 12px;
-            border-radius: 14px;
-            width: 100%;
-            box-sizing: border-box;
-            color: var(--text-color);
-            font-size: 0.85rem;
-            font-weight: 700;
-            border: 1px solid var(--border-color);
-        }
-        .config-flex-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            width: 100%;
-        }
-        .config-input {
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-color);
-            border-radius: 10px;
-            padding: 8px;
-            font-weight: 700;
-            text-align: center;
-            font-size: 0.9rem;
-            outline: none;
-        }
+        .config-sub-panel { display: none; background-color: var(--bg-color); padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); }
+        .config-flex-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
+        .config-input { border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-color); border-radius: 10px; padding: 8px; font-weight: 700; text-align: center; outline: none; }
 
-        /* 🏆 儲蓄目標與水瓶卡片 */
-        .target-progress-box {
-            background: var(--card-bg);
-            padding: 18px;
-            border-radius: 24px;
-            box-shadow: var(--app-shadow);
-            margin-bottom: 16px;
-            border: 1px solid var(--border-color);
-        }
+        .target-progress-box { background: var(--card-bg); padding: 18px; border-radius: 24px; box-shadow: var(--app-shadow); margin-bottom: 16px; border: 1px solid var(--border-color); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .target-input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
+        .target-label { font-size: 0.95rem; font-weight: 800; }
+        .target-input { flex: 1; border: none; border-radius: 12px; padding: 10px 14px; font-size: 0.9rem; color: var(--text-color); background-color: var(--bg-color); font-weight: 700; outline: none; text-align: right; box-shadow: var(--inner-shadow); }
 
-        .target-input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-            gap: 8px;
-        }
+        .theme-selector { display: flex; justify-content: space-around; background-color: var(--bg-color); padding: 6px; border-radius: 14px; margin-bottom: 18px; box-shadow: var(--inner-shadow); }
+        .theme-btn { background: none; border: none; font-size: 0.9rem; font-weight: 700; padding: 8px 12px; cursor: pointer; border-radius: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; opacity: 0.5; transition: all 0.3s; }
+        .theme-btn.active { opacity: 1; background-color: var(--card-bg); color: var(--text-color); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-        .target-label {
-            font-size: 0.95rem;
-            font-weight: 800;
-            color: var(--text-color);
-        }
-
-        .target-input {
-            flex: 1;
-            border: none;
-            border-radius: 12px;
-            padding: 10px 14px;
-            font-size: 0.9rem;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            font-weight: 700;
-            outline: none;
-            text-align: right;
-            box-shadow: var(--inner-shadow);
-        }
-
-        .theme-selector {
-            display: flex;
-            justify-content: space-around;
-            background-color: var(--bg-color);
-            padding: 6px;
-            border-radius: 14px;
-            margin-bottom: 18px;
-            box-shadow: var(--inner-shadow);
-        }
-
-        .theme-btn {
-            background: none;
-            border: none;
-            font-size: 0.9rem;
-            font-weight: 700;
-            padding: 8px 12px;
-            cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            opacity: 0.5;
-        }
-
-        .theme-btn.active {
-            opacity: 1;
-            background-color: var(--card-bg);
-            color: var(--text-color);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            transform: scale(1.02);
-        }
-
-        .water-bottle-container {
-            position: relative;
-            background-color: var(--bg-color);
-            height: 42px;
-            border-radius: 16px;
-            margin: 24px 0 14px 0;
-            overflow: visible;
-            box-shadow: var(--inner-shadow);
-            border: 1px solid var(--border-color);
-        }
-
-        .water-fluid {
-            height: 100%;
-            background: var(--water-color);
-            border-radius: 14px 0 0 14px;
-            width: 0%;
-            transition: width 0.8s cubic-bezier(0.1, 0.8, 0.3, 1);
-            position: relative;
-        }
-
-        .water-fluid.full {
-            border-radius: 14px;
-        }
-
-        .water-floating-runner {
-            position: absolute;
-            right: -16px;
-            top: -26px;
-            font-size: 1.5rem;
-            transition: all 0.8s cubic-bezier(0.1, 0.8, 0.3, 1);
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-            animation: floatingWave 2.5s ease-in-out infinite;
-        }
+        .water-bottle-container { position: relative; background-color: var(--bg-color); height: 42px; border-radius: 16px; margin: 24px 0 14px 0; overflow: visible; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
+        .water-fluid { height: 100%; background: var(--water-color); border-radius: 14px 0 0 14px; width: 0%; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.3, 1); position: relative; }
+        .water-fluid.full { border-radius: 14px; }
+        .water-floating-runner { position: absolute; right: -16px; top: -26px; font-size: 1.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1)); animation: floatingWave 2.5s ease-in-out infinite; }
 
         @keyframes floatingWave {
             0% { transform: translateY(0px) rotate(0deg); }
@@ -260,387 +97,83 @@
             100% { transform: translateY(0px) rotate(0deg); }
         }
 
-        .blueprint-status {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-align: center;
-            font-weight: 600;
-            background-color: var(--bg-color);
-            padding: 12px 16px;
-            border-radius: 14px;
-            margin-top: 10px;
-            min-height: 38px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.4;
-            box-shadow: var(--inner-shadow);
-        }
+        .blueprint-status { font-size: 0.85rem; color: var(--text-muted); text-align: center; font-weight: 600; background-color: var(--bg-color); padding: 12px 16px; border-radius: 14px; margin-top: 10px; min-height: 38px; display: flex; align-items: center; justify-content: center; line-height: 1.4; box-shadow: var(--inner-shadow); }
 
-        /* 📱 記帳手帳面板 */
-        .app-journal-box {
-            display: none;
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 18px;
-            margin-bottom: 16px;
-            box-shadow: var(--app-shadow);
-            border: 1px solid var(--border-color);
-        }
-        .journal-title-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 10px;
-            margin-bottom: 12px;
-            font-weight: 800;
-            color: var(--text-color);
-            font-size: 1rem;
-            letter-spacing: -0.3px;
-        }
+        .app-journal-box { display: none; background: var(--card-bg); border-radius: 24px; padding: 18px; margin-bottom: 16px; box-shadow: var(--app-shadow); border: 1px solid var(--border-color); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .journal-title-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 12px; font-weight: 800; font-size: 1rem; }
         
-        /* ➕ 高級感折疊式補帳工具 */
-        .patch-toggle-btn {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-            width: 100%;
-            padding: 10px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: background 0.2s;
-        }
-        .patch-toggle-btn:active { background-color: var(--border-color); }
-        .manual-patch-box {
-            display: none;
-            background-color: var(--bg-color);
-            padding: 12px;
-            border-radius: 14px;
-            margin-bottom: 14px;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: var(--inner-shadow);
-        }
-        .patch-form {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .patch-btn {
-            background: var(--btn-gradient);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
-        }
+        .patch-toggle-btn { background-color: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); width: 100%; padding: 10px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .manual-patch-box { display: none; background-color: var(--bg-color); padding: 12px; border-radius: 14px; margin-bottom: 14px; flex-direction: column; gap: 10px; box-shadow: var(--inner-shadow); }
+        .patch-form { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+        .patch-btn { background: var(--btn-gradient); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
-        .journal-container-list {
-            max-height: 280px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .journal-row-card {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background-color: var(--bg-color);
-            padding: 12px 16px;
-            border-radius: 14px;
-            box-shadow: var(--inner-shadow);
-            border: 1px solid var(--border-color);
-            animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .journal-row-card.patched-card {
-            border-left: 4px solid #10b981;
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .journal-left-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        .j-day-tag {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #0284c7;
-            background-color: rgba(2, 132, 199, 0.1);
-            padding: 2px 8px;
-            border-radius: 6px;
-            width: fit-content;
-        }
-        .j-day-tag.patch-tag {
-            color: #10b981;
-            background-color: rgba(16, 185, 129, 0.1);
-        }
-        .j-date-text {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            font-weight: 600;
-        }
-        .journal-right-flex {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .journal-right-amt {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #10b981;
-        }
-        .journal-delete-btn {
-            background-color: rgba(239, 68, 68, 0.08);
-            border: none;
-            color: #ef4444;
-            font-size: 0.85rem;
-            cursor: pointer;
-            padding: 6px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .journal-container-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-color); padding: 12px 16px; border-radius: 14px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .journal-row-card.patched-card { border-left: 4px solid #10b981; }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .journal-left-info { display: flex; flex-direction: column; gap: 4px; }
+        .j-day-tag { font-size: 0.7rem; font-weight: 800; color: #0284c7; background-color: rgba(2, 132, 199, 0.1); padding: 2px 8px; border-radius: 6px; width: fit-content; }
+        .j-day-tag.patch-tag { color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
+        .j-day-tag.birthday-tag { color: #db2777; background-color: rgba(219, 39, 119, 0.1); }
+        .j-date-text { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; }
+        .journal-right-flex { display: flex; align-items: center; gap: 12px; }
+        .journal-right-amt { font-size: 1.15rem; font-weight: 800; color: #10b981; }
+        .journal-delete-btn { background-color: rgba(239, 68, 68, 0.08); border: none; color: #ef4444; font-size: 0.85rem; cursor: pointer; padding: 6px; border-radius: 8px; }
 
-        /* 🎲 尊榮極光盲盒卡片 */
-        .random-box {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 24px;
-            margin-bottom: 16px;
-            text-align: center;
-            box-shadow: var(--app-shadow);
-        }
+        .random-box { background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 24px; margin-bottom: 16px; box-shadow: var(--app-shadow); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .random-title { font-size: 0.85rem; font-weight: 800; color: var(--text-muted); letter-spacing: 0.5px; margin-bottom: 10px; }
+        .celebrity-info { font-size: 1.05rem; color: var(--text-color); margin-bottom: 16px; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; text-align: center; }
+        .random-btn { background: var(--btn-gradient); color: white; border: none; padding: 14px 36px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; cursor: pointer; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3); width: 100%; transition: all 0.2s; }
+        .random-btn:active { transform: scale(0.98); }
 
-        .random-title {
-            font-size: 0.85rem;
-            font-weight: 800;
-            color: var(--text-muted);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
+        .dashboard { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; background: var(--card-bg); padding: 16px; border-radius: 24px; box-shadow: var(--app-shadow); margin-bottom: 20px; border: 1px solid var(--border-color); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .stat-card { text-align: center; padding: 6px 0; }
+        .stat-card h3 { margin: 0 0 4px 0; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
+        .stat-card p { margin: 0; font-size: 1.3rem; font-weight: 800; color: var(--text-color); }
 
-        .celebrity-info {
-            font-size: 1.05rem;
-            color: var(--text-color);
-            margin-bottom: 16px;
-            min-height: 48px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            line-height: 1.5;
-        }
+        .grid-container { display: flex; flex-direction: column; gap: 18px; }
+        .month-column { background: var(--card-bg); border-radius: 22px; box-shadow: var(--app-shadow); border: 1px solid var(--border-color); overflow: hidden; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+        .month-header { background: var(--bg-color); color: var(--text-color); padding: 14px 16px; font-weight: 800; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .month-target { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
+        .days-list { padding: 14px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+        
+        .day-cell { padding: 14px 0; text-align: center; background-color: var(--bg-color); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: var(--cell-text); transition: all 0.2s ease; box-shadow: var(--inner-shadow); }
+        .day-cell.checked { background: var(--checked-bg) !important; color: var(--checked-text) !important; box-shadow: 0 4px 10px rgba(167, 201, 87, 0.3); }
+        .day-cell.readonly-lock { cursor: default; }
 
-        .random-btn {
-            background: var(--btn-gradient);
-            color: white;
-            border: none;
-            padding: 14px 36px;
-            font-size: 0.95rem;
-            font-weight: 800;
-            border-radius: 16px;
-            cursor: pointer;
-            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
-            transition: all 0.2s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .random-btn:active {
-            transform: scale(0.98);
-            box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2);
-        }
-        .random-btn:disabled {
-            background: #cbd5e1 !important;
-            color: #94a3b8 !important;
-            cursor: not-allowed;
-            box-shadow: none !important;
-        }
-        body.midnight-mode .random-btn:disabled {
-            background: #1e293b !important;
-            color: #475569 !important;
-        }
-
-        /* 📊 頂級儀表板 */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            background: var(--card-bg);
-            padding: 16px;
-            border-radius: 24px;
-            box-shadow: var(--app-shadow);
-            margin-bottom: 20px;
-            border: 1px solid var(--border-color);
-        }
-
-        .stat-card {
-            text-align: center;
-            padding: 6px 0;
-        }
-
-        .stat-card h3 {
-            margin: 0 0 4px 0;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: var(--text-muted);
-            letter-spacing: 0.3px;
-        }
-
-        .stat-card p {
-            margin: 0;
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: var(--text-color);
-        }
-
-        /* 📅 日曆大圖格優化（去網頁線條） */
-        .grid-container {
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-
-        .month-column {
-            background: var(--card-bg);
-            border-radius: 22px;
-            box-shadow: var(--app-shadow);
-            border: 1px solid var(--border-color);
-            overflow: hidden;
-        }
-
-        .month-header {
-            background: var(--bg-color);
-            color: var(--text-color);
-            padding: 14px 16px;
-            font-weight: 800;
-            font-size: 0.95rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .month-target {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            font-weight: 700;
-        }
-
-        .days-list {
-            padding: 14px;
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-
-        .day-cell {
-            padding: 14px 0;
-            text-align: center;
-            background-color: var(--bg-color);
-            border: none;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--cell-text);
-            transition: all 0.2s ease;
-            user-select: none;
-            box-shadow: var(--inner-shadow);
-        }
-
-        .day-cell.checked {
-            background: var(--checked-bg) !important;
-            color: var(--checked-text) !important;
-            text-decoration: none;
-            box-shadow: 0 4px 10px rgba(167, 201, 87, 0.3);
-        }
-
-        /* 🤫 頂級 App 風格圓角對話框 */
-        .custom-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
         .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .custom-modal {
-            background-color: var(--card-bg); border-radius: 28px;
-            padding: 24px; width: 85%; max-width: 320px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; border: 1px solid var(--border-color);
-            transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .custom-modal { background-color: var(--card-bg); border-radius: 28px; padding: 24px; width: 85%; max-width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; border: 1px solid var(--border-color); transform: scale(0.9); transition: transform 0.4s; }
         .custom-modal-overlay.active .custom-modal { transform: scale(1); }
         .custom-modal-text { font-size: 1rem; line-height: 1.5; color: var(--text-color); margin-bottom: 24px; white-space: pre-line; font-weight: 700;}
         .custom-modal-btn-group { display: flex; gap: 12px; }
-        .custom-modal-btn { background: var(--btn-gradient); color: white; border: none; padding: 12px 24px; font-size: 0.95rem; font-weight: 800; border-radius: 14px; cursor: pointer; flex: 1; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);}
-        .custom-modal-btn.cancel-btn { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); box-shadow: none; }
+        .custom-modal-btn { background: var(--btn-gradient); color: white; border: none; padding: 12px 24px; font-size: 0.95rem; font-weight: 800; border-radius: 14px; cursor: pointer; flex: 1; }
+        .custom-modal-btn.cancel-btn { background: var(--bg-color); color: var(--text-color); border: 1px solid var(--border-color); }
 
-        /* 隨喜專用 */
-        .prompt-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 10000; opacity: 0; pointer-events: none;
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
+        .prompt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; }
         .prompt-modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .prompt-modal {
-            background-color: var(--card-bg); border-radius: 28px;
-            padding: 24px; width: 85%; max-width: 300px; text-align: center; border: 1px solid var(--border-color);
-        }
-        .prompt-title { font-weight: 800; margin-bottom: 14px; color: var(--text-color); font-size: 1.05rem; }
-        .prompt-input-box { width: 90%; padding: 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 12px; font-size: 1.2rem; text-align: center; font-weight: 800; margin-bottom: 18px; outline: none; box-shadow: var(--inner-shadow);}
+        .prompt-modal { background-color: var(--card-bg); border-radius: 28px; padding: 24px; width: 85%; max-width: 300px; text-align: center; border: 1px solid var(--border-color); }
+        .prompt-title { font-weight: 800; margin-bottom: 14px; color: var(--text-color); }
+        .prompt-input-box { width: 90%; padding: 12px; border: 1px solid var(--border-color); background: var(--bg-color); color: var(--text-color); border-radius: 12px; font-size: 1.2rem; text-align: center; font-weight: 800; margin-bottom: 18px; outline: none; }
 
-        @keyframes highlight {
-            0% { transform: scale(1); background-color: #fef08a; }
-            50% { transform: scale(1.05); background-color: #bae6fd; }
-            100% { transform: scale(1); background-color: #fef08a; }
-        }
-        .target-flash {
-            animation: highlight 0.6s ease 2;
-            border: 2px solid #00b4d8 !important;
-        }
+        @keyframes highlight { 0% { transform: scale(1); background-color: #fef08a; } 50% { transform: scale(1.05); background-color: #bae6fd; } 100% { transform: scale(1); background-color: #fef08a; } }
+        .target-flash { animation: highlight 0.6s ease 2; border: 2px solid #00b4d8 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <h1>祈星渡仁 — 萬用百變存錢大廳</h1>
+        <h1>✨ 祈星渡仁 — 萬用百變存錢大廳 ✨</h1>
     </header>
 
-    <!-- 🎰 選單 -->
     <div class="mode-selector-box">
         <div class="mode-row">
             <span class="mode-label">⚙️ 儲蓄核心：</span>
             <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
-                <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [App預設]</option>
+                <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [網頁預設]</option>
                 <option value="365_阶梯">💎 365天階梯存錢法 (經典自選)</option>
-                <option value="fixed_50">🪙 天天固定 50 元大銅板法</option>
                 <option value="custom_fixed">📊 萬用自訂固定金額法</option>
                 <option value="week_52">📈 52週階梯存錢法 (每週步道)</option>
                 <option value="隨喜">💖 自由隨喜無壓力存錢法</option>
@@ -649,7 +182,7 @@
         
         <div class="config-sub-panel" id="custom-amt-panel">
             <div class="config-flex-row">
-                <span>🔧 設定面額：</span>
+                <span>🔧 設定自訂面額：</span>
                 <div>
                     <input type="number" id="custom-fixed-amt-input" class="config-input" style="width:65px;" value="100">
                     <button style="background: var(--btn-gradient); border:none; padding:8px 12px; font-weight:bold; border-radius:8px; color:white; font-size:0.8rem; margin-left:4px;" onclick="applyCustomFixedAmount()">套用</button>
@@ -666,7 +199,6 @@
         </div>
     </div>
 
-    <!-- 🏆 目標進度 -->
     <div class="target-progress-box">
         <div class="target-input-group">
             <span class="target-label">🎯 儲蓄目標</span>
@@ -689,14 +221,12 @@
         <div class="blueprint-status" id="blueprint-status-text">裝填藍圖中...</div>
     </div>
 
-    <!-- 📱 現代記帳流水清單 -->
     <div class="app-journal-box" id="app-journal-ui-area">
         <div class="journal-title-bar">
             <span>📝 儲蓄流水手帳</span>
             <span id="journal-total-count-label" style="font-size:0.8rem; color: var(--text-muted);">0 筆</span>
         </div>
 
-        <!-- ➕ 折疊式萬能補帳工具 -->
         <button class="patch-toggle-btn" onclick="togglePatchBox()">
             <span>➕ 展開補帳與多人同步工具</span>
         </button>
@@ -720,14 +250,12 @@
         </div>
     </div>
 
-    <!-- 🎲 盲盒 -->
     <div class="random-box">
         <div class="random-title">🎲 幸運儲蓄盲盒抽獎</div>
-        <div class="celebrity-info" id="celebrity-display">點擊下方開啟今日驚喜...</div>
+        <div class="celebrity-info" id="celebrity-display">開啟今日驚喜儲蓄任務...</div>
         <button class="random-btn" id="main-action-random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
     </div>
 
-    <!-- 📊 數據 -->
     <div class="dashboard">
         <div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
             <h3>目前已存總金額</h3>
@@ -746,7 +274,6 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
-<!-- 專業對話框 -->
 <div class="custom-modal-overlay" id="custom-modal-layer">
     <div class="custom-modal">
         <div class="custom-modal-text" id="custom-modal-msg"></div>
@@ -755,7 +282,6 @@
     </div>
 </div>
 
-<!-- 隨喜對話框 -->
 <div class="prompt-modal-overlay" id="custom-prompt-layer">
     <div class="prompt-modal">
         <div class="prompt-title" id="prompt-modal-title">自由隨喜</div>
@@ -781,7 +307,6 @@
 
     let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
-    let checkedDays50 = JSON.parse(localStorage.getItem('fixed_50_savings_progress')) || [];
     let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
     let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
     let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
@@ -800,10 +325,51 @@
         else document.body.classList.remove('midnight-mode');
     }
 
+    function applyDynamicFestivalAndTimeTheme() {
+        const now = new Date();
+        const month = now.getMonth() + 1;
+        const date = now.getDate();
+        const hour = now.getHours();
+        const root = document.documentElement;
+
+        let isMidnight = (hour >= 0 && hour < 5);
+        if (isMidnight) document.body.classList.add('midnight-mode');
+        else document.body.classList.remove('midnight-mode');
+
+        let festivalGradient = "";
+        if (month === 12 && date >= 20 && date <= 26) {
+            festivalGradient = isMidnight ? "radial-gradient(circle at top, #1e3a1e 0%, #0b0f19 100%)" : "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)";
+            root.style.setProperty('--checked-bg', "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)");
+        } else if ((month === 1 && date >= 15) || (month === 2 && date <= 15)) {
+            festivalGradient = isMidnight ? "radial-gradient(circle at top, #3b0712 0%, #0b0f19 100%)" : "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)";
+            root.style.setProperty('--checked-bg', "linear-gradient(135deg, #dc2626 0%, #991b1b 100%)");
+        } else if (month === 1 && date === 19) {
+            // 🎂 1/19 祈祈生日專屬櫻粉色櫻花節慶效果背景
+            festivalGradient = isMidnight ? "radial-gradient(circle at top, #4d122b 0%, #0b0f19 100%)" : "linear-gradient(135deg, #fff1f2 0%, #ffe4e6 100%)";
+            root.style.setProperty('--checked-bg', "linear-gradient(135deg, #ec4899 0%, #be185d 100%)");
+        } else if (month === 10 && date >= 25) {
+            festivalGradient = isMidnight ? "radial-gradient(circle at top, #2d1a4a 0%, #0b0f19 100%)" : "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)";
+        } else {
+            if (month >= 3 && month <= 5) festivalGradient = isMidnight ? "radial-gradient(circle at top, #142820 0%, #0b0f19 100%)" : "linear-gradient(135deg, #f4f9f4 0%, #e8f5e9 100%)";
+            else if (month >= 6 && month <= 8) festivalGradient = isMidnight ? "radial-gradient(circle at top, #0c2340 0%, #0b0f19 100%)" : "linear-gradient(135deg, #f0f7fa 0%, #e1f5fe 100%)";
+            else if (month >= 9 && month <= 11) festivalGradient = isMidnight ? "radial-gradient(circle at top, #2e1f10 0%, #0b0f19 100%)" : "linear-gradient(135deg, #fffaf0 0%, #fff3e0 100%)";
+            else festivalGradient = isMidnight ? "radial-gradient(circle at top, #1a2332 0%, #0b0f19 100%)" : "linear-gradient(135deg, #f5f7fa 0%, #eceff1 100%)";
+        }
+        document.body.style.backgroundImage = festivalGradient;
+        
+        const celebrityDisplay = document.getElementById('celebrity-display');
+        if (celebrityDisplay && celebrityDisplay.innerText.includes("開啟今日驚喜")) {
+            if (isMidnight) {
+                celebrityDisplay.innerHTML = `<span style="color:#38bdf8; font-weight:800;">🌙 夜深了，儲蓄守護者</span><br><span style="font-size:0.85rem; color:var(--text-muted); font-style:italic; margin-top:4px; display:inline-block;">祈星渡仁溫馨提醒您早點休息，明天再存也是一種紀律喔！</span>`;
+            } else {
+                celebrityDisplay.innerHTML = `🌟 開啟今日驚喜儲蓄任務...`;
+            }
+        }
+    }
+
     function togglePatchBox() {
         const area = document.getElementById('manual-patch-expand-area');
-        if(area.style.display === 'flex') area.style.display = 'none';
-        else area.style.display = 'flex';
+        area.style.display = area.style.display === 'flex' ? 'none' : 'flex';
     }
 
     function showStandardAlert(msg) {
@@ -882,6 +448,20 @@
         localStorage.setItem(`goal_${currentMode}`, document.getElementById('target-saving-input').value);
     }
 
+    function triggerMilestoneCelebration(currentCount) {
+        let title = ""; let milestone = false;
+        if (currentCount === 11) { title = "🎖️ 儲蓄小幼苗 🎖️"; milestone = true; }
+        else if (currentCount === 21) { title = "🥈 儲蓄小達人 🥈"; milestone = true; }
+        else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestone = true; }
+        else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestone = true; }
+        
+        if (milestone) {
+            confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
+            confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
+            setTimeout(() => { showStandardAlert(`🎉 太棒了！\n您的累積儲蓄已邁入第 ${currentCount} 步！\n榮獲全新里程碑稱號：\n【${title}】！🔥✨`); }, 400);
+        }
+    }
+
     function switchTheme(themeType) {
         localStorage.setItem(`theme_${currentMode}`, themeType);
         document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
@@ -923,8 +503,11 @@
             const card = document.createElement('div');
             card.className = `journal-row-card ${item.isPatched ? 'patched-card' : ''}`;
             const displayDate = item.dateStr.replace(/-/g, '/');
-            const tagStyle = item.isPatched ? 'j-day-tag patch-tag' : 'j-day-tag';
-            const tagText = item.isPatched ? '歷史補帳' : `第 ${item.dayIndex} 天`;
+            
+            // 🎂 網頁版核心：1/19 祈祈生日手帳緞帶標籤歸位！
+            let isBday = item.dateStr.endsWith('01-19');
+            const tagStyle = isBday ? 'j-day-tag birthday-tag' : (item.isPatched ? 'j-day-tag patch-tag' : 'j-day-tag');
+            let tagText = isBday ? '🎂 祈祈生日加碼' : (item.isPatched ? '歷史補帳' : `第 ${item.dayIndex} 天`);
 
             card.innerHTML = `
                 <div class="journal-left-info">
@@ -970,6 +553,7 @@
             targetCell.classList.add('target-flash');
         }
         confetti({ particleCount: 50, spread: 40 });
+        triggerMilestoneCelebration(journalListHistory.length);
     }
 
     function deleteJournalItem(targetAmount) {
@@ -984,7 +568,7 @@
     }
 
     function renderGrid() {
-        checkMidnightMode();
+        applyDynamicFestivalAndTimeTheme();
         document.getElementById('main-saving-mode-select').value = currentMode;
         gridContainer.innerHTML = '';
         
@@ -1025,9 +609,11 @@
                 if (currentMode === '365_阶梯' || currentMode === '365_journal') {
                     let sum = 0; for(let d=month.start; d<=month.end; d++) sum += d;
                     monthTargetText = `預估 ${sum} 元`;
-                } else if (currentMode === 'fixed_50') { monthTargetText = `預估 ${totalDaysInMonth * 50} 元`; }
-                else if (currentMode === 'custom_fixed') { monthTargetText = `預估 ${totalDaysInMonth * currentCustomFixedAmt} 元`; }
-                else { monthTargetText = `彈性儲蓄`; }
+                } else if (currentMode === 'custom_fixed') {
+                    monthTargetText = `預估 ${totalDaysInMonth * currentCustomFixedAmt} 元`;
+                } else {
+                    monthTargetText = `彈性儲蓄`;
+                }
 
                 const header = document.createElement('div'); header.className = 'month-header';
                 header.innerHTML = `<span>${month.name}</span><span class="month-target">${monthTargetText}</span>`;
@@ -1047,8 +633,6 @@
                         } else {
                             if (checkedDays365.includes(i)) cell.classList.add('checked');
                         }
-                    } else if (currentMode === 'fixed_50') {
-                        cell.innerText = "$50"; if (checkedDays50.includes(i)) cell.classList.add('checked');
                     } else if (currentMode === 'custom_fixed') {
                         cell.innerText = `$${currentCustomFixedAmt}`; if (checkedDaysCustom.includes(i)) cell.classList.add('checked');
                     } else {
@@ -1093,35 +677,21 @@
 
         let arr = []; let key = "";
         if (currentMode === '365_阶梯') { arr = checkedDays365; key = '365_savings_progress'; }
-        else if (currentMode === 'fixed_50') { arr = checkedDays50; key = 'fixed_50_savings_progress'; }
         else if (currentMode === 'custom_fixed') { arr = checkedDaysCustom; key = 'custom_fixed_savings_progress'; }
         else if (currentMode === 'week_52') { arr = checkedWeeks52; key = 'week_52_savings_progress'; }
 
         const idx = arr.indexOf(id);
-        let isAdding = false;
-        if (idx === -1) { arr.push(id); element.classList.add('checked'); isAdding = true; }
+        if (idx === -1) { arr.push(id); element.classList.add('checked'); }
         else { arr.splice(idx, 1); element.classList.remove('checked'); }
         
         localStorage.setItem(key, JSON.stringify(arr));
         updateDashboard();
-
-        if (isAdding) {
-            const currentCount = arr.length;
-            let title = ""; let milestone = false;
-            if (currentCount === 11) { title = "🎖️ 儲蓄小幼苗 🎖️"; milestone = true; }
-            else if (currentCount === 21) { title = "🥈 儲蓄小達人 🥈"; milestone = true; }
-            
-            if (milestone) {
-                confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
-                confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
-                setTimeout(() => { showStandardAlert(`🎉 累積進度已邁入第 ${currentCount} 步！\n獲取榮譽稱號：\n【${title}】！🔥✨`); }, 400);
-            }
-        }
+        triggerMilestoneCelebration(arr.length);
     }
 
     function updateDashboard() {
-        checkMidnightMode();
         let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
+        let hasBirthdayBonus = false; 
         
         if (currentMode === '365_阶梯') {
             totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0);
@@ -1129,8 +699,13 @@
         } else if (currentMode === '365_journal') {
             totalSaved = journalListHistory.reduce((sum, card) => sum + card.amount, 0);
             daysCount = journalListHistory.length;
-        } else if (currentMode === 'fixed_50') {
-            totalSaved = checkedDays50.length * 50; daysCount = checkedDays50.length;
+            
+            // 🎂 網頁版核心：只要手帳存在 01-19，總金額智動加碼 1,000 元！
+            const isBirthdayActive = journalListHistory.some(card => card.dateStr.endsWith('01-19'));
+            if (isBirthdayActive) {
+                totalSaved += 1000;
+                hasBirthdayBonus = true;
+            }
         } else if (currentMode === 'custom_fixed') {
             totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length;
         } else if (currentMode === 'week_52') {
@@ -1160,22 +735,28 @@
 
         let runnerIcon = "🚀"; let statusString = "";
 
-        if (currentTheme === 'travel') {
-            runnerIcon = "✈️";
-            if (percentNum === 0) statusString = `🗺️ 正在描繪前往【${goalText}】的儲蓄藍圖...`;
-            else statusString = `🧳 [進度 ${progressPercent}%]：旅行能量穩定注入中！即將前往【${goalText}】前進！✈️`;
-        } else if (currentTheme === 'perfume') {
-            runnerIcon = "🧴";
-            if (percentNum === 0) statusString = `✨ 正在調配屬於【${goalText}】的芬芳美學能量...`;
-            else statusString = `🧪 [進度 ${progressPercent}%]：夢幻香氣凝聚中！【${goalText}】完美精華日漸充盈！🧴`;
-        } else if (currentTheme === 'lego') {
-            runnerIcon = "🧱";
-            if (percentNum === 0) statusString = `🎁 鎖定【${goalText}】積木城堡，極致結構拼裝中...`;
-            else statusString = `🧱 [進度 ${progressPercent}%]：結構合體！【${goalText}】的彩色積木塊正在拼出外型！`;
+        // 🎂 網頁版特製：1/19 生日進度條加碼大彩蛋文字串接
+        if (hasBirthdayBonus) {
+            statusString = `🎂 [1/19 祈祈生日大加碼] 已自動為許願瓶注入 $1,000 元幸福基金！目前進度已達 ${progressPercent}% 往【${goalText}】大步邁進！✨`;
+            runnerIcon = "🎁";
         } else {
-            runnerIcon = "🚀";
-            if (percentNum === 0) statusString = `🌌 火箭發射台就位！等待注入宇宙級別的儲蓄能量！`;
-            else statusString = `🚀 [進度 ${progressPercent}%]：引擎全開！火箭正載著滿滿的意志力，航向【${goalText}】！✨`;
+            if (currentTheme === 'travel') {
+                runnerIcon = "✈️";
+                if (percentNum === 0) statusString = `🗺️ 正在描繪前往【${goalText}】的儲蓄藍圖...`;
+                else statusString = `🧳 [進度 ${progressPercent}%]：旅行能量穩定注入中！即將前往【${goalText}】前進！✈️`;
+            } else if (currentTheme === 'perfume') {
+                runnerIcon = "🧴";
+                if (percentNum === 0) statusString = `✨ 正在調配屬於【${goalText}】的芬芳美學能量...`;
+                else statusString = `🧪 [進度 ${progressPercent}%]：夢幻香氣凝聚中！【${goalText}】完美精華日漸充盈！🧴`;
+            } else if (currentTheme === 'lego') {
+                runnerIcon = "🧱";
+                if (percentNum === 0) statusString = `🎁 鎖定【${goalText}】積木城堡，極致結構拼裝中...`;
+                else statusString = `🧱 [進度 ${progressPercent}%]：結構合體！【${goalText}】的彩色積木塊正在拼出外型！`;
+            } else {
+                runnerIcon = "🚀";
+                if (percentNum === 0) statusString = `🌌 火箭發射台就位！等待注入宇宙級別的儲蓄能量！`;
+                else statusString = `🚀 [進度 ${progressPercent}%]：引擎全開！火箭正載著滿滿的意志力，航向【${goalText}】！✨`;
+            }
         }
         waterRunner.innerText = runnerIcon;
         statusBox.innerHTML = statusString;
@@ -1184,9 +765,6 @@
     function pickCelebrity() {
         if (currentMode === '隨喜') {
             document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br><span style="font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin-top: 4px; display: inline-block;">💬 隨心所欲將今日富餘的小銅板或鈔票存入吧！</span>`;
-            return;
-        } else if (currentMode === 'fixed_50') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: #0284c7; font-weight: bold;">今日任務：固定存下大銅板！🪙</span><br><span style="font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin-top: 4px; display: inline-block;">💬 點亮任意格，為您的儲蓄瓶注入 0.27% 能量！</span>`;
             return;
         } else if (currentMode === 'custom_fixed') {
             document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: #059669; font-weight: bold;">今日任務：存下配置款 $${currentCustomFixedAmt} 元！📊</span><br><span style="font-size: 0.85rem; color: var(--text-muted); font-style: italic; margin-top: 4px; display: inline-block;">💬 這是屬於您最驕傲的專屬紀律面額！</span>`;
@@ -1215,7 +793,7 @@
             <span style="font-size:0.85rem; color:#0284c7; font-weight:bold; margin-top:4px; display:inline-block;">📢 請查看彈出的對話框確認登載！</span>
         `;
 
-        showFlexibleConfirm(`🎰 盲盒抽中面額：$${selectedAmount} 元\n\n確定要將此筆交易登載至「祈星渡仁」儲蓄流水手帳中嗎？`, function() {
+        showFlexibleConfirm(`🎰 盲盒抽中面額：$${selectedAmount} 元\n\n確定要將此筆交易登載至手帳中嗎？`, function() {
             const nextDayIndex = journalListHistory.length + 1;
             const todayStr = new Date().toISOString().split('T')[0];
 
@@ -1237,6 +815,7 @@
                 targetCell.classList.add('target-flash');
             }
             confetti({ particleCount: 70, spread: 60, origin: { y: 0.8 } });
+            triggerMilestoneCelebration(journalListHistory.length);
         });
     }
 
