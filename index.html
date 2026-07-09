@@ -105,37 +105,33 @@
             cursor: pointer;
         }
         
-        /* 自訂固定金額輸入區 */
-        .custom-amt-config-panel {
+        /* 配置面板容器 */
+        .config-sub-panel {
             display: none;
             background-color: rgba(255, 255, 255, 0.15);
-            padding: 8px 12px;
+            padding: 10px;
             border-radius: 8px;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
             width: 100%;
             box-sizing: border-box;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
         }
-        .custom-amt-input {
-            width: 80px;
+        .config-flex-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .config-input {
             border: none;
             border-radius: 4px;
             padding: 6px;
             font-weight: bold;
             text-align: center;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             outline: none;
-        }
-        .custom-amt-btn {
-            background-color: #bae6fd;
-            color: #0369a1;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-weight: bold;
-            font-size: 0.85rem;
-            cursor: pointer;
         }
 
         .target-progress-box {
@@ -268,6 +264,84 @@
             border-left: 4px solid var(--accent-color);
         }
 
+        /* 📱 現代記帳 App 流水帳面板區塊 */
+        .app-journal-box {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        .journal-title-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--header-bg);
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+            font-weight: bold;
+            color: var(--header-text);
+            font-size: 0.95rem;
+        }
+        .journal-container-list {
+            max-height: 260px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 2px;
+        }
+        /* 記帳 App 風格極致精緻單行卡片 */
+        .journal-row-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--cell-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.01);
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .journal-left-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .j-day-tag {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #0284c7;
+            background-color: #e0f2fe;
+            padding: 1px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+        .j-date-text {
+            font-size: 0.85rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+        .journal-right-amt {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #16a34a;
+        }
+        .journal-empty-tip {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            padding: 30px 0;
+            font-style: italic;
+        }
+
         .dashboard {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -289,9 +363,6 @@
             margin: 0 0 3px 0;
             font-size: 0.8rem;
             color: #777;
-        }
-        body.midnight-mode .stat-card h3 {
-            color: #94a3b8;
         }
 
         .stat-card p {
@@ -345,6 +416,12 @@
             border-radius: 20px;
             cursor: pointer;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .random-btn:disabled {
+            background-color: #cbd5e1;
+            color: #94a3b8;
+            cursor: not-allowed;
+            box-shadow: none;
         }
 
         .grid-container {
@@ -407,7 +484,11 @@
             text-decoration: line-through;
         }
 
-        /* 🤫 內置自製特殊輸入彈窗系統 */
+        /* 🔒 唯讀唯唯防誤觸遮罩日曆效果 */
+        .day-cell.readonly-lock {
+            cursor: default;
+        }
+
         .prompt-modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -468,24 +549,37 @@
         <h1>✨ 祈祈星星的萬用百變存錢大廳 ✨</h1>
     </header>
 
-    <!-- 🎰 萬用大廳：五合一模式大下拉選單 -->
+    <!-- 🎰 萬用大廳：智慧多合一模式選單 -->
     <div class="mode-selector-box">
         <div class="mode-row">
             <span class="mode-label">🎰 儲蓄模式大廳：</span>
             <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
-                <option value="365_阶梯">💎 365天階梯存錢法 ($1 ~ $365)</option>
+                <option value="365_阶梯">💎 365天階梯存錢法 (經典自選)</option>
+                <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [全新]</option>
                 <option value="fixed_50">🪙 天天固定 50 元大銅板法</option>
                 <option value="custom_fixed">📊 萬用自訂固定金額法</option>
-                <option value="week_52">📈 52週階梯存錢法 (每週增加)</option>
+                <option value="week_52">📈 52週階梯存錢法 (每週步道)</option>
                 <option value="隨喜">💖 自由隨喜無壓力存錢法</option>
             </select>
         </div>
-        <!-- 自訂模式專屬的面額配置面板 -->
-        <div class="custom-amt-config-panel" id="custom-amt-panel">
-            <span style="color: white; font-size: 0.85rem; font-weight: bold;">🔧 設定你每天想存的金額：</span>
-            <div>
-                <input type="number" id="custom-fixed-amt-input" class="custom-amt-input" value="100">
-                <button class="custom-amt-btn" onclick="applyCustomFixedAmount()">套用變身</button>
+        
+        <!-- 面板 A: 自訂固定金額配置 -->
+        <div class="config-sub-panel" id="custom-amt-panel">
+            <div class="config-flex-row">
+                <span>🔧 設定每天存的金額：</span>
+                <div>
+                    <input type="number" id="custom-fixed-amt-input" class="config-input" style="width:70px;" value="100">
+                    <button style="background-color:#bae6fd; border:none; padding:6px; font-weight:bold; border-radius:4px; color:#0369a1;" onclick="applyCustomFixedAmount()">套用</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面板 B: 🛡️ 全新防誤觸手帳日期配置區 -->
+        <div class="config-sub-panel" id="journal-config-panel">
+            <div class="config-flex-row">
+                <span>📅 手動設定開始日期：</span>
+                <input type="date" id="journal-start-date-picker" class="config-input" onchange="updateJournalDates()">
+                <span id="journal-end-date-display" style="color: #bae6fd; font-size:0.8rem;">預計結束：--</span>
             </div>
         </div>
     </div>
@@ -513,10 +607,21 @@
         <div class="blueprint-status" id="blueprint-status-text">正在裝填藍圖...</div>
     </div>
 
+    <!-- 📱 現代記帳 App 一行行精緻流水帳清單 (僅在防誤觸手帳模式下亮起) -->
+    <div class="app-journal-box" id="app-journal-ui-area">
+        <div class="journal-title-bar">
+            <span>📝 儲蓄流水手帳清單</span>
+            <span id="journal-total-count-label" style="font-size:0.8rem; color:#64748b;">共 0 筆</span>
+        </div>
+        <div class="journal-container-list" id="journal-list-render-target">
+            <!-- 記帳卡片由 JS 動態塞入 -->
+        </div>
+    </div>
+
     <div class="random-box">
         <div class="random-title">🎲 歡樂存錢雙重盲盒</div>
         <div class="celebrity-info" id="celebrity-display">點擊抽盲盒...</div>
-        <button class="random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
+        <button class="random-btn" id="main-action-random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
     </div>
 
     <div class="dashboard">
@@ -558,6 +663,9 @@
 </div>
 
 <script {__id__="script-block"}>
+    // 2026/07/09 初始化當前日期格式
+    const DEFAULT_START_DATE = "2026-07-09"; // 本地手帳起跑預設值
+
     const monthsData = [
         { name: "一月", start: 1, end: 31 }, { name: "二月", start: 32, end: 59 },
         { name: "三月", start: 60, end: 90 }, { name: "四月", start: 91, end: 120 },
@@ -567,15 +675,18 @@
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
-    // 🛡️ 五軌數據絕對獨立保險箱！
+    // 🛡️ 數據保險箱隔離機制
     let currentMode = localStorage.getItem('global_saving_mode') || '365_阶梯';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     let checkedDays50 = JSON.parse(localStorage.getItem('fixed_50_savings_progress')) || [];
     let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
     let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
-    
-    // 隨喜模式：用物件記錄格子索引與金額的映射關係 { "1": 150, "15": 300 }
     let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
+
+    // 🛡️ 6.0 智慧手帳全新防誤觸防線：獨立記帳卡片陣列
+    // 陣列卡片結構：{ dayIndex: 1, dateStr: "2026-07-09", amount: 125 }
+    let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
+    let journalStartDate = localStorage.getItem('365_journal_start_date') || DEFAULT_START_DATE;
 
     let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
     const gridContainer = document.getElementById('months-grid');
@@ -594,7 +705,6 @@
     }
     function closeCustomModal() { document.getElementById('custom-modal-layer').classList.remove('active'); }
 
-    // 內建安全輸入框控制
     function openPromptModal(title, defaultVal, callback) {
         document.getElementById('prompt-modal-title').innerText = title;
         document.getElementById('prompt-modal-input').value = defaultVal;
@@ -621,6 +731,38 @@
         renderGrid();
     }
 
+    // 📅 手帳模式：更新並推算預計結束日期
+    function updateJournalDates() {
+        const pickerVal = document.getElementById('journal-start-date-picker').value;
+        journalStartDate = pickerVal || DEFAULT_START_DATE;
+        localStorage.setItem('365_journal_start_date', journalStartDate);
+
+        // 推算 365 天之後
+        const start = new Date(journalStartDate);
+        start.setDate(start.getDate() + 364);
+        
+        const y = start.getFullYear();
+        const m = String(start.getMonth() + 1).padStart(2, '0');
+        const d = String(start.getDate()).padStart(2, '0');
+        
+        document.getElementById('journal-end-date-display').innerText = `預計結束：${y}/${m}/${d}`;
+        
+        // 如果手帳有歷史紀錄，更改起跑日後需要全面依序重算卡片中的日期
+        if (journalListHistory.length > 0) {
+            journalListHistory.forEach((item, index) => {
+                const currentCardDate = new Date(journalStartDate);
+                currentCardDate.setDate(currentCardDate.getDate() + index);
+                const cy = currentCardDate.getFullYear();
+                const cm = String(currentCardDate.getMonth() + 1).padStart(2, '0');
+                const cd = String(currentCardDate.getDate()).padStart(2, '0');
+                item.dateStr = `${cy}-${cm}-${cd}`;
+            });
+            localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+        }
+        updateDashboard();
+        renderJournalListUI();
+    }
+
     function loadTargetGoal() {
         const goalKey = `goal_${currentMode}`;
         document.getElementById('target-saving-input').value = localStorage.getItem(goalKey) || '我的新計劃';
@@ -640,21 +782,58 @@
         updateDashboard();
     }
 
+    // 🎨 渲染記帳 App 樣式流水卡片
+    function renderJournalListUI() {
+        const listContainer = document.getElementById('journal-list-render-target');
+        listContainer.innerHTML = '';
+        document.getElementById('journal-total-count-label').innerText = `共 ${journalListHistory.length} 筆`;
+
+        if (journalListHistory.length === 0) {
+            listContainer.innerHTML = `<div class="journal-empty-tip">🫙 帳本目前空空的，快按下盲盒抽取第一天任務吧！</div>`;
+            return;
+        }
+
+        // 記帳 App 習慣：最新抽出的日期顯示在最上面（反轉渲染）
+        const displayArr = [...journalListHistory].reverse();
+
+        displayArr.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'journal-row-card';
+            
+            // 將日期連字號換成精緻斜線
+            const displayDate = item.dateStr.replace(/-/g, '/');
+
+            card.innerHTML = `
+                <div class="journal-left-info">
+                    <span class="j-day-tag">第 ${item.dayIndex} 天</span>
+                    <span class="j-date-text">📅 ${displayDate}</span>
+                </div>
+                <div class="journal-right-amt">+$${item.amount}</div>
+            `;
+            listContainer.appendChild(card);
+        });
+    }
+
     function renderGrid() {
         checkMidnightMode();
         document.getElementById('main-saving-mode-select').value = currentMode;
         gridContainer.innerHTML = '';
         
-        // 自訂模式面板顯示開關
+        // 模式附屬面板配置
         document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
-        document.getElementById('custom-fixed-amt-input').value = currentCustomFixedAmt;
+        document.getElementById('journal-config-panel').style.display = currentMode === '365_journal' ? 'flex' : 'none';
+        document.getElementById('app-journal-ui-area').style.display = currentMode === '365_journal' ? 'block' : 'none';
 
-        // 🧠 52週模式大變身
+        if (currentMode === '365_journal') {
+            document.getElementById('journal-start-date-picker').value = journalStartDate;
+            updateJournalDates();
+        }
+
+        // 52週步道渲染
         if (currentMode === 'week_52') {
             document.getElementById('label-completed-unit').innerText = "已完成週數";
             const col = document.createElement('div');
             col.className = 'month-column';
-            
             const header = document.createElement('div');
             header.className = 'month-header';
             header.innerHTML = `<span>📅 52週階梯挑戰步道</span><span class="month-target">總目標 $13,780 元</span>`;
@@ -669,7 +848,6 @@
                 cell.className = 'day-cell';
                 cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.6; display:block;">第${w}週</span>$${w * 10}`;
                 cell.id = `week-${w}`;
-                
                 if (checkedWeeks52.includes(w)) cell.classList.add('checked');
                 cell.addEventListener('click', () => toggleDayOrWeek(w, cell));
                 daysList.appendChild(cell);
@@ -678,16 +856,17 @@
             col.appendChild(daysList);
             gridContainer.appendChild(col);
         } else {
+            // 常規 365 格子日曆
             document.getElementById('label-completed-unit').innerText = "已完成天數";
             
             monthsData.forEach(month => {
                 const col = document.createElement('div');
                 col.className = 'month-column';
 
-                let monthTargetText = "正在計算...";
+                let monthTargetText = "";
                 let totalDaysInMonth = month.end - month.start + 1;
                 
-                if (currentMode === '365_阶梯') {
+                if (currentMode === '365_阶梯' || currentMode === '365_journal') {
                     let sum = 0; for(let d=month.start; d<=month.end; d++) sum += d;
                     monthTargetText = `存下 ${sum} 元`;
                 } else if (currentMode === 'fixed_50') {
@@ -711,9 +890,16 @@
                     cell.className = 'day-cell';
                     cell.id = `day-${i}`;
                     
-                    if (currentMode === '365_阶梯') {
+                    if (currentMode === '365_阶梯' || currentMode === '365_journal') {
                         cell.innerText = i;
-                        if (checkedDays365.includes(i)) cell.classList.add('checked');
+                        // 365手帳模式下，改讀取手帳歷史中抽出的金額進行點亮
+                        if (currentMode === '365_journal') {
+                            cell.classList.add('readonly-lock'); // 🔓 注入防誤觸核心鎖！
+                            const isSavedInJournal = journalListHistory.some(card => card.amount === i);
+                            if (isSavedInJournal) cell.classList.add('checked');
+                        } else {
+                            if (checkedDays365.includes(i)) cell.classList.add('checked');
+                        }
                     } else if (currentMode === 'fixed_50') {
                         cell.innerText = "$50";
                         if (checkedDays50.includes(i)) cell.classList.add('checked');
@@ -721,7 +907,6 @@
                         cell.innerText = `$${currentCustomFixedAmt}`;
                         if (checkedDaysCustom.includes(i)) cell.classList.add('checked');
                     } else {
-                        // 隨喜模式
                         if (隨喜Map[i]) {
                             cell.innerHTML = `<span style="font-size:0.75rem; color:#15803d; display:block;">第${i}天</span>$${隨喜Map[i]}`;
                             cell.classList.add('checked');
@@ -730,7 +915,10 @@
                         }
                     }
 
-                    cell.addEventListener('click', () => toggleDayOrWeek(i, cell));
+                    // 🛡️ 如果是手帳模式，禁止手動點擊日曆（完全阻斷防誤觸）
+                    if (currentMode !== '365_journal') {
+                        cell.addEventListener('click', () => toggleDayOrWeek(i, cell));
+                    }
                     daysList.appendChild(cell);
                     cellsMap[i] = cell;
                 }
@@ -739,6 +927,7 @@
             });
         }
         loadTargetGoal();
+        if (currentMode === '365_journal') renderJournalListUI();
     }
 
     function toggleDayOrWeek(id, element) {
@@ -764,8 +953,7 @@
             return;
         }
 
-        let arr = [];
-        let key = "";
+        let arr = []; let key = "";
         if (currentMode === '365_阶梯') { arr = checkedDays365; key = '365_savings_progress'; }
         else if (currentMode === 'fixed_50') { arr = checkedDays50; key = 'fixed_50_savings_progress'; }
         else if (currentMode === 'custom_fixed') { arr = checkedDaysCustom; key = 'custom_fixed_savings_progress'; }
@@ -783,9 +971,9 @@
             const currentCount = arr.length;
             let title = ""; let milestone = false;
             if (currentCount === 11) { title = "🎖️ 存錢小幼苗 🎖️"; milestone = true; }
-            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestoneReached = true; }
-            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestoneReached = true; }
-            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestoneReached = true; }
+            else if (currentCount === 21) { title = "🥈 存錢小達人 🥈"; milestone = true; }
+            else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestone = true; }
+            else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestone = true; }
             
             if (milestone) {
                 confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
@@ -799,30 +987,25 @@
         checkMidnightMode();
         let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
         
-        // 🛠️ 嚴格校正後的五軌純淨金額計算邏輯！
         if (currentMode === '365_阶梯') {
-            totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0); // 格子編號 = 金額
+            totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0);
             daysCount = checkedDays365.length;
+        } else if (currentMode === '365_journal') {
+            // 🛡️ 手帳模式金額：精準加總流水帳卡片內的 amount
+            totalSaved = journalListHistory.reduce((sum, card) => sum + card.amount, 0);
+            daysCount = journalListHistory.length;
         } else if (currentMode === 'fixed_50') {
-            totalSaved = checkedDays50.length * 50; // 天數 * 50
-            daysCount = checkedDays50.length;
+            totalSaved = checkedDays50.length * 50; daysCount = checkedDays50.length;
         } else if (currentMode === 'custom_fixed') {
-            totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; // 天數 * 自訂金額
-            daysCount = checkedDaysCustom.length;
+            totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length;
         } else if (currentMode === 'week_52') {
-            // 修正 52 週金額加總：週編號 * 10
             totalSaved = checkedWeeks52.reduce((sum, w) => sum + (w * 10), 0);
-            daysCount = checkedWeeks52.length; 
-            maxUnits = 52;
+            daysCount = checkedWeeks52.length; maxUnits = 52;
         } else {
-            // 隨喜模式：精準加總 map 內的值，不再誤加 key
-            for (let k in 隨喜Map) { 
-                totalSaved += parseInt(隨喜Map[k]) || 0; 
-            }
+            for (let k in 隨喜Map) { totalSaved += parseInt(隨喜Map[k]) || 0; }
             daysCount = Object.keys(隨喜Map).length;
         }
         
-        // 📈 百分比嚴格天數/週數平分制
         const percentNum = (daysCount / maxUnits) * 100;
         const progressPercent = percentNum.toFixed(2);
 
@@ -834,6 +1017,25 @@
         const waterRunner = document.getElementById('dynamic-water-runner');
         waterFluid.style.width = `${percentNum}%`;
         if (percentNum >= 98) waterFluid.classList.add('full'); else waterFluid.classList.remove('full');
+
+        // 處理盲盒抽過鎖定的防呆按鈕狀態
+        const actionBtn = document.getElementById('main-action-random-btn');
+        if (currentMode === '365_journal') {
+            // 檢查今天日期 (YYYY-MM-DD) 是否已經存在於流水帳中
+            const todayStr = new Date().toISOString().split('T')[0];
+            const alreadyPulledToday = journalListHistory.some(card => card.dateStr === todayStr);
+            
+            if (alreadyPulledToday) {
+                actionBtn.disabled = true;
+                actionBtn.innerText = "🔒 今日手帳已記錄，明天再來抽！";
+            } else {
+                actionBtn.disabled = false;
+                actionBtn.innerText = "抽取今日驚喜任務";
+            }
+        } else {
+            actionBtn.disabled = false;
+            actionBtn.innerText = "抽取今日驚喜任務";
+        }
 
         const themeKey = `theme_${currentMode}`;
         const currentTheme = localStorage.getItem(themeKey) || 'space';
@@ -865,49 +1067,104 @@
 
     function pickCelebrity() {
         let displayContent = "";
+        
+        // 🛡️ 智慧手帳模式的特製盲盒抽獎核心
+        if (currentMode === '365_journal') {
+            // 找出 1~365 之間，哪幾個面額「還沒出現在手帳裡」
+            const pulledAmounts = journalListHistory.map(card => card.amount);
+            const availableAmounts = [];
+            for (let i = 1; i <= 365; i++) {
+                if (!pulledAmounts.includes(i)) availableAmounts.push(i);
+            }
+
+            if (availableAmounts.length === 0) {
+                document.getElementById('celebrity-display').innerHTML = "🎉 太不可思議了！365天手帳帳本已全數大滿貫圓滿達成！🏆";
+                return;
+            }
+
+            // 抽獎
+            const selectedAmount = availableAmounts[Math.floor(Math.random() * availableAmounts.length)];
+            
+            // 依據歷史陣列長度，算出當前是「第幾天」
+            const nextDayIndex = journalListHistory.length + 1;
+            
+            // 推算這張卡片的日期 (開始日期 + 當前已有的天數)
+            const cardDate = new Date(journalStartDate);
+            cardDate.setDate(cardDate.getDate() + (nextDayIndex - 1));
+            const cy = cardDate.getFullYear();
+            const cm = String(cardDate.getMonth() + 1).padStart(2, '0');
+            const cd = String(cardDate.getDate()).padStart(2, '0');
+            const cardDateStr = `${cy}-${cm}-${cd}`;
+
+            // 生成精緻卡片物件並推入歷史
+            const newJournalCard = {
+                dayIndex: nextDayIndex,
+                dateStr: cardDateStr,
+                amount: selectedAmount
+            };
+            journalListHistory.push(newJournalCard);
+            localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+
+            // 反向點亮表格並滾動對齊
+            renderGrid(); // 全表格重新繪製以套用變色
+            const targetCell = cellsMap[selectedAmount];
+            if (targetCell) {
+                targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
+                targetCell.classList.add('target-flash');
+            }
+
+            // 觸發拉炮
+            confetti({ particleCount: 60, spread: 50, origin: { y: 0.8 } });
+
+            // 檢查手帳里程碑章節稱號
+            let title = ""; let milestone = false;
+            if (nextDayIndex === 11) { title = "🎖️ 手帳小幼苗 🎖️"; milestone = true; }
+            else if (nextDayIndex === 21) { title = "🥈 手帳小達人 🥈"; milestone = true; }
+            else if (nextDayIndex === 51) { title = "🥇 記帳大宗師 🥇"; milestone = true; }
+            
+            if (milestone) {
+                setTimeout(() => { showCustomModal(`🎉 恭喜！手帳流水帳已默默累積達第 ${nextDayIndex} 天！\n解鎖手帳專屬榮譽稱號：\n【${title}】！🔥✨`); }, 400);
+            }
+
+            return;
+        }
+
+        // 以下為其他普通模式的盲盒提示
         if (currentMode === '隨喜') {
-            displayContent = `
-                <span style="font-size: 1.1rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br>
-                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 隨便選一格灰色有緣的格子，放進你今天皮夾裡的任意硬幣或鈔票，給許願瓶加水吧！</span>
-            `;
+            displayContent = `<span style="font-size: 1.1rem; color: #a855f7; font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 隨便選一格灰色有緣的格子，放進你今天皮夾裡的任意硬幣，為許願瓶加水吧！</span>`;
             document.getElementById('celebrity-display').innerHTML = displayContent;
             return;
         } else if (currentMode === 'fixed_50') {
-            displayContent = `
-                <span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：存下一個 $50 元金幣大銅板！🪙</span><br>
-                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 天天大銅板，生活超簡單！點亮一格立刻幫水瓶注入 0.27% 能量！</span>
-            `;
+            displayContent = `<span style="font-size: 1.1rem; color: #0284c7; font-weight: bold;">今日任務：存下一個 $50 元大銅板！🪙</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 點亮一格立刻幫水瓶注入 0.27% 能量！</span>`;
             document.getElementById('celebrity-display').innerHTML = displayContent;
             return;
         } else if (currentMode === 'custom_fixed') {
-            displayContent = `
-                <span style="font-size: 1.1rem; color: #059669; font-weight: bold;">今日任務：存下你的自訂款 $${currentCustomFixedAmt} 元！📊</span><br>
-                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 這是屬於你最驕傲的專屬紀律面額！點亮一格，水分精準跳動！</span>
-            `;
+            displayContent = `<span style="font-size: 1.1rem; color: #059669; font-weight: bold;">今日任務：存下自訂款 $${currentCustomFixedAmt} 元！📊</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 點亮一格，水分精準跳動！</span>`;
             document.getElementById('celebrity-display').innerHTML = displayContent;
             return;
         } else if (currentMode === 'week_52') {
-            displayContent = `
-                <span style="font-size: 1.1rem; color: #d97706; font-weight: bold;">今日任務：挑戰本週的 52 週步道！📈</span><br>
-                <span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 一週只要點亮一格，小數點後兩位％數字就會以接近 1.92% 的巨大水流往上衝喔！</span>
-            `;
+            displayContent = `<span style="font-size: 1.1rem; color: #d97706; font-weight: bold;">今日任務：挑戰本週的 52 週步道！📈</span><br><span style="font-size: 0.9rem; color: #475569; font-style: italic; margin-top: 6px; display: inline-block;">💬 一週點亮一格，水位大流往上衝！</span>`;
             document.getElementById('celebrity-display').innerHTML = displayContent;
             return;
         }
 
+        // 經典自選 365 模式
         let arr = checkedDays365;
         const available = []; for (let i = 1; i <= 365; i++) { if (!arr.includes(i)) available.push(i); }
-        if (available.length === 0) { document.getElementById('celebrity-display').innerText = "🎉 滿貫全乾！"; return; }
+        if (available.length === 0) { document.getElementById('celebrity-display').innerText = "🎉 全數存滿！"; return; }
         const selectedDay = available[Math.floor(Math.random() * available.length)];
-        
-        let dynamicTip = "";
-        if (selectedDay >= 300) dynamicTip = " <span style='color:#dc2626; font-size:0.85rem; font-weight:bold;'>(大魔王🦁)</span>";
-        
         displayContent = `
-            <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span>${dynamicTip}<br>
-            <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 365階梯特派任務！存下這格，水分公平前進！</span>
+            <span style="font-size:1.1rem; color:#b45309; font-weight:bold;">今日任務：存下 $${selectedDay} 元！</span><br>
+            <span style="font-size:0.9rem; color:#475569; font-style:italic; margin-top:6px; display:inline-block;">💬 經典自選模式：手動將上方 [${selectedDay}] 那一格點亮吧！</span>
         `;
         document.getElementById('celebrity-display').innerHTML = displayContent;
+        const targetCell = cellsMap[selectedDay];
+        if (targetCell) {
+            targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
+            targetCell.classList.add('target-flash');
+        }
     }
 
     renderGrid();
