@@ -16,57 +16,48 @@
             --text-color: #1e293b;
             --text-muted: #64748b;
             --border-color: rgba(0, 0, 0, 0.05);
-            --header-bg: #f0fdf4;
-            --header-text: #166534;
             --cell-bg: #ffffff;
             --cell-text: #334155;
             --water-color: linear-gradient(180deg, #4ea8de 0%, #0077b6 100%);
-            --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
             --inner-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.03);
-            --festival-overlay: transparent;
             --glass-blur: 12px;
         }
 
-        /* 🌙 深夜模式變暗變色色票 (00:00-05:00 自動切換) */
         body.midnight-mode {
-            --primary-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
-            --btn-gradient: linear-gradient(135deg, #0284c7 0%, #075985 100%);
             --card-bg: rgba(19, 28, 46, 0.85);
-            --checked-bg: linear-gradient(135deg, #34d399 0%, #059669 100%);
-            --checked-text: #ffffff;
             --border-color: rgba(255, 255, 255, 0.08);
-            --header-bg: #1e293b;
-            --header-text: #38bdf8;
             --cell-bg: #1a2438;
             --cell-text: #cbd5e1;
-            --water-color: linear-gradient(180deg, #38bdf8 0%, #0369a1 100%);
-            --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            --inner-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+            --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             margin: 0;
             padding: 20px 16px;
+            background-color: var(--bg-color);
             -webkit-tap-highlight-color: transparent;
-            transition: background 0.5s ease, color 0.5s ease; /* Plan Joy 絲滑變色特效 */
+            transition: background 0.5s ease, color 0.5s ease;
             letter-spacing: -0.2px;
         }
 
         .container { max-width: 480px; margin: 0 auto; }
-        header { text-align: center; margin-bottom: 20px; }
-        h1 { font-size: 1.6rem; font-weight: 800; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0; }
+        
+        /* ⚙️ 頂部齒輪控制列 */
+        .top-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-color); margin: 0; }
+        .gear-btn { background: var(--card-bg); border: 1px solid var(--border-color); font-size: 1.2rem; padding: 8px 12px; border-radius: 14px; cursor: pointer; box-shadow: var(--app-shadow); transition: transform 0.2s; }
+        .gear-btn:active { transform: scale(0.92) rotate(30deg); }
 
         .mode-selector-box {
             background: var(--card-bg); padding: 14px; border-radius: 20px; margin-bottom: 16px;
             box-shadow: var(--app-shadow); border: 1px solid var(--border-color);
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease;
         }
         .mode-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
-        .mode-label { color: var(--text-color); font-size: 0.85rem; font-weight: 700; white-space: nowrap; opacity: 0.8; }
+        .mode-label { color: var(--text-color); font-size: 0.85rem; font-weight: 700; opacity: 0.8; }
         .mode-select { flex: 1; background-color: rgba(0,0,0,0.04); color: var(--text-color); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 700; outline: none; }
-        
         body.midnight-mode .mode-select { background-color: rgba(255,255,255,0.06); }
 
         .config-sub-panel { display: none; background-color: rgba(0,0,0,0.03); padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); }
@@ -76,20 +67,13 @@
         .target-progress-box { 
             background: var(--card-bg); padding: 18px; border-radius: 24px; box-shadow: var(--app-shadow); margin-bottom: 16px; border: 1px solid var(--border-color); 
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease;
         }
         .target-input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
         .target-label { font-size: 0.95rem; font-weight: 800; color: var(--text-color); }
         .target-input { flex: 1; border: none; border-radius: 12px; padding: 10px 14px; font-size: 0.9rem; color: var(--text-color); background-color: rgba(0,0,0,0.04); font-weight: 700; outline: none; text-align: right; box-shadow: var(--inner-shadow); }
         body.midnight-mode .target-input { background-color: rgba(255,255,255,0.06); }
 
-        /* 🌈 Plan Joy 風格：心靈主題控制中心（膠囊卡片） */
-        .theme-selector { display: flex; justify-content: space-around; background-color: rgba(0,0,0,0.04); padding: 6px; border-radius: 16px; margin-bottom: 18px; box-shadow: var(--inner-shadow); }
-        body.midnight-mode .theme-selector { background-color: rgba(255,255,255,0.06); }
-        .theme-btn { background: none; border: none; font-size: 0.85rem; font-weight: bold; padding: 10px 16px; cursor: pointer; border-radius: 12px; color: var(--text-color); display: flex; align-items: center; gap: 4px; opacity: 0.4; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .theme-btn.active { opacity: 1; background-color: var(--cell-bg); color: var(--text-color); box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: scale(1.05); }
-
-        .water-bottle-container { position: relative; background-color: rgba(0,0,0,0.04); height: 42px; border-radius: 16px; margin: 24px 0 14px 0; overflow: visible; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
+        .water-bottle-container { position: relative; background-color: rgba(0,0,0,0.04); height: 42px; border-radius: 16px; margin: 12px 0 14px 0; overflow: visible; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
         body.midnight-mode .water-bottle-container { background-color: rgba(255,255,255,0.06); }
         .water-fluid { height: 100%; background: var(--water-color); border-radius: 14px 0 0 14px; width: 0%; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.3, 1); position: relative; }
         .water-fluid.full { border-radius: 14px; }
@@ -106,7 +90,6 @@
         .app-journal-box { 
             display: none; background: var(--card-bg); border-radius: 24px; padding: 18px; margin-bottom: 16px; box-shadow: var(--app-shadow); border: 1px solid var(--border-color); 
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease;
         }
         .journal-title-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 12px; font-weight: 800; font-size: 1rem; color: var(--text-color); }
         
@@ -117,9 +100,8 @@
         .patch-btn { background: var(--btn-gradient); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
         .journal-container-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 12px 16px; border-radius: 14px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 12px 16px; border-radius: 14px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
         .journal-row-card.patched-card { border-left: 4px solid #10b981; }
-        @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
         
         .journal-left-info { display: flex; flex-direction: column; gap: 4px; }
         .j-day-tag { font-size: 0.7rem; font-weight: 800; color: #0284c7; background-color: rgba(2, 132, 199, 0.1); padding: 2px 8px; border-radius: 6px; width: fit-content; }
@@ -133,18 +115,15 @@
         .random-box { 
             background: var(--card-bg); border: 1px solid var(--border-color); padding: 20px; border-radius: 24px; margin-bottom: 16px; box-shadow: var(--app-shadow); 
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease;
         }
         .random-title { font-size: 0.85rem; font-weight: 800; color: var(--text-color); opacity: 0.7; letter-spacing: 0.5px; margin-bottom: 10px; }
         .celebrity-info { font-size: 1.05rem; color: var(--text-color); margin-bottom: 16px; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; text-align: center; }
         .random-btn { background: var(--btn-gradient); color: white; border: none; padding: 14px 36px; font-size: 0.95rem; font-weight: 800; border-radius: 16px; cursor: pointer; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.2); width: 100%; transition: all 0.2s; }
-        .random-btn:active { transform: scale(0.98); }
 
         .dashboard { 
             background: var(--card-bg); padding: 16px; border-radius: 24px; box-shadow: var(--app-shadow); margin-bottom: 20px; border: 1px solid var(--border-color); 
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
             display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
-            transition: all 0.5s ease;
         }
         .stat-card { text-align: center; padding: 6px 0; }
         .stat-card h3 { margin: 0 0 4px 0; font-size: 0.75rem; font-weight: 700; color: var(--text-muted); }
@@ -154,7 +133,6 @@
         .month-column { 
             background: var(--card-bg); border-radius: 22px; box-shadow: var(--app-shadow); border: 1px solid var(--border-color); overflow: hidden; 
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease;
         }
         .month-header { background: rgba(0,0,0,0.02); color: var(--text-color); padding: 14px 16px; font-weight: 800; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .month-target { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
@@ -163,6 +141,14 @@
         .day-cell { padding: 14px 0; text-align: center; background-color: var(--cell-bg); border: none; border-radius: 12px; font-size: 0.9rem; font-weight: 700; color: var(--cell-text); transition: all 0.2s ease; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
         .day-cell.checked { background: var(--checked-bg) !important; color: var(--checked-text) !important; box-shadow: 0 4px 10px rgba(167, 201, 87, 0.25); border-color: transparent; }
         .day-cell.readonly-lock { cursor: default; }
+
+        /* ⚙️ 齒輪控制面板專用 Modal 樣式 */
+        .settings-panel-box { display: flex; flex-direction: column; gap: 18px; text-align: left !important; }
+        .settings-row-title { font-size: 0.85rem; font-weight: 800; color: var(--text-color); opacity: 0.6; margin-bottom: 6px; }
+        .settings-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .settings-item-btn { background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; color: var(--text-color); cursor: pointer; transition: all 0.2s; text-align: center; }
+        body.midnight-mode .settings-item-btn { background: rgba(255,255,255,0.05); }
+        .settings-item-btn.active { background: var(--btn-gradient); color: white; border-color: transparent; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2); }
 
         .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
         .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -179,20 +165,21 @@
         .prompt-title { font-weight: 800; margin-bottom: 14px; color: var(--text-color); }
         .prompt-input-box { width: 90%; padding: 12px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.04); color: var(--text-color); border-radius: 12px; font-size: 1.2rem; text-align: center; font-weight: 800; margin-bottom: 18px; outline: none; }
 
-        @keyframes highlight { 0% { transform: scale(1); background-color: #fef08a; } 50% { transform: scale(1.05); background-color: #bae6fd; } 100% { transform: scale(1); background-color: #fef08a; } }
         .target-flash { animation: highlight 0.6s ease 2; border: 2px solid #00b4d8 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>✨ 祈星渡仁 — 萬用百變存錢大廳 ✨</h1>
-    </header>
+    <!-- ⚙️ 頂部導覽列 -->
+    <div class="top-header-bar">
+        <h1 id="app-title">✨ 祈星渡仁 — 萬用百變存錢大廳 ✨</h1>
+        <button class="gear-btn" onclick="openSettingsPanel()">⚙️</button>
+    </div>
 
     <div class="mode-selector-box">
         <div class="mode-row">
-            <span class="mode-label">⚙️ 儲蓄核心：</span>
+            <span class="mode-label" id="lbl-saving-core">⚙️ 儲蓄核心：</span>
             <select id="main-saving-mode-select" class="mode-select" onchange="changeSavingMode(this.value)">
                 <option value="365_journal">🛡️ 365天防誤觸智慧手帳模式 [預設]</option>
                 <option value="365_阶梯">💎 365天階梯存錢法 (經典自選)</option>
@@ -204,17 +191,17 @@
         
         <div class="config-sub-panel" id="custom-amt-panel">
             <div class="config-flex-row">
-                <span>🔧 設定自訂面額：</span>
+                <span id="lbl-custom-amt">🔧 設定自訂面額：</span>
                 <div>
                     <input type="number" id="custom-fixed-amt-input" class="config-input" style="width:65px;" value="100">
-                    <button style="background: var(--btn-gradient); border:none; padding:8px 12px; font-weight:bold; border-radius:8px; color:white; font-size:0.8rem; margin-left:4px;" onclick="applyCustomFixedAmount()">套用</button>
+                    <button id="btn-apply-amt" style="background: var(--btn-gradient); border:none; padding:8px 12px; font-weight:bold; border-radius:8px; color:white; font-size:0.8rem; margin-left:4px;" onclick="applyCustomFixedAmount()">套用</button>
                 </div>
             </div>
         </div>
 
         <div class="config-sub-panel" id="journal-config-panel">
             <div class="config-flex-row">
-                <span>📅 起始日期：</span>
+                <span id="lbl-start-date">📅 起始日期：</span>
                 <input type="date" id="journal-start-date-picker" class="config-input" onchange="updateJournalDates()">
                 <span id="journal-end-date-display" style="color: var(--text-muted); font-size:0.8rem;">結束：--</span>
             </div>
@@ -223,14 +210,8 @@
 
     <div class="target-progress-box">
         <div class="target-input-group">
-            <span class="target-label">🎯 儲蓄目標</span>
+            <span class="target-label" id="lbl-target-goal">🎯 儲蓄目標</span>
             <input type="text" id="target-saving-input" class="target-input" placeholder="輸入您的願望清單" oninput="saveTargetGoal(); updateDashboard();">
-        </div>
-
-        <div class="theme-selector">
-            <button class="theme-btn spiritual-theme-btn" id="s-btn-rainbow" onclick="applySpiritualTheme('rainbow')">🌈 彩虹療癒</button>
-            <button class="theme-btn spiritual-theme-btn" id="s-btn-buddhism" onclick="applySpiritualTheme('buddhism')">🏯 禪心福報</button>
-            <button class="theme-btn spiritual-theme-btn" id="s-btn-gospel" onclick="applySpiritualTheme('gospel')">✝️ 恩典管家</button>
         </div>
 
         <div class="water-bottle-container">
@@ -244,26 +225,26 @@
 
     <div class="app-journal-box" id="app-journal-ui-area">
         <div class="journal-title-bar">
-            <span>📝 儲蓄流水手帳</span>
+            <span id="lbl-journal-title">📝 儲蓄流水手帳</span>
             <span id="journal-total-count-label" style="font-size:0.8rem; color: var(--text-muted);">0 筆</span>
         </div>
 
         <button class="patch-toggle-btn" onclick="togglePatchBox()">
-            <span>➕ 展開補帳與多人同步工具</span>
+            <span id="lbl-expand-tool">➕ 展開補帳與多人同步工具</span>
         </button>
         
         <div class="manual-patch-box" id="manual-patch-expand-area">
             <div class="patch-form">
                 <div>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">日期：</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lbl-patch-date">日期：</span>
                     <input type="date" id="patch-date-input" class="config-input" style="font-size:0.8rem; padding:6px;">
                 </div>
                 <div>
-                    <span style="font-size:0.8rem; color:var(--text-muted);">面額：</span>
+                    <span style="font-size:0.8rem; color:var(--text-muted);" id="lbl-patch-amt">面額：</span>
                     <select id="patch-amount-select" class="config-input" style="font-size:0.8rem; padding:6px; background:var(--cell-bg); color:var(--text-color);">
                     </select>
                 </div>
-                <button class="patch-btn" onclick="executeManualPatch()">登載</button>
+                <button class="patch-btn" onclick="executeManualPatch()" id="btn-patch-submit">登載</button>
             </div>
         </div>
 
@@ -271,15 +252,15 @@
         </div>
     </div>
 
-    <div class="random-box">
-        <div class="random-title">🎲 幸運儲蓄盲盒抽獎</div>
+    <div class="random-box" id="blindbox-ui-area">
+        <div class="random-title" id="lbl-blindbox-title">🎲 幸運儲蓄盲盒抽獎</div>
         <div class="celebrity-info" id="celebrity-display">開啟今日驚喜儲蓄任務...</div>
         <button class="random-btn" id="main-action-random-btn" onclick="pickCelebrity()">抽取今日驚喜任務</button>
     </div>
 
     <div class="dashboard">
         <div class="stat-card" style="grid-column: span 2; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-            <h3>目前已存總金額</h3>
+            <h3 id="lbl-dash-total">目前已存總金額</h3>
             <p id="total-saved" style="font-size: 1.7rem; color: #10b981;">$0</p>
         </div>
         <div class="stat-card">
@@ -287,12 +268,41 @@
             <p id="days-count">0 / 365 天</p>
         </div>
         <div class="stat-card">
-            <h3>目前總進度</h3>
+            <h3 id="lbl-dash-progress">目前總進度</h3>
             <p id="progress-percent">0%</p>
         </div>
     </div>
 
     <div class="grid-container" id="months-grid"></div>
+</div>
+
+<!-- ⚙️ 齒輪控制面板視窗 -->
+<div class="custom-modal-overlay" id="settings-modal-layer">
+    <div class="custom-modal" style="max-width: 340px;">
+        <div class="settings-panel-box">
+            <!-- 語言區 -->
+            <div>
+                <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
+                <div class="settings-btn-grid">
+                    <button class="settings-item-btn lang-item" id="s-lang-zh-TW" onclick="changeLanguage('zh-TW')">繁體中文</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-zh-CN" onclick="changeLanguage('zh-CN')">简体中文</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-en" onclick="changeLanguage('en')">English</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-ja" onclick="changeLanguage('ja')">日本語</button>
+                </div>
+            </div>
+            <!-- 主題區 -->
+            <div style="margin-top: 6px;">
+                <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
+                <div class="settings-btn-grid">
+                    <button class="settings-item-btn theme-item" id="s-theme-classic" onclick="selectThemeStyle('classic')">🌌 經典原版</button>
+                    <button class="settings-item-btn theme-item" id="s-theme-rainbow" onclick="selectThemeStyle('rainbow')">🌈 彩虹療癒</button>
+                    <button class="settings-item-btn theme-item" id="s-theme-buddhism" onclick="selectThemeStyle('buddhism')">🏯 禪心福報</button>
+                    <button class="settings-item-btn theme-item" id="s-theme-gospel" onclick="selectThemeStyle('gospel')">✝️ 恩典管家</button>
+                </div>
+            </div>
+        </div>
+        <button class="custom-modal-btn" style="margin-top:20px; width:100%;" onclick="closeSettingsPanel()" id="btn-setting-close">關閉 / Close</button>
+    </div>
 </div>
 
 <div class="custom-modal-overlay" id="custom-modal-layer">
@@ -308,8 +318,8 @@
         <div class="prompt-title" id="prompt-modal-title">自由隨喜</div>
         <input type="number" id="prompt-modal-input" class="prompt-input-box" placeholder="輸入金額">
         <div class="prompt-btn-group">
-            <button style="background: var(--btn-gradient); color: white; border: none; flex: 1; padding: 12px; border-radius: 14px; font-weight: bold;" onclick="confirmPromptModal()">確認放入</button>
-            <button style="background: rgba(0,0,0,0.05); color: var(--text-color); border: 1px solid var(--border-color); padding: 12px; border-radius: 14px; font-weight: bold;" onclick="closePromptModal()">取消</button>
+            <button style="background: var(--btn-gradient); color: white; border: none; flex: 1; padding: 12px; border-radius: 14px; font-weight: bold;" onclick="confirmPromptModal()" id="btn-prompt-ok">確認放入</button>
+            <button style="background: rgba(0,0,0,0.05); color: var(--text-color); border: 1px solid var(--border-color); padding: 12px; border-radius: 14px; font-weight: bold;" onclick="closePromptModal()" id="btn-prompt-cancel">取消</button>
         </div>
     </div>
 </div>
@@ -326,6 +336,169 @@
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
+    // ==========================================
+    // 🌍 多國語言控制中心字典
+    // ==========================================
+    const LANG_DICTIONARY = {
+        'zh-TW': {
+            title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 儲蓄核心：", lblCustomAmt: "🔧 設定自訂面額：", btnApply: "套用",
+            lblStartDate: "📅 起始日期：", lblTarget: "🎯 儲蓄目標", lblJournal: "📝 儲蓄流水手帳", lblExpand: "➕ 展開補帳與多人同步工具",
+            lblDate: "日期：", lblAmt: "面額：", btnSubmit: "登載", lblBoxTitle: "🎲 幸運儲蓄盲盒抽獎", btnBoxDraw: "抽取今日驚喜任務",
+            lblDashTotal: "目前已存總金額", lblDashDoneDay: "已完成天數", lblDashDoneWeek: "已完成週數", lblDashProg: "目前總進度",
+            opt1: "🛡️ 365天防誤觸智慧手帳模式 [預設]", opt2: "💎 365天階梯存錢法 (經典自選)", opt3: "📊 萬用自訂固定金額法",
+            opt4: "📈 52週階梯存錢法 (每週步道)", opt5: "💖 自由隨喜無壓力存錢法",
+            emptyTip: "🫙 目前尚無紀錄，點盲盒或登載開始", alertDateAmt: "❌ 請填妥日期與金額！", alertRepeat: "❌ 此面額已重複登記。",
+            confirmDel: "❓ 確定要移除此筆紀錄嗎？", confirmBoxTitle: "🎰 盲盒指引開啟", confirmBoxBody: "今日面額：${amt} 元\n\n確定要將此交易登載手帳嗎？",
+            btnOk: "確定", btnCancel: "取消", boxWelcome: "🔮 歡迎來到【${name}】大廳<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>點擊下方按鈕，抽取今日專屬指引面額</span>",
+            monthNames: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"], weekTrack: "📅 52週步道挑戰",
+            bdayBonus: "🎂 [1/19 祈祈生日大加碼] 已自動為許願瓶注入 $1,000 元基金！目前進度已達 ${prog}% 目標【${goal}】！✨",
+            statusInit: "🌌 【${name}】正在為您的願望【${goal}】凝聚最初的儲蓄能量...", statusRun: "${icon} 【${name} · 進度 ${prog}%】：儲蓄能量穩定灌注中！願望【${goal}】正在發光！✨",
+            setLang: "🌐 選擇語言 / Language", setTheme: "🎨 選擇世界觀主題 / Theme", setClose: "關閉 / Close"
+        },
+        'zh-CN': {
+            title: "✨ 祈星渡仁 — 万用百变存钱大厅 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自定面额：", btnApply: "套用",
+            lblStartDate: "📅 起始日期：", lblTarget: "🎯 储蓄目标", lblJournal: "📝 储蓄流水手帐", lblExpand: "➕ 展开补帐与多人同步工具",
+            lblDate: "日期：", lblAmt: "面额：", btnSubmit: "登载", lblBoxTitle: "🎲 幸运储蓄盲盒抽奖", btnBoxDraw: "抽取今日惊喜任务",
+            lblDashTotal: "目前已存总金额", lblDashDoneDay: "已完成天数", lblDashDoneWeek: "已完成周数", lblDashProg: "目前总进度",
+            opt1: "🛡️ 365天防误触智慧手帐模式 [预设]", opt2: "💎 365天阶梯存钱法 (经典自选)", opt3: "📊 万用自订固定金额法",
+            opt4: "📈 52周阶梯存钱法 (每周步道)", opt5: "💖 自由随喜无压力存钱法",
+            emptyTip: "🫙 目前尚无纪录，点盲盒或登载开始", alertDateAmt: "❌ 请填妥日期与金额！", alertRepeat: "❌ 此面额已重复登记。",
+            confirmDel: "❓ 确定要移除此笔纪录吗？", confirmBoxTitle: "🎰 盲盒指引开启", confirmBoxBody: "今日面额：${amt} 元\n\n确定要将此交易登载手帐吗？",
+            btnOk: "确定", btnCancel: "取消", boxWelcome: "🔮 欢迎来到【${name}】大厅<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>点击下方按钮，抽取今日专属指引面额</span>",
+            monthNames: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"], weekTrack: "📅 52周步道挑战",
+            bdayBonus: "🎂 [1/19 祈祈生日大加码] 已自动为许愿瓶注入 $1,000 元基金！目前进度已达 ${prog}% 目标【${goal}】！✨",
+            statusInit: "🌌 【${name}】正在为您的愿望【${goal}】凝聚最初的储蓄能量...", statusRun: "${icon} 【${name} · 进度 ${prog}%】：储蓄能量稳定灌注中！愿望【${goal}】正在发光！✨",
+            setLang: "🌐 选择语言 / Language", setTheme: "🎨 选择世界观主题 / Theme", setClose: "关闭 / Close"
+        },
+        'en': {
+            title: "✨ Astra Savings — Universal Hall ✨", lblCore: "⚙️ Savings Core:", lblCustomAmt: "🔧 Custom Amount:", btnApply: "Apply",
+            lblStartDate: "📅 Start Date:", lblTarget: "🎯 Savings Goal", lblJournal: "📝 Savings Ledger", lblExpand: "➕ Sync & Patch Tools",
+            lblDate: "Date:", lblAmt: "Amt:", btnSubmit: "Log", lblBoxTitle: "🎲 Lucky Savings Blind Box", btnBoxDraw: "Draw Today's Mission",
+            lblDashTotal: "Total Amount Saved", lblDashDoneDay: "Days Completed", lblDashDoneWeek: "Weeks Completed", lblDashProg: "Total Progress",
+            opt1: "🛡️ 365-Day Smart Ledger Mode [Default]", opt2: "💎 365-Day Step Savings (Classic)", opt3: "📊 Custom Fixed Amount Method",
+            opt4: "📈 52-Week Ladder Method (Weekly Walk)", opt5: "💖 Free Savings Without Pressure",
+            emptyTip: "🫙 No records yet. Draw a box or log manually to start.", alertDateAmt: "❌ Please fill in date and amount!", alertRepeat: "❌ This amount has already been recorded.",
+            confirmDel: "❓ Are you sure you want to remove this record?", confirmBoxTitle: "🎰 Blind Box Drawn", confirmBoxBody: "Today's Amount: $${amt}\n\nDo you want to log this into your ledger?",
+            btnOk: "Confirm", btnCancel: "Cancel", boxWelcome: "🔮 Welcome to 【${name}】 Hall<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>Click below to draw today's savings target</span>",
+            monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], weekTrack: "📅 52-Week Ladder Challenge",
+            bdayBonus: "🎂 [Jan 19 Birthday Bonus] $1,000 automatically injected into your vault! Current progress ${prog}% towards 【${goal}】! ✨",
+            statusInit: "🌌 【${name}】 is channeling energy for your goal 【${goal}】...", statusRun: "${icon} 【${name} · ${prog}%】: Energy stabilizing! Your goal 【${goal}】 is closer than ever! ✨",
+            setLang: "🌐 Select Language", setTheme: "🎨 Select Worldview Theme", setClose: "Close"
+        },
+        'ja': {
+            title: "✨ 祈星渡仁 — 万能貯金ホール ✨", lblCore: "⚙️ 貯金コア：", lblCustomAmt: "🔧 金額カスタム：", btnApply: "適用",
+            lblStartDate: "📅 開始日：", lblTarget: "🎯 貯金目標", lblJournal: "📝 貯金手帳・履歴", lblExpand: "➕ 過去ログの補填・同期ツール",
+            lblDate: "日付：", lblAmt: "金額：", btnSubmit: "記録", lblBoxTitle: "🎲 幸運の貯金ガチャ", btnBoxDraw: "今日のミッションを引く",
+            lblDashTotal: "現在の総貯金額", lblDashDoneDay: "達成日数", lblDashDoneWeek: "達成週数", lblDashProg: "現在の進捗率",
+            opt1: "🛡️ 365日誤タップ防止スマート手帳 [推奨]", opt2: "💎 365日段階貯金法 (クラシック)", opt3: "📊 万能カスタム固定金額法",
+            opt4: "📈 52週ステップ貯金法 (毎週の歩道)", opt5: "💖 自由な隨喜貯金法",
+            emptyTip: "🫙 履歴がありません。ガチャを引くか手動で記録してください。", alertDateAmt: "❌ 日付と金額を正しく入力してください！", alertRepeat: "❌ この金額は既に記録されています。",
+            confirmDel: "❓ この記録を削除してもよろしいですか？", confirmBoxTitle: "🎰 ガチャが引かれました", confirmBoxBody: "本日の金額：$${amt}\n\nこの取引を手帳に記録しますか？",
+            btnOk: "確認", btnCancel: "キャンセル", boxWelcome: "🔮 【${name}】ホールへようこそ<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>下のボタンをクリックして、本日の目標を引き出しましょう</span>",
+            monthNames: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"], weekTrack: "📅 52週ラダーチャレンジ",
+            bdayBonus: "🎂 [1/19 生日ボーナス] $1,000が自動的に注入されました！【${goal}】への進捗率は ${prog}% です！✨",
+            statusInit: "🌌 【${name}】があなたの目標【${goal}】のために、最初のエネルギーを集めています...", statusRun: "${icon} 【${name} · 進捗 ${prog}%】: エネルギー安定注入中！目標【${goal}】が輝いています！✨",
+            setLang: "🌐 言語選択 / Language", setTheme: "🎨 世界観テーマ選択 / Theme", setClose: "閉じる"
+        }
+    };
+
+    // ==========================================
+    // 🎨 四大外觀皮膚世界觀資料庫（由小齒輪自由設定連動）
+    // ==========================================
+    const THEME_CONTENT_BANK = {
+        classic: {
+            name: "🌌 經典太空原版", idName: { 'zh-TW': '經典原版', 'zh-CN': '经典原版', 'en': 'Classic Space', 'ja': '宇宙原版' },
+            bgColor: "#f4f7fa", textColor: "#1e293b", btnGradient: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)", checkedBg: "linear-gradient(135deg, #4ea8de 0%, #0077b6 100%)", audioFreq: 600, runnerIcon: "🚀",
+            quotes: {
+                'zh-TW': [{ source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" }],
+                'zh-CN': [{ source: "祈星渡仁", text: "每天存下一点意志力，未来的你，一定会感谢现在开始累积的自己。" }],
+                'en': [{ source: "Astra", text: "Save a little willpower every day. Your future self will deeply thank you for starting now." }],
+                'ja': [{ source: "Astra", text: "毎日少しの意志の力を貯金しましょう。未来のあなたは、今積み上げを始めた自分に深く感謝するはずです。" }]
+            }
+        },
+        buddhism: {
+            name: "🏯 禪心福報", idName: { 'zh-TW': '禪心福報', 'zh-CN': '禅心福报', 'en': 'Zen Karma', 'ja': '禪心福報' },
+            bgColor: "#F5F2EB", textColor: "#8C6239", btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)", checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)", audioFreq: 528, runnerIcon: "🪷",
+            quotes: {
+                'zh-TW': [
+                    { source: "六度波羅蜜", text: "布施、持戒、忍辱、精進、禪定、智慧。今天存下的不只是財富，更是精進修行。" },
+                    { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。安住當下，踏實累積。" },
+                    { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。儲蓄是為了給未來的自己一份安定的底氣。" }
+                ],
+                'zh-CN': [
+                    { source: "六度波罗蜜", text: "布施、持戒、忍辱、精进、禅定、智慧。今天存下的不只是财富，更是精进修行。" },
+                    { source: "金刚经", text: "过去心不可得，现在心不可得，未来心不可得。安住当下，踏实累积。" },
+                    { source: "心经", text: "心无罣碍，无罣碍故，无有恐怖。储蓄是为了给未来的自己一份安定的底气。" }
+                ],
+                'en': [
+                    { source: "The Six Paramitas", text: "Generosity, precepts, patience, diligence, meditation, and wisdom. Today's saving is a mindful practice." },
+                    { source: "Diamond Sutra", text: "Past mind cannot be grasped, present mind cannot be grasped, future mind cannot be grasped. Abide in the now." },
+                    { source: "Heart Sutra", text: "With no hindrance in the mind, no hindrance, therefore no fear. Save to secure deep inner peace." }
+                ],
+                'ja': [
+                    { source: "六波羅蜜", text: "布施・持戒・忍辱・精進・禅定・智慧。今日の貯金は、欲望をコントロールする素晴らしい精進の修行です。" },
+                    { source: "金剛経", text: "過去心不可得、現在心不可得、未来心不可得。今この瞬間に集中し、一歩一歩積み上げましょう。" },
+                    { source: "般若心経", text: "心無罣礙。心に引っかかりがなければ、恐怖もありません。未来の自分のために揺るぎない安心の土台を作りましょう。" }
+                ]
+            }
+        },
+        gospel: {
+            name: "✝️ 恩典管家", idName: { 'zh-TW': '恩典管家', 'zh-CN': '恩典管家', 'en': 'Grace Steward', 'ja': '恵みの執事' },
+            bgColor: "#EAEFf2", textColor: "#2B4C5E", btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)", checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", audioFreq: 392, runnerIcon: "🕊️",
+            quotes: {
+                'zh-TW': [
+                    { source: "創世記·約瑟的智慧", text: "把豐年所剩餘的糧食聚斂起來，積蓄在城裡，以防備將來的饑荒。" },
+                    { source: "馬太福音 6:21", text: "因為你的財寶在哪裡，你的心也在哪裡。" },
+                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理手中的財富，便是忠心的管家。" }
+                ],
+                'zh-CN': [
+                    { source: "创世记·约瑟的智慧", text: "把丰年所剩余的粮食聚敛起来，积蓄在城里，以防备将来的饥荒。" },
+                    { source: "马太福音 6:21", text: "因为你的财宝在哪里，你的心也在哪里。" },
+                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理手中的财富，便是忠心的管家。" }
+                ],
+                'en': [
+                    { source: "Genesis · Joseph's Wisdom", text: "Let them gather all the food of those good years and store up the grain against the famine." },
+                    { source: "Matthew 6:21", text: "For where your treasure is, there your heart will be also." },
+                    { source: "Luke 16:10", text: "Whoever can be trusted with very little can also be trusted with much. Be a faithful steward of wealth." }
+                ],
+                'ja': [
+                    { source: "創世記・ヨセフの知恵", text: "豊作の年々の食糧をすべて集め、将来の飢饉に備えて街に蓄えておきなさい。" },
+                    { source: "マタイによる福音書 6:21", text: "あなたの宝のある所には、心もあるからです。" },
+                    { source: "ルカによる福音書 16:10", text: "小さい事に忠実な人は、大きい事にも忠実です。託された富を賢く管理する良き執事となりましょう。" }
+                ]
+            }
+        },
+        rainbow: {
+            name: "🌈 彩虹療癒", idName: { 'zh-TW': '彩虹療癒', 'zh-CN': '彩虹疗愈', 'en': 'Rainbow Healing', 'ja': '虹色の癒やし' },
+            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", textColor: "#6B11B3", btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)", audioFreq: 888, runnerIcon: "🦄",
+            quotes: {
+                'zh-TW': [
+                    { source: "脈輪肯定句", text: "我值得擁有富足的人生，我感謝宇宙此刻給予我的一切豐盛。" },
+                    { source: "自我覺察", text: "每一次的儲蓄，都是我對未來生活投下的信任票。" },
+                    { source: "心靈療癒", text: "散發豐盛的能量，生命將以不可思議的溫暖與財富回應你。" }
+                ],
+                'zh-CN': [
+                    { source: "脉轮肯定句", text: "我值得拥有富足的人生，我感谢宇宙此刻给予我的一切丰盛。" },
+                    { source: "自我觉察", text: "每一次的储蓄，都是我对未来生活投下的信任票。" },
+                    { source: "心灵疗愈", text: "散发丰盛的能量，生命将以不可思議的温暖与财富回应你。" }
+                ],
+                'en': [
+                    { source: "Chakra Affirmation", text: "I deserve a prosperous life. I am deeply grateful for the abundance the universe brings me." },
+                    { source: "Self-Awareness", text: "Every single cent I save is a vote of deep confidence and trust in my beautiful future." },
+                    { source: "Healing Energy", text: "Radiate the frequency of true abundance, and life will echo back with miraculous warmth." }
+                ],
+                'ja': [
+                    { source: "チャクラの言葉", text: "私は豊かで満ち足りた人生を送る価値があります。宇宙が今もたらしてくれる全ての豊かさに感謝します。" },
+                    { source: "自己対話", text: "日々のささやかな貯金は、自分が自分の輝かしい未来へと投じる、何よりの信頼の証です。" },
+                    { source: "心の癒やし", text: "あなたが心から満たされたエネルギーを放つとき、世界は思いがけない温かさと豊かさで応えてくれます。" }
+                ]
+            }
+        }
+    };
+
+    let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
+    let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
+
     let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
     let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
@@ -340,117 +513,112 @@
     const cellsMap = {};
     let promptCallback = null;
 
-    // ==========================================
-    // 🎨 【全新核心】三大心靈世界觀主題內容數據包
-    // ==========================================
-    const THEME_CONTENT_BANK = {
-        buddhism: {
-            name: "🏯 禪心福報",
-            bgColor: "#F5F2EB",
-            textColor: "#8C6239",
-            btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)",
-            accentColor: "#D4AF37",
-            checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)",
-            audioFreq: 528, // 頌缽高頻共振音
-            runnerIcon: "🪷",
-            quotes: [
-                { source: "六度波羅蜜", text: "布施、持戒、忍辱、精進、禪定、智慧。今天存下的不節制，更是克制欲望的精進修行。" },
-                { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。安住當下，踏實累積。" },
-                { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。儲蓄是為了給未來的自己一份安定的底氣。" },
-                { source: "佛家智慧", text: "萬法皆空，因果不空。今日累積福報資糧，定結出未來豐盛清淨之果。" }
-            ]
-        },
-        gospel: {
-            name: "✝️ 恩典管家",
-            bgColor: "#EAEFf2",
-            textColor: "#2B4C5E",
-            btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)",
-            accentColor: "#3b82f6",
-            checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)",
-            audioFreq: 392, // 教堂神聖和弦音
-            runnerIcon: "🕊️",
-            quotes: [
-                { source: "創世記·約瑟的智慧", text: "把豐年所剩餘的糧食聚斂起來，積蓄在城裡，以防備將來的饑荒。" },
-                { source: "馬太福音 6:21", text: "因為你的財寶在哪裡，你的心也在哪裡。" },
-                { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理手中的財富，便是忠心的管家。" },
-                { source: "箴言 10:22", text: "耶和華所賜的福使人富足，並不加上憂慮。帶著感恩的心儲蓄，恩典一生相隨。" }
-            ]
-        },
-        rainbow: {
-            name: "🌈 彩虹療癒",
-            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", // Plan Joy 繽紛亮麗漸層
-            textColor: "#6B11B3",
-            btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)",
-            accentColor: "#FF6B6B",
-            checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)",
-            audioFreq: 888, // 水晶高頻風鈴音
-            runnerIcon: "🦄",
-            quotes: [
-                { source: "脈輪肯定句", text: "我值得擁有富足的人生，我感謝宇宙此刻給予我的一切豐盛。" },
-                { source: "自我覺察", text: "每一次的儲蓄，都是我對未來生活投下的信任票。" },
-                { source: "心靈療癒", text: "散發豐盛的能量，生命將以不可思議的溫暖與財富回應你。" },
-                { source: "正能量卡", text: "今天我帶著喜悅的心情存下這筆錢，我相信豐盛會像潮水般源源不絕流向我。" }
-            ]
-        }
-    };
-
-    let activeThemeKey = localStorage.getItem('active_spiritual_theme') || 'rainbow';
-
-    // 🔊 【全新核心】Web Audio 科技晶片音效生成器 (無須外部音樂檔案，100%發聲)
+    // 🔊 類比晶片高頻發聲器
     function playThemeSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            const config = THEME_CONTENT_BANK[activeThemeKey];
+            const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
             
-            osc.type = activeThemeKey === 'buddhism' ? 'sine' : (activeThemeKey === 'gospel' ? 'triangle' : 'sine');
+            osc.type = (activeThemeKey === 'buddhism') ? 'sine' : ((activeThemeKey === 'gospel') ? 'triangle' : 'sine');
             osc.frequency.setValueAtTime(config.audioFreq, ctx.currentTime);
             
-            gain.gain.setValueAtTime(0.2, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.15, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
             
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 0.5);
-        } catch(e) { console.log("音效遭瀏覽器攔截，互動後解鎖"); }
+            osc.stop(ctx.currentTime + 0.4);
+        } catch(e){}
     }
 
-    // 🎨 【全新核心】Plan Joy 風格全域換裝與色彩渲染
-    function applySpiritualTheme(themeKey) {
+    // ⚙️ 齒輪面板開關
+    function openSettingsPanel() { document.getElementById('settings-modal-layer').classList.add('active'); }
+    function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('active'); }
+
+    // 🎨 外觀主題切換（齒輪面板驅動）
+    function selectThemeStyle(themeKey) {
         activeThemeKey = themeKey;
-        localStorage.setItem('active_spiritual_theme', themeKey);
+        localStorage.setItem('active_spiritual_theme_v2', themeKey);
         
+        document.querySelectorAll('.theme-item').forEach(btn => btn.classList.remove('active'));
+        if (document.getElementById(`s-theme-${themeKey}`)) document.getElementById(`s-theme-${themeKey}`).classList.add('active');
+
+        // 刷新外觀配色
         const config = THEME_CONTENT_BANK[themeKey];
         const root = document.documentElement;
-        
-        // 渲染全域背景顏色 (支援漸層與單色)
         if (config.bgColor.includes('linear-gradient')) {
             document.body.style.backgroundImage = config.bgColor;
         } else {
             document.body.style.backgroundColor = config.bgColor;
             document.body.style.backgroundImage = 'none';
         }
-        
-        // 動態更換全域 CSS 屬性
         root.style.setProperty('--text-color', config.textColor);
         root.style.setProperty('--btn-gradient', config.btnGradient);
         root.style.setProperty('--checked-bg', config.checkedBg);
-        
-        // 更新卡片按鈕點擊動態
-        document.querySelectorAll('.spiritual-theme-btn').forEach(btn => btn.classList.remove('active'));
-        const activeBtn = document.getElementById(`s-btn-${themeKey}`);
-        if (activeBtn) activeBtn.classList.add('active');
-        
-        // 重刷盲盒卡片顯示區提示
-        const celebrityDisplay = document.getElementById('celebrity-display');
-        if (celebrityDisplay && (celebrityDisplay.innerText.includes("開啟今日驚喜") || celebrityDisplay.innerText.includes("歡迎來到"))) {
-            celebrityDisplay.innerHTML = `🔮 歡迎來到【${config.name}】盲盒大廳<br><span style="font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;">點擊下方按鈕，抽取今日專屬心靈指引面額</span>`;
-        }
-        
+
         playThemeSound();
         updateDashboard();
+
+        // 重新刷新盲盒提示字
+        const d = LANG_DICTIONARY[currentLang];
+        const bBoxDisplay = document.getElementById('celebrity-display');
+        if (bBoxDisplay) {
+            bBoxDisplay.innerHTML = d.boxWelcome.replace('${name}', config.idName[currentLang]);
+        }
+    }
+
+    // 🌐 多國語言切換（齒輪面板驅動）
+    function changeLanguage(langKey) {
+        currentLang = langKey;
+        localStorage.setItem('global_app_language', langKey);
+        
+        document.querySelectorAll('.lang-item').forEach(btn => btn.classList.remove('active'));
+        if(document.getElementById(`s-lang-${langKey}`)) document.getElementById(`s-lang-${langKey}`).classList.add('active');
+
+        const d = LANG_DICTIONARY[langKey];
+        
+        // 靜態翻譯一鍵置換
+        document.getElementById('app-title').innerText = d.title;
+        document.getElementById('lbl-saving-core').innerText = d.lblCore;
+        document.getElementById('lbl-custom-amt').innerText = d.lblCustomAmt;
+        document.getElementById('btn-apply-amt').innerText = d.btnApply;
+        document.getElementById('lbl-start-date').innerText = d.lblStartDate;
+        document.getElementById('lbl-target-goal').innerText = d.lblTarget;
+        document.getElementById('lbl-journal-title').innerText = d.lblJournal;
+        document.getElementById('lbl-expand-tool').innerText = d.lblExpand;
+        document.getElementById('lbl-patch-date').innerText = d.lblDate;
+        document.getElementById('lbl-patch-amt').innerText = d.lblAmt;
+        document.getElementById('btn-patch-submit').innerText = d.btnSubmit;
+        document.getElementById('lbl-blindbox-title').innerText = d.lblBoxTitle;
+        document.getElementById('main-action-random-btn').innerText = d.btnBoxDraw;
+        document.getElementById('lbl-dash-total').innerText = d.lblDashTotal;
+        document.getElementById('lbl-dash-progress').innerText = d.lblDashProg;
+        document.getElementById('btn-prompt-ok').innerText = d.btnOk;
+        document.getElementById('btn-prompt-cancel').innerText = d.btnCancel;
+        
+        // 齒輪內部文字翻譯
+        document.getElementById('lbl-setting-lang').innerText = d.setLang;
+        document.getElementById('lbl-setting-theme').innerText = d.setTheme;
+        document.getElementById('btn-setting-close').innerText = d.setClose;
+
+        // 翻譯核心玩法下拉選單
+        const sel = document.getElementById('main-saving-mode-select');
+        sel.options[0].text = d.opt1; sel.options[1].text = d.opt2; sel.options[2].text = d.opt3;
+        sel.options[3].text = d.opt4; sel.options[4].text = d.opt5;
+
+        // 連動刷新齒輪裡四大主題自己的多國名字
+        for (let key in THEME_CONTENT_BANK) {
+            const btn = document.getElementById(`s-theme-${key}`);
+            if(btn) {
+                let emoji = key === 'classic' ? '🌌 ' : (key === 'rainbow' ? '🌈 ' : (key === 'buddhism' ? '🏯 ' : '✝️ '));
+                btn.innerText = emoji + THEME_CONTENT_BANK[key].idName[langKey];
+            }
+        }
+
+        renderGrid();
     }
 
     function checkMidnightMode() {
@@ -467,7 +635,7 @@
     function showStandardAlert(msg) {
         document.getElementById('custom-modal-msg').innerText = msg;
         const btnArea = document.getElementById('custom-modal-buttons-area');
-        btnArea.innerHTML = `<button class="custom-modal-btn" onclick="closeCustomModal()">確定</button>`;
+        btnArea.innerHTML = `<button class="custom-modal-btn" onclick="closeCustomModal()">${LANG_DICTIONARY[currentLang].btnOk}</button>`;
         document.getElementById('custom-modal-layer').classList.add('active');
     }
 
@@ -475,8 +643,8 @@
         document.getElementById('custom-modal-msg').innerText = msg;
         const btnArea = document.getElementById('custom-modal-buttons-area');
         btnArea.innerHTML = `
-            <button class="custom-modal-btn cancel-btn" onclick="closeCustomModal()">取消</button>
-            <button class="custom-modal-btn" id="modal-confirm-action-btn">確認登載</button>
+            <button class="custom-modal-btn cancel-btn" onclick="closeCustomModal()">${LANG_DICTIONARY[currentLang].btnCancel}</button>
+            <button class="custom-modal-btn" id="modal-confirm-action-btn">${LANG_DICTIONARY[currentLang].btnSubmit}</button>
         `;
         document.getElementById('custom-modal-layer').classList.add('active');
         document.getElementById('modal-confirm-action-btn').onclick = function() {
@@ -523,7 +691,7 @@
         const y = start.getFullYear();
         const m = String(start.getMonth() + 1).padStart(2, '0');
         const d = String(start.getDate()).padStart(2, '0');
-        document.getElementById('journal-end-date-display').innerText = `結束：${y}/${m}/${d}`;
+        document.getElementById('journal-end-date-display').innerText = `${y}/${m}/${d}`;
         
         updateDashboard();
         renderJournalListUI();
@@ -531,8 +699,7 @@
 
     function loadTargetGoal() {
         const goalKey = `goal_${currentMode}`;
-        document.getElementById('target-saving-input').value = localStorage.getItem(goalKey) || '夢想計劃';
-        updateDashboard();
+        document.getElementById('target-saving-input').value = localStorage.getItem(goalKey) || (currentLang === 'zh-TW' ? '夢想計劃' : 'My Goal');
     }
 
     function saveTargetGoal() {
@@ -541,15 +708,14 @@
 
     function triggerMilestoneCelebration(currentCount) {
         let title = ""; let milestone = false;
-        if (currentCount === 11) { title = "🎖️ 儲蓄小幼苗 🎖️"; milestone = true; }
-        else if (currentCount === 21) { title = "🥈 儲蓄小達人 🥈"; milestone = true; }
-        else if (currentCount === 51) { title = "🥇 銅板終結者 🥇"; milestone = true; }
-        else if (currentCount === 101) { title = "💎 破百大英豪 💎"; milestone = true; }
+        if (currentCount === 11) { title = "🎖️ Seed"; milestone = true; }
+        else if (currentCount === 21) { title = "🥈 Expert"; milestone = true; }
+        else if (currentCount === 51) { title = "🥇 Master"; milestone = true; }
+        else if (currentCount === 101) { title = "💎 Hero"; milestone = true; }
         
         if (milestone) {
-            confetti({ particleCount: 150, spread: 80, origin: { x: 0, y: 0.8 } });
-            confetti({ particleCount: 150, spread: 80, origin: { x: 1, y: 0.8 } });
-            setTimeout(() => { showStandardAlert(`🎉 太棒了！\n您的累積儲蓄已邁入第 ${currentCount} 步！\n榮獲全新里程碑稱號：\n【${title}】！🔥✨`); }, 400);
+            confetti({ particleCount: 100, spread: 60, origin: { y: 0.8 } });
+            setTimeout(() => { showStandardAlert(`🎉 Milestone reached! (${currentCount}) \n【${title}】! 🔥✨`); }, 400);
         }
     }
 
@@ -566,7 +732,7 @@
             for (let i = 1; i <= 365; i++) {
                 if (!pulledAmounts.includes(i)) {
                     const opt = document.createElement('option');
-                    opt.value = i; opt.innerText = `$${i} 元`;
+                    opt.value = i; opt.innerText = `$${i}`;
                     patchSelect.appendChild(opt);
                 }
             }
@@ -578,7 +744,7 @@
         }
 
         if (journalListHistory.length === 0) {
-            listContainer.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.85rem; opacity:0.6;">🫙 目前尚無紀錄，點盲盒或登載開始</div>`;
+            listContainer.innerHTML = `<div style="text-align:center; padding:20px; font-size:0.85rem; opacity:0.6;">${LANG_DICTIONARY[currentLang].emptyTip}</div>`;
             return;
         }
 
@@ -591,7 +757,7 @@
             
             let isBday = item.dateStr.endsWith('01-19');
             const tagStyle = isBday ? 'j-day-tag birthday-tag' : (item.isPatched ? 'j-day-tag patch-tag' : 'j-day-tag');
-            let tagText = isBday ? '🎂 祈祈生日加碼' : (item.isPatched ? '歷史補帳' : `第 ${item.dayIndex} 天`);
+            let tagText = isBday ? '🎂 1/19 Birthday' : (item.isPatched ? 'Patch' : `Day ${item.dayIndex}`);
 
             card.innerHTML = `
                 <div class="journal-left-info">
@@ -612,11 +778,11 @@
         const amtVal = parseInt(document.getElementById('patch-amount-select').value);
 
         if (!dateVal || !amtVal) {
-            showStandardAlert("❌ 請填妥日期與金額！"); return;
+            showStandardAlert(LANG_DICTIONARY[currentLang].alertDateAmt); return;
         }
 
         if (journalListHistory.some(card => card.amount === amtVal)) {
-            showStandardAlert(`❌ 面額 $${amtVal} 元已重複登記。`); return;
+            showStandardAlert(LANG_DICTIONARY[currentLang].alertRepeat); return;
         }
 
         const newPatchCard = {
@@ -630,19 +796,10 @@
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
         playThemeSound();
         renderGrid();
-        
-        const targetCell = cellsMap[amtVal];
-        if (targetCell) {
-            targetCell.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
-            targetCell.classList.add('target-flash');
-        }
-        confetti({ particleCount: 50, spread: 40 });
-        triggerMilestoneCelebration(journalListHistory.length);
     }
 
     function deleteJournalItem(targetAmount) {
-        showFlexibleConfirm(`❓ 確定要移除此筆 $${targetAmount} 元紀錄嗎？`, function() {
+        showFlexibleConfirm(LANG_DICTIONARY[currentLang].confirmDel, function() {
             journalListHistory = journalListHistory.filter(card => card.amount !== targetAmount);
             journalListHistory.forEach((card, idx) => {
                 if (!card.isPatched) card.dayIndex = idx + 1;
@@ -657,20 +814,26 @@
         checkMidnightMode();
         document.getElementById('main-saving-mode-select').value = currentMode;
         gridContainer.innerHTML = '';
-        
+
+        // 子面板打開規則
+        const isJournalStyle = (currentMode==='365_journal');
+        const is隨喜Style = (currentMode==='隨喜');
+
         document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
         document.getElementById('journal-config-panel').style.display = currentMode === '365_journal' ? 'flex' : 'none';
-        document.getElementById('app-journal-ui-area').style.display = currentMode === '365_journal' ? 'block' : 'none';
+        document.getElementById('app-journal-ui-area').style.display = isJournalStyle ? 'block' : 'none';
 
         if (currentMode === '365_journal') {
             document.getElementById('journal-start-date-picker').value = journalStartDate;
         }
 
+        const d = LANG_DICTIONARY[currentLang];
+        document.getElementById('label-completed-unit').innerText = currentMode === 'week_52' ? d.lblDashDoneWeek : d.lblDashDoneDay;
+
         if (currentMode === 'week_52') {
-            document.getElementById('label-completed-unit').innerText = "已完成週數";
             const col = document.createElement('div'); col.className = 'month-column';
             const header = document.createElement('div'); header.className = 'month-header';
-            header.innerHTML = `<span>📅 52週步道挑戰</span><span class="month-target">總目標 $13,780</span>`;
+            header.innerHTML = `<span>${d.weekTrack}</span><span class="month-target">Total $13,780</span>`;
             col.appendChild(header);
 
             const daysList = document.createElement('div'); daysList.className = 'days-list';
@@ -678,31 +841,27 @@
 
             for (let w = 1; w <= 52; w++) {
                 const cell = document.createElement('div'); cell.className = 'day-cell';
-                cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.6; display:block;">第${w}週</span>$${w * 10}`;
-                cell.id = `week-${w}`;
+                cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.6; display:block;">W${w}</span>$${w * 10}`;
                 if (checkedWeeks52.includes(w)) cell.classList.add('checked');
                 cell.addEventListener('click', () => toggleDayOrWeek(w, cell));
                 daysList.appendChild(cell); cellsMap[w] = cell;
             }
             col.appendChild(daysList); gridContainer.appendChild(col);
         } else {
-            document.getElementById('label-completed-unit').innerText = "已完成天數";
-            
-            monthsData.forEach(month => {
+            d.monthNames.forEach((mName, mIdx) => {
+                const month = monthsData[mIdx];
                 const col = document.createElement('div'); col.className = 'month-column';
                 let monthTargetText = ""; let totalDaysInMonth = month.end - month.start + 1;
                 
-                if (currentMode === '365_阶梯' || currentMode === '365_journal') {
+                if (currentMode === '365_阶梯' || isJournalStyle) {
                     let sum = 0; for(let d=month.start; d<=month.end; d++) sum += d;
-                    monthTargetText = `預估 ${sum} 元`;
+                    monthTargetText = `$${sum}`;
                 } else if (currentMode === 'custom_fixed') {
-                    monthTargetText = `預估 ${totalDaysInMonth * currentCustomFixedAmt} 元`;
-                } else {
-                    monthTargetText = `彈性儲蓄`;
+                    monthTargetText = `$${totalDaysInMonth * currentCustomFixedAmt}`;
                 }
 
                 const header = document.createElement('div'); header.className = 'month-header';
-                header.innerHTML = `<span>${month.name}</span><span class="month-target">${monthTargetText}</span>`;
+                header.innerHTML = `<span>${mName}</span><span class="month-target">${monthTargetText}</span>`;
                 col.appendChild(header);
 
                 const daysList = document.createElement('div'); daysList.className = 'days-list';
@@ -710,53 +869,53 @@
                 for (let i = month.start; i <= month.end; i++) {
                     const cell = document.createElement('div'); cell.className = 'day-cell'; cell.id = `day-${i}`;
                     
-                    if (currentMode === '365_阶梯' || currentMode === '365_journal') {
+                    if (currentMode === '365_阶梯' || isJournalStyle) {
                         cell.innerText = i;
-                        if (currentMode === '365_journal') {
+                        if (isJournalStyle) {
                             cell.classList.add('readonly-lock'); 
-                            const isSavedInJournal = journalListHistory.some(card => card.amount === i);
-                            if (isSavedInJournal) cell.classList.add('checked');
+                            if (journalListHistory.some(card => card.amount === i)) cell.classList.add('checked');
                         } else {
                             if (checkedDays365.includes(i)) cell.classList.add('checked');
                         }
                     } else if (currentMode === 'custom_fixed') {
                         cell.innerText = `$${currentCustomFixedAmt}`; if (checkedDaysCustom.includes(i)) cell.classList.add('checked');
                     } else {
+                        // 隨喜模式
                         if (隨喜Map[i]) {
-                            cell.innerHTML = `<span style="font-size:0.75rem; color:#15803d; display:block;">第${i}天</span>$${隨喜Map[i]}`;
+                            cell.innerHTML = `<span style="font-size:0.75rem; display:block; opacity:0.6;">D${i}</span>$${隨喜Map[i]}`;
                             cell.classList.add('checked');
-                        } else { cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.5; display:block;">第${i}天</span>💸`; }
+                        } else { cell.innerHTML = `<span style="font-size:0.75rem; opacity:0.4; display:block;">D${i}</span>💸`; }
                     }
 
-                    if (currentMode !== '365_journal') { cell.addEventListener('click', () => toggleDayOrWeek(i, cell)); }
+                    if (!isJournalStyle) { cell.addEventListener('click', () => toggleDayOrWeek(i, cell)); }
                     daysList.appendChild(cell); cellsMap[i] = cell;
                 }
                 col.appendChild(daysList); gridContainer.appendChild(col);
             });
         }
         loadTargetGoal();
-        if (currentMode === '365_journal') renderJournalListUI();
+        
+        // 刷新外觀皮膚
+        selectThemeStyle(activeThemeKey);
     }
 
     function toggleDayOrWeek(id, element) {
         if (currentMode === '隨喜') {
             if (隨喜Map[id]) {
                 delete 隨喜Map[id];
-                element.innerHTML = `<span style="font-size:0.75rem; opacity:0.5; display:block;">第${id}天</span>💸`;
+                element.innerHTML = `<span style="font-size:0.75rem; opacity:0.4; display:block;">D${id}</span>💸`;
                 element.classList.remove('checked');
                 localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map));
-                playThemeSound();
-                updateDashboard();
+                playThemeSound(); updateDashboard();
             } else {
-                openPromptModal(`💖 第 ${id} 天自由隨喜`, "100", function(inputAmt) {
+                openPromptModal(`💖 Day ${id}`, "100", function(inputAmt) {
                     let amt = parseInt(inputAmt) || 0;
                     if (amt > 0) {
                         隨喜Map[id] = amt;
-                        element.innerHTML = `<span style="font-size:0.75rem; color:#15803d; display:block;">第${id}天</span>$${amt}`;
+                        element.innerHTML = `<span style="font-size:0.75rem; display:block; opacity:0.6;">D${id}</span>$${amt}`;
                         element.classList.add('checked');
                         localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map));
-                        playThemeSound();
-                        updateDashboard();
+                        playThemeSound(); updateDashboard();
                     }
                 });
             }
@@ -782,17 +941,16 @@
         let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
         let hasBirthdayBonus = false; 
         
+        const isJournalStyle = (currentMode==='365_journal');
+
         if (currentMode === '365_阶梯') {
             totalSaved = checkedDays365.reduce((sum, val) => sum + val, 0);
             daysCount = checkedDays365.length;
-        } else if (currentMode === '365_journal') {
+        } else if (isJournalStyle) {
             totalSaved = journalListHistory.reduce((sum, card) => sum + card.amount, 0);
             daysCount = journalListHistory.length;
-            
-            const isBirthdayActive = journalListHistory.some(card => card.dateStr.endsWith('01-19'));
-            if (isBirthdayActive) {
-                totalSaved += 1000;
-                hasBirthdayBonus = true;
+            if (journalListHistory.some(card => card.dateStr.endsWith('01-19'))) {
+                totalSaved += 1000; hasBirthdayBonus = true;
             }
         } else if (currentMode === 'custom_fixed') {
             totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length;
@@ -807,13 +965,9 @@
         const percentNum = maxUnits > 0 ? (daysCount / maxUnits) * 100 : 0;
         const progressPercent = percentNum.toFixed(2);
 
-        const totalSavedEl = document.getElementById('total-saved');
-        const daysCountEl = document.getElementById('days-count');
-        const progressPercentEl = document.getElementById('progress-percent');
-
-        if(totalSavedEl) totalSavedEl.innerText = `$${totalSaved.toLocaleString()}`;
-        if(daysCountEl) daysCountEl.innerText = `${daysCount} / ${maxUnits} ${maxUnits===52?'週':'天'}`;
-        if(progressPercentEl) progressPercentEl.innerText = `${progressPercent}%`;
+        if(document.getElementById('total-saved')) document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
+        if(document.getElementById('days-count')) document.getElementById('days-count').innerText = `${daysCount} / ${maxUnits} ${currentMode==='week_52'?'W':'D'}`;
+        if(document.getElementById('progress-percent')) document.getElementById('progress-percent').innerText = `${progressPercent}%`;
 
         const waterFluid = document.getElementById('dynamic-water-fluid');
         const waterRunner = document.getElementById('dynamic-water-runner');
@@ -822,84 +976,84 @@
             if (percentNum >= 98) waterFluid.classList.add('full'); else waterFluid.classList.remove('full');
         }
 
-        const config = THEME_CONTENT_BANK[activeThemeKey];
-        const goalText = document.getElementById('target-saving-input').value || "夢想計劃";
+        const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
+        const goalText = document.getElementById('target-saving-input').value || "Dream";
         const statusBox = document.getElementById('blueprint-status-text');
+        const d = LANG_DICTIONARY[currentLang];
 
-        let runnerIcon = config.runnerIcon; 
-        let statusString = "";
-
+        let runnerIcon = config.runnerIcon || "🚀"; 
         if (hasBirthdayBonus) {
-            statusString = `🎂 [1/19 祈祈生日大加碼] 已自動為許願瓶注入 $1,000 元幸福基金！目前總進度已達 ${progressPercent}%，往【${goalText}】大步邁進！✨`;
-            runnerIcon = "🎁";
+            if(statusBox) statusBox.innerHTML = d.bdayBonus.replace('${prog}', progressPercent).replace('${goal}', goalText);
+            if (waterRunner) waterRunner.innerText = "🎁";
         } else {
             if (percentNum === 0) {
-                statusString = `🔮 【${config.name}】正在為您的願望【${goalText}】凝聚最初的信念儲蓄能量...`;
+                if(statusBox) statusBox.innerHTML = d.statusInit.replace('${name}', config.idName[currentLang]).replace('${goal}', goalText);
             } else {
-                statusString = `${config.runnerIcon} 【${config.name} 核心·進度 ${progressPercent}%】：智慧能量穩定灌注中！願望【${goalText}】正在大放異彩！✨`;
+                if(statusBox) statusBox.innerHTML = d.statusRun.replace('${icon}', config.runnerIcon).replace('${name}', config.idName[currentLang]).replace('${prog}', progressPercent).replace('${goal}', goalText);
             }
+            if (waterRunner) waterRunner.innerText = runnerIcon;
         }
-        if (waterRunner) waterRunner.innerText = runnerIcon;
-        if (statusBox) statusBox.innerHTML = statusString;
     }
 
     // ==========================================
-    // 🎲 【全新核心】心靈盲盒抽獎邏輯重構
+    // 🎲 心靈盲盒抽獎（智慧連動小齒輪設定的主題）
     // ==========================================
     function pickCelebrity() {
-        if (currentMode === '隨喜') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: var(--text-color); font-weight: bold;">今日任務：自由隨喜無壓力！💖</span><br><span style="font-size: 0.85rem; opacity:0.8; font-style: italic; margin-top: 4px; display: inline-block;">💬 隨心所欲將今日富餘的小銅板或鈔票存入吧！</span>`;
-            return;
-        } else if (currentMode === 'custom_fixed') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: var(--text-color); font-weight: bold;">今日任務：存下配置款 $${currentCustomFixedAmt} 元！📊</span><br><span style="font-size: 0.85rem; opacity:0.8; font-style: italic; margin-top: 4px; display: inline-block;">💬 這是屬於您最驕傲的專屬紀律面額！</span>`;
-            return;
+        const d = LANG_DICTIONARY[currentLang];
+        
+        if (currentMode === 'custom_fixed') {
+            document.getElementById('celebrity-display').innerHTML = `<b>Target: $${currentCustomFixedAmt}</b>`; return;
         } else if (currentMode === 'week_52') {
-            document.getElementById('celebrity-display').innerHTML = `<span style="font-size: 1.05rem; color: var(--text-color); font-weight: bold;">今日任務：挑戰本週 52 週步道！📈</span><br><span style="font-size: 0.85rem; opacity:0.8; font-style: italic; margin-top: 4px; display: inline-block;">💬 每週前進一格，輕鬆擁抱豐碩成果！</span>`;
-            return;
+            document.getElementById('celebrity-display').innerHTML = `<b>Target: Weekly Step</b>`; return;
         }
 
+        // 不論是手帳模式還是隨喜，都可以抽盲盒面額
         const pulledAmounts = journalListHistory.map(card => card.amount);
         const availableAmounts = [];
+        
+        let isJournalStyle = (currentMode === '365_journal');
+        
         for (let i = 1; i <= 365; i++) {
-            if (!pulledAmounts.includes(i)) availableAmounts.push(i);
+            if (isJournalStyle) {
+                if (!journalListHistory.some(card => card.amount === i)) availableAmounts.push(i);
+            } else {
+                if (!隨喜Map[i]) availableAmounts.push(i);
+            }
         }
 
         if (availableAmounts.length === 0) {
-            document.getElementById('celebrity-display').innerHTML = "🎉 365天智慧手帳已全數達成大滿貫！🏆";
-            return;
+            document.getElementById('celebrity-display').innerHTML = "🏆 Max Complete! 🏆"; return;
         }
 
-        // 隨機抽選金額與當前主題之智慧經典箴言
         const selectedAmount = availableAmounts[Math.floor(Math.random() * availableAmounts.length)];
-        const currentBank = THEME_CONTENT_BANK[activeThemeKey];
-        const randomQuote = currentBank.quotes[Math.floor(Math.random() * currentBank.quotes.length)];
+        const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
         
-        let dynamicTip = selectedAmount >= 300 ? " <span style='color:#ef4444; font-size:0.8rem; font-weight:800;'>(大魔王關卡🦁)</span>" : "";
+        const quotePool = config.quotes ? config.quotes[currentLang] : null;
+        let randomQuote = (quotePool && quotePool.length > 0) ? quotePool[Math.floor(Math.random() * quotePool.length)] : { source: "Astra", text: "Keep going!" };
         
         playThemeSound();
 
-        // 活潑展現智慧字卡
         document.getElementById('celebrity-display').innerHTML = `
-            <div style="background: rgba(255,255,255,0.4); padding: 14px; border-radius: 16px; margin-bottom: 12px; font-size: 0.95rem; line-height:1.5; color: var(--text-color); border: 1px solid rgba(255,255,255,0.3); text-align: left;">
+            <div style="background: rgba(255,255,255,0.4); padding: 12px; border-radius: 14px; margin-bottom: 10px; font-size: 0.9rem; line-height:1.4; border: 1px solid rgba(255,255,255,0.2); text-align: left;">
                 “${randomQuote.text}”
-                <br><span style="font-size:0.75rem; opacity:0.6; display:block; text-align:right; margin-top:6px; font-weight: bold;">——《${randomQuote.source}》</span>
+                <br><span style="font-size:0.75rem; opacity:0.6; display:block; text-align:right; margin-top:4px; font-weight:bold;">——《${randomQuote.source}》</span>
             </div>
-            <span style="font-size:1.1rem; font-weight:bold;">✨ 今日盲盒指引：$${selectedAmount} 元</span>${dynamicTip}
+            <span style="font-size:1.05rem; font-weight:bold;">✨ Target: $${selectedAmount}</span>
         `;
 
-        showFlexibleConfirm(`🎰 【${currentBank.name}】盲盒開啟\n\n今日面額：$${selectedAmount} 元\n\n確定要將此交易登載至手帳，累積人生福報能量嗎？`, function() {
-            const nextDayIndex = journalListHistory.length + 1;
-            const todayStr = new Date().toISOString().split('T')[0];
+        let confirmTitle = d.confirmBoxTitle + `【${config.idName[currentLang]}】`;
+        let confirmBody = d.confirmBoxBody.replace('${amt}', selectedAmount);
 
-            const newJournalCard = {
-                dayIndex: nextDayIndex,
-                dateStr: todayStr,
-                amount: selectedAmount,
-                isPatched: false
-            };
-            
-            journalListHistory.push(newJournalCard);
-            localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+        showFlexibleConfirm(`${confirmTitle}\n\n${confirmBody}`, function() {
+            if (isJournalStyle) {
+                const nextDayIndex = journalListHistory.length + 1;
+                const todayStr = new Date().toISOString().split('T')[0];
+                journalListHistory.push({ dayIndex: nextDayIndex, dateStr: todayStr, amount: selectedAmount, isPatched: false });
+                localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+            } else {
+                隨喜Map[selectedAmount] = selectedAmount;
+                localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map));
+            }
             
             playThemeSound();
             renderGrid();
@@ -910,14 +1064,12 @@
                 document.querySelectorAll('.target-flash').forEach(el => el.classList.remove('target-flash'));
                 targetCell.classList.add('target-flash');
             }
-            confetti({ particleCount: 70, spread: 60, origin: { y: 0.8 } });
-            triggerMilestoneCelebration(journalListHistory.length);
+            confetti({ particleCount: 60, spread: 50 });
         });
     }
 
-    // 初始化加載心靈與視覺環境
-    renderGrid();
-    applySpiritualTheme(activeThemeKey);
+    // 啟動預設配置
+    changeLanguage(currentLang);
 </script>
 
 </body>
