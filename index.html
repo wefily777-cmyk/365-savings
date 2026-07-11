@@ -24,12 +24,15 @@
             --glass-blur: 12px;
         }
 
+        /* 🌙 修正夜間模式：強制將文字轉為高對比的淺色，避免被主題色吃掉 */
         body.midnight-mode {
             --card-bg: rgba(19, 28, 46, 0.85);
             --border-color: rgba(255, 255, 255, 0.08);
             --cell-bg: #1a2438;
             --cell-text: #cbd5e1;
             --app-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --text-color: #f8fafc !important; 
+            --text-muted: #94a3b8 !important;
         }
 
         body {
@@ -46,7 +49,7 @@
         
         .top-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-color); margin: 0; }
-        .gear-btn { background: var(--card-bg); border: 1px solid var(--border-color); font-size: 1.2rem; padding: 8px 12px; border-radius: 14px; cursor: pointer; box-shadow: var(--app-shadow); transition: transform 0.2s; }
+        .gear-btn { background: var(--card-bg); border: 1px solid var(--border-color); font-size: 1.2rem; padding: 8px 12px; border-radius: 14px; cursor: pointer; box-shadow: var(--app-shadow); transition: transform 0.2s; color: var(--text-color); }
         .gear-btn:active { transform: scale(0.92) rotate(30deg); }
 
         .mode-selector-box {
@@ -59,17 +62,16 @@
         .mode-select { flex: 1; background-color: rgba(0,0,0,0.04); color: var(--text-color); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 700; outline: none; }
         body.midnight-mode .mode-select { background-color: rgba(255,255,255,0.06); }
 
-        /* 📜 每日心靈大字卡專區（Plan Joy 風格靈魂） */
         .daily-wisdom-card {
             background: var(--card-bg); padding: 16px; border-radius: 20px; margin-bottom: 16px;
             box-shadow: var(--app-shadow); border: 1px solid var(--border-color);
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
-            transition: all 0.5s ease; position: relative;
+            transition: all 0.5s ease; position: relative; color: var(--text-color);
         }
         .wisdom-header-line { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 800; opacity: 0.6; margin-bottom: 8px; }
         .wisdom-text { font-size: 0.95rem; line-height: 1.5; font-weight: 700; text-align: left; margin-bottom: 6px; }
         .wisdom-src { font-size: 0.75rem; text-align: right; opacity: 0.7; font-weight: bold; }
-        .wisdom-refresh-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; opacity: 0.6; transition: transform 0.3s; }
+        .wisdom-refresh-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; opacity: 0.6; transition: transform 0.3s; color: var(--text-color); }
         .wisdom-refresh-btn:active { transform: rotate(180deg); }
 
         .config-sub-panel { display: none; background-color: rgba(0,0,0,0.03); padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); }
@@ -98,6 +100,7 @@
         }
 
         .blueprint-status { font-size: 0.85rem; color: var(--text-color); opacity: 0.9; text-align: center; font-weight: 600; background-color: rgba(0,0,0,0.03); padding: 12px 16px; border-radius: 14px; margin-top: 10px; min-height: 38px; display: flex; align-items: center; justify-content: center; line-height: 1.4; box-shadow: var(--inner-shadow); }
+        body.midnight-mode .blueprint-status { background-color: rgba(255,255,255,0.05); }
 
         .app-journal-box { 
             display: none; background: var(--card-bg); border-radius: 24px; padding: 18px; margin-bottom: 16px; box-shadow: var(--app-shadow); border: 1px solid var(--border-color); 
@@ -112,7 +115,7 @@
         .patch-btn { background: var(--btn-gradient); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
         .journal-container-list { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 12px 16px; border-radius: 14px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
+        .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 12px 16px; border-radius: 14px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); color: var(--text-color); }
         .journal-row-card.patched-card { border-left: 4px solid #10b981; }
         
         .journal-left-info { display: flex; flex-direction: column; gap: 4px; }
@@ -147,6 +150,7 @@
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
         }
         .month-header { background: rgba(0,0,0,0.02); color: var(--text-color); padding: 14px 16px; font-weight: 800; font-size: 0.95rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        body.midnight-mode .month-header { background: rgba(255,255,255,0.03); }
         .month-target { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; }
         .days-list { padding: 14px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
         
@@ -161,7 +165,7 @@
         body.midnight-mode .settings-item-btn { background: rgba(255,255,255,0.05); }
         .settings-item-btn.active { background: var(--btn-gradient); color: white; border-color: transparent; box-shadow: 0 4px 10px rgba(2, 132, 199, 0.2); }
 
-        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
+        .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.4s; }
         .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
         .custom-modal { background-color: var(--cell-bg); border-radius: 28px; padding: 24px; width: 85%; max-width: 320px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); text-align: center; border: 1px solid var(--border-color); transform: scale(0.9); transition: transform 0.4s; }
         .custom-modal-overlay.active .custom-modal { transform: scale(1); }
@@ -169,12 +173,14 @@
         .custom-modal-btn-group { display: flex; gap: 12px; }
         .custom-modal-btn { background: var(--btn-gradient); color: white; border: none; padding: 12px 24px; font-size: 0.95rem; font-weight: 800; border-radius: 14px; cursor: pointer; flex: 1; }
         .custom-modal-btn.cancel-btn { background: rgba(0,0,0,0.05); color: var(--text-color); border: 1px solid var(--border-color); }
+        body.midnight-mode .custom-modal-btn.cancel-btn { background: rgba(255,255,255,0.05); }
 
-        .prompt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; }
+        .prompt-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10000; opacity: 0; pointer-events: none; }
         .prompt-modal-overlay.active { opacity: 1; pointer-events: auto; }
         .prompt-modal { background-color: var(--cell-bg); border-radius: 28px; padding: 24px; width: 85%; max-width: 300px; text-align: center; border: 1px solid var(--border-color); }
         .prompt-title { font-weight: 800; margin-bottom: 14px; color: var(--text-color); }
         .prompt-input-box { width: 90%; padding: 12px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.04); color: var(--text-color); border-radius: 12px; font-size: 1.2rem; text-align: center; font-weight: 800; margin-bottom: 18px; outline: none; }
+        body.midnight-mode .prompt-input-box { background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body>
@@ -216,7 +222,6 @@
         </div>
     </div>
 
-    <!-- 📜 Plan Joy 靈魂優化：每日箴言經典大字卡展示區 -->
     <div class="daily-wisdom-card">
         <div class="wisdom-header-line">
             <span id="lbl-wisdom-title">📜 每日心靈指引 / Daily Wisdom</span>
@@ -294,11 +299,9 @@
     <div class="grid-container" id="months-grid"></div>
 </div>
 
-<!-- ⚙️ 齒輪控制面板視窗 -->
 <div class="custom-modal-overlay" id="settings-modal-layer">
     <div class="custom-modal" style="max-width: 340px;">
         <div class="settings-panel-box">
-            <!-- 語言區 -->
             <div>
                 <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
                 <div class="settings-btn-grid">
@@ -308,7 +311,6 @@
                     <button class="settings-item-btn lang-item" id="s-lang-ja" onclick="changeLanguage('ja')">日本語</button>
                 </div>
             </div>
-            <!-- 主題區 -->
             <div style="margin-top: 4px;">
                 <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
@@ -318,7 +320,6 @@
                     <button class="settings-item-btn theme-item" id="s-theme-gospel" onclick="selectThemeStyle('gospel')">✝️ 恩典管家</button>
                 </div>
             </div>
-            <!-- 音樂開關區 -->
             <div style="margin-top: 4px;">
                 <div class="settings-row-title" id="lbl-setting-music">🎵 背景冥想音樂 / Ambient Music</div>
                 <div class="settings-btn-grid" style="grid-template-columns: 1fr;">
@@ -428,10 +429,11 @@
         }
     };
 
+    // 🌟 修正點 1：將 baseFreq (基礎頻率) 全部調低，變成低沉溫暖的冥想墊音 (Ambient Pad)
     const THEME_CONTENT_BANK = {
         classic: {
             name: "🌌 經典太空原版", idName: { 'zh-TW': '經典原版', 'zh-CN': '经典原版', 'en': 'Classic Space', 'ja': '宇宙原版' },
-            bgColor: "#f4f7fa", textColor: "#1e293b", btnGradient: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)", checkedBg: "linear-gradient(135deg, #4ea8de 0%, #0077b6 100%)", audioFreq: 144, runnerIcon: "🚀",
+            bgColor: "#f4f7fa", textColor: "#1e293b", btnGradient: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)", checkedBg: "linear-gradient(135deg, #4ea8de 0%, #0077b6 100%)", audioFreq: 72, runnerIcon: "🚀",
             quotes: {
                 'zh-TW': [
                     { source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" },
@@ -453,7 +455,7 @@
         },
         buddhism: {
             name: "🏯 禪心福報", idName: { 'zh-TW': '禪心福報', 'zh-CN': '禅心福报', 'en': 'Zen Karma', 'ja': '禪心福報' },
-            bgColor: "#F5F2EB", textColor: "#8C6239", btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)", checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)", audioFreq: 220, runnerIcon: "🪷",
+            bgColor: "#F5F2EB", textColor: "#8C6239", btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)", checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)", audioFreq: 110, runnerIcon: "🪷",
             quotes: {
                 'zh-TW': [
                     { source: "六度波羅蜜", text: "布施、持戒、忍辱、精進、禪定、智慧。今天克制無明欲望存下的財富，亦是極好的精進修行。" },
@@ -479,7 +481,7 @@
         },
         gospel: {
             name: "✝️ 恩典管家", idName: { 'zh-TW': '恩典管家', 'zh-CN': '恩典管家', 'en': 'Grace Steward', 'ja': '恵みの執事' },
-            bgColor: "#EAEFf2", textColor: "#2B4C5E", btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)", checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", audioFreq: 196, runnerIcon: "🕊️",
+            bgColor: "#EAEFf2", textColor: "#2B4C5E", btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)", checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", audioFreq: 98, runnerIcon: "🕊️",
             quotes: {
                 'zh-TW': [
                     { source: "創世記·約瑟的智慧", text: "法老當把豐年所剩餘的糧食聚斂起來，積蓄在各城裡，以防備將來必行的七年饑荒。" },
@@ -505,7 +507,7 @@
         },
         rainbow: {
             name: "🌈 彩虹療癒", idName: { 'zh-TW': '彩虹療癒', 'zh-CN': '彩虹疗愈', 'en': 'Rainbow Healing', 'ja': '虹色の癒やし' },
-            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", textColor: "#6B11B3", btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)", audioFreq: 330, runnerIcon: "🦄",
+            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", textColor: "#6B11B3", btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)", audioFreq: 165, runnerIcon: "🦄",
             quotes: {
                 'zh-TW': [
                     { source: "脈輪肯定句", text: "我值得擁有安全與富足的人生，我誠摯感謝宇宙在此刻給予我的一切豐盛豐饒。" },
@@ -533,7 +535,7 @@
 
     let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
     let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
-    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true'; // 預設關閉，由使用者手動開啟最貼心
+    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true'; 
 
     let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
@@ -549,7 +551,7 @@
     const cellsMap = {};
     let promptCallback = null;
 
-    // 🎵 【全新突破】純代碼合成式多波形背景冥想音樂引擎 (免除外接mp3失敗)
+    // 🎵 【淨化版】背景音樂引擎：移除了詭異的微小頻差，全面換成溫暖、和諧的 SPA 冥想純律和弦
     let audioCtx = null;
     let mainLfoNode = null;
     let mainGainNode = null;
@@ -558,64 +560,77 @@
     function startSpiritualBgmEngine() {
         if (!isBgmEnabled) return;
         try {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            stopSpiritualBgmEngine(false); // 乾淨清空舊聲道
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            stopSpiritualBgmEngine(false); 
 
-            const baseFreq = THEME_CONTENT_BANK[activeThemeKey].audioFreq;
+            let baseFreq = THEME_CONTENT_BANK[activeThemeKey].audioFreq;
+
+            // 加入低通濾波器 (Lowpass Filter)，把尖銳的電子音過濾掉，變得悶悶的、非常溫暖
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.value = 450; 
+            filter.connect(audioCtx.destination);
+
             mainGainNode = audioCtx.createGain();
-            mainGainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // 輕柔微音量襯底
+            mainGainNode.gain.setValueAtTime(0, audioCtx.currentTime); 
+            mainGainNode.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 4); // 像日出一樣，4秒鐘超輕柔淡入
+            mainGainNode.connect(filter);
 
-            // 建立 LFO 低頻震盪器，模擬大自然「海浪/呼吸」的流動感
+            // 用 LFO 製造超慢速的呼吸感 (Tremolo)，每 12.5 秒起伏一次
             mainLfoNode = audioCtx.createOscillator();
             mainLfoNode.type = 'sine';
-            mainLfoNode.frequency.setValueAtTime(0.12, audioCtx.currentTime); // 每8秒一次呼吸起伏
+            mainLfoNode.frequency.setValueAtTime(0.08, audioCtx.currentTime); 
             const lfoGain = audioCtx.createGain();
-            lfoGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            lfoGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
             mainLfoNode.connect(lfoGain);
             lfoGain.connect(mainGainNode.gain);
             mainLfoNode.start();
 
-            // 根據主題編織不同的五聲調式和弦長音 (Chord Drone)
-            let chords = [1, 1.25, 1.5, 1.875]; // 預設大三和弦
-            let waveType = 'sine';
-            
-            if (activeThemeKey === 'buddhism') {
-                chords = [1, 1.333, 1.5, 2.0]; // 禪意正弦純音
-                waveType = 'sine';
-            } else if (activeThemeKey === 'gospel') {
-                chords = [1, 1.2, 1.5, 1.8]; // 復古聖歌三角波
-                waveType = 'triangle';
-            } else if (activeThemeKey === 'rainbow') {
-                chords = [1, 1.25, 1.6, 2.25]; // 高頻水晶泛音
-                waveType = 'sine';
-            }
+            // 完全不刺耳的和諧純律 (Root, P5, Octave)，聽起來非常莊嚴平靜
+            let chords = [1, 1.5, 2]; // 經典款：根音、完全五度、八度
+            if (activeThemeKey === 'buddhism') chords = [1, 1.333, 1.5]; // 禪心：懸留和弦，有東方空靈感
+            else if (activeThemeKey === 'rainbow') chords = [1, 1.25, 1.5]; // 彩虹：大三和弦，溫暖充滿希望
+            else if (activeThemeKey === 'gospel') chords = [0.5, 1, 1.5]; // 恩典：極低頻墊底，如同教堂管風琴
 
-            chords.forEach((ratio, idx) => {
+            chords.forEach((ratio) => {
                 const osc = audioCtx.createOscillator();
-                osc.type = waveType;
-                // 加入極微小的微調頻差 (Detune)，製造更深邃的環境空間感
-                osc.frequency.setValueAtTime(baseFreq * ratio + (idx * 0.4), audioCtx.currentTime);
+                osc.type = 'sine'; // 捨棄三角波，全部採用最圓潤的正弦波
+                osc.frequency.setValueAtTime(baseFreq * ratio, audioCtx.currentTime);
                 osc.connect(mainGainNode);
                 osc.start();
                 oscillatorNodesPool.push(osc);
             });
 
-            mainGainNode.connect(audioCtx.destination);
-        } catch(e) { console.log("等待使用者初次手動互動解鎖音訊"); }
+        } catch(e) { console.log("等待互動解鎖音訊"); }
     }
 
+    // 優雅淡出，不會發出「啪」的斷電聲
     function stopSpiritualBgmEngine(clearState = true) {
         if (clearState) {
             isBgmEnabled = false;
             localStorage.setItem('bgm_engine_enabled', 'false');
             updateBgmBtnUI();
         }
-        if (mainLfoNode) { try{ mainLfoNode.stop(); }catch(e){} mainLfoNode = null; }
-        oscillatorNodesPool.forEach(osc => { try{ osc.stop(); }catch(e){} });
+        if (!mainGainNode || !audioCtx) return;
+        
+        const time = audioCtx.currentTime;
+        mainGainNode.gain.cancelScheduledValues(time);
+        mainGainNode.gain.setValueAtTime(mainGainNode.gain.value, time);
+        mainGainNode.gain.exponentialRampToValueAtTime(0.0001, time + 0.5); // 0.5秒緩緩淡出
+        
+        const currentOscs = oscillatorNodesPool;
+        const lfo = mainLfoNode;
+        
+        setTimeout(() => {
+            try {
+                currentOscs.forEach(o => o.stop());
+                if (lfo) lfo.stop();
+            } catch(e){}
+        }, 600);
+
         oscillatorNodesPool = [];
-        if (mainGainNode) { mainGainNode.disconnect(); mainGainNode = null; }
+        mainLfoNode = null;
+        mainGainNode = null;
     }
 
     function toggleBgmState() {
@@ -637,7 +652,6 @@
         btn.className = isBgmEnabled ? "settings-item-btn active" : "settings-item-btn";
     }
 
-    // 短投幣短音效
     function playThemeSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -645,23 +659,20 @@
             const gain = ctx.createGain();
             const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
             
-            osc.type = (activeThemeKey === 'buddhism') ? 'sine' : ((activeThemeKey === 'gospel') ? 'triangle' : 'sine');
-            osc.frequency.setValueAtTime(config.audioFreq * 3, ctx.currentTime); // 提高八度清脆聲
+            osc.type = 'sine'; // 改用溫潤單音
+            osc.frequency.setValueAtTime(config.audioFreq * 4, ctx.currentTime); // 提高音階當作輕脆的提示音
             
-            gain.gain.setValueAtTime(0.15, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.1, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
             
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start();
-            osc.stop(ctx.currentTime + 0.4);
+            osc.stop(ctx.currentTime + 0.3);
         } catch(e){}
     }
 
-    // ==========================================
-    // 📜 核心新功能：每日固定大字卡展示與洗牌引擎
-    // ==========================================
-    let customWisdomOffset = 0; // 洗牌洗到第幾張的偏移量
+    let customWisdomOffset = 0; 
 
     function refreshDailyWisdom(isUserClick = false) {
         const config = THEME_CONTENT_BANK[activeThemeKey];
@@ -669,7 +680,6 @@
         
         if (!quotePool || quotePool.length === 0) return;
 
-        // 計算時間種子，讓每天一睜開眼，固定自動顯示同一句經文
         const todaySeed = new Date().getDate();
         let index = (todaySeed + customWisdomOffset) % quotePool.length;
         
@@ -699,22 +709,22 @@
 
         const config = THEME_CONTENT_BANK[themeKey];
         const root = document.documentElement;
+        
         if (config.bgColor.includes('linear-gradient')) {
             document.body.style.backgroundImage = config.bgColor;
         } else {
             document.body.style.backgroundColor = config.bgColor;
             document.body.style.backgroundImage = 'none';
         }
+        
         root.style.setProperty('--text-color', config.textColor);
         root.style.setProperty('--btn-gradient', config.btnGradient);
         root.style.setProperty('--checked-bg', config.checkedBg);
 
-        // 音樂隨主題連動流暢切換
         if (isBgmEnabled) {
             startSpiritualBgmEngine();
         }
 
-        // 重算字卡
         customWisdomOffset = 0;
         refreshDailyWisdom(false);
         updateDashboard();
@@ -775,9 +785,10 @@
         renderGrid();
     }
 
+    // 🌙 修正夜間模式：讓判定時間為正常的 PM 6:00 ~ AM 6:00 
     function checkMidnightMode() {
         const hour = new Date().getHours();
-        if (hour >= 0 && hour < 5) document.body.classList.add('midnight-mode');
+        if (hour >= 18 || hour < 6) document.body.classList.add('midnight-mode');
         else document.body.classList.remove('midnight-mode');
     }
 
@@ -1213,14 +1224,12 @@
         });
     }
 
-    // 瀏覽器音訊解鎖監聽（滿足現代瀏覽器資安規範）
     document.addEventListener('click', function() {
         if (isBgmEnabled && audioCtx && audioCtx.state === 'suspended') {
             audioCtx.resume().then(() => { startSpiritualBgmEngine(); });
         }
     }, { once: false });
 
-    // 啟動預設配置
     changeLanguage(currentLang);
 </script>
 
