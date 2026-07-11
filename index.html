@@ -44,14 +44,13 @@
 
         .container { max-width: 480px; margin: 0 auto; }
         
-        /* ⚙️ 頂部齒輪控制列 */
         .top-header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-color); margin: 0; }
         .gear-btn { background: var(--card-bg); border: 1px solid var(--border-color); font-size: 1.2rem; padding: 8px 12px; border-radius: 14px; cursor: pointer; box-shadow: var(--app-shadow); transition: transform 0.2s; }
         .gear-btn:active { transform: scale(0.92) rotate(30deg); }
 
         .mode-selector-box {
-            background: var(--card-bg); padding: 14px; border-radius: 20px; margin-bottom: 16px;
+            background: var(--card-bg); padding: 14px; border-radius: 20px; margin-bottom: 12px;
             box-shadow: var(--app-shadow); border: 1px solid var(--border-color);
             backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
         }
@@ -59,6 +58,19 @@
         .mode-label { color: var(--text-color); font-size: 0.85rem; font-weight: 700; opacity: 0.8; }
         .mode-select { flex: 1; background-color: rgba(0,0,0,0.04); color: var(--text-color); border: 1px solid var(--border-color); padding: 10px 14px; border-radius: 14px; font-size: 0.9rem; font-weight: 700; outline: none; }
         body.midnight-mode .mode-select { background-color: rgba(255,255,255,0.06); }
+
+        /* 📜 每日心靈大字卡專區（Plan Joy 風格靈魂） */
+        .daily-wisdom-card {
+            background: var(--card-bg); padding: 16px; border-radius: 20px; margin-bottom: 16px;
+            box-shadow: var(--app-shadow); border: 1px solid var(--border-color);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+            transition: all 0.5s ease; position: relative;
+        }
+        .wisdom-header-line { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; font-weight: 800; opacity: 0.6; margin-bottom: 8px; }
+        .wisdom-text { font-size: 0.95rem; line-height: 1.5; font-weight: 700; text-align: left; margin-bottom: 6px; }
+        .wisdom-src { font-size: 0.75rem; text-align: right; opacity: 0.7; font-weight: bold; }
+        .wisdom-refresh-btn { background: none; border: none; font-size: 0.9rem; cursor: pointer; padding: 4px; opacity: 0.6; transition: transform 0.3s; }
+        .wisdom-refresh-btn:active { transform: rotate(180deg); }
 
         .config-sub-panel { display: none; background-color: rgba(0,0,0,0.03); padding: 12px; border-radius: 14px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); }
         .config-flex-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; }
@@ -142,8 +154,7 @@
         .day-cell.checked { background: var(--checked-bg) !important; color: var(--checked-text) !important; box-shadow: 0 4px 10px rgba(167, 201, 87, 0.25); border-color: transparent; }
         .day-cell.readonly-lock { cursor: default; }
 
-        /* ⚙️ 齒輪控制面板專用 Modal 樣式 */
-        .settings-panel-box { display: flex; flex-direction: column; gap: 18px; text-align: left !important; }
+        .settings-panel-box { display: flex; flex-direction: column; gap: 16px; text-align: left !important; }
         .settings-row-title { font-size: 0.85rem; font-weight: 800; color: var(--text-color); opacity: 0.6; margin-bottom: 6px; }
         .settings-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
         .settings-item-btn { background: rgba(0,0,0,0.04); border: 1px solid var(--border-color); padding: 10px; border-radius: 12px; font-size: 0.8rem; font-weight: bold; color: var(--text-color); cursor: pointer; transition: all 0.2s; text-align: center; }
@@ -164,14 +175,11 @@
         .prompt-modal { background-color: var(--cell-bg); border-radius: 28px; padding: 24px; width: 85%; max-width: 300px; text-align: center; border: 1px solid var(--border-color); }
         .prompt-title { font-weight: 800; margin-bottom: 14px; color: var(--text-color); }
         .prompt-input-box { width: 90%; padding: 12px; border: 1px solid var(--border-color); background: rgba(0,0,0,0.04); color: var(--text-color); border-radius: 12px; font-size: 1.2rem; text-align: center; font-weight: 800; margin-bottom: 18px; outline: none; }
-
-        .target-flash { animation: highlight 0.6s ease 2; border: 2px solid #00b4d8 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- ⚙️ 頂部導覽列 -->
     <div class="top-header-bar">
         <h1 id="app-title">✨ 祈星渡仁 — 萬用百變存錢大廳 ✨</h1>
         <button class="gear-btn" onclick="openSettingsPanel()">⚙️</button>
@@ -206,6 +214,16 @@
                 <span id="journal-end-date-display" style="color: var(--text-muted); font-size:0.8rem;">結束：--</span>
             </div>
         </div>
+    </div>
+
+    <!-- 📜 Plan Joy 靈魂優化：每日箴言經典大字卡展示區 -->
+    <div class="daily-wisdom-card">
+        <div class="wisdom-header-line">
+            <span id="lbl-wisdom-title">📜 每日心靈指引 / Daily Wisdom</span>
+            <button class="wisdom-refresh-btn" onclick="refreshDailyWisdom(true)">🔄</button>
+        </div>
+        <div class="wisdom-text" id="display-wisdom-text">...</div>
+        <div class="wisdom-src" id="display-wisdom-src">...</div>
     </div>
 
     <div class="target-progress-box">
@@ -291,7 +309,7 @@
                 </div>
             </div>
             <!-- 主題區 -->
-            <div style="margin-top: 6px;">
+            <div style="margin-top: 4px;">
                 <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
                     <button class="settings-item-btn theme-item" id="s-theme-classic" onclick="selectThemeStyle('classic')">🌌 經典原版</button>
@@ -300,8 +318,15 @@
                     <button class="settings-item-btn theme-item" id="s-theme-gospel" onclick="selectThemeStyle('gospel')">✝️ 恩典管家</button>
                 </div>
             </div>
+            <!-- 音樂開關區 -->
+            <div style="margin-top: 4px;">
+                <div class="settings-row-title" id="lbl-setting-music">🎵 背景冥想音樂 / Ambient Music</div>
+                <div class="settings-btn-grid" style="grid-template-columns: 1fr;">
+                    <button class="settings-item-btn" id="btn-toggle-bgm" onclick="toggleBgmState()">音樂狀態：關閉 / OFF</button>
+                </div>
+            </div>
         </div>
-        <button class="custom-modal-btn" style="margin-top:20px; width:100%;" onclick="closeSettingsPanel()" id="btn-setting-close">關閉 / Close</button>
+        <button class="custom-modal-btn" style="margin-top:16px; width:100%;" onclick="closeSettingsPanel()" id="btn-setting-close">關閉 / Close</button>
     </div>
 </div>
 
@@ -336,9 +361,6 @@
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
-    // ==========================================
-    // 🌍 多國語言控制中心字典
-    // ==========================================
     const LANG_DICTIONARY = {
         'zh-TW': {
             title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 儲蓄核心：", lblCustomAmt: "🔧 設定自訂面額：", btnApply: "套用",
@@ -353,7 +375,8 @@
             monthNames: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"], weekTrack: "📅 52週步道挑戰",
             bdayBonus: "🎂 [1/19 祈祈生日大加碼] 已自動為許願瓶注入 $1,000 元基金！目前進度已達 ${prog}% 目標【${goal}】！✨",
             statusInit: "🌌 【${name}】正在為您的願望【${goal}】凝聚最初的儲蓄能量...", statusRun: "${icon} 【${name} · 進度 ${prog}%】：儲蓄能量穩定灌注中！願望【${goal}】正在發光！✨",
-            setLang: "🌐 選擇語言 / Language", setTheme: "🎨 選擇世界觀主題 / Theme", setClose: "關閉 / Close"
+            setLang: "🌐 選擇語言 / Language", setTheme: "🎨 選擇世界觀主題 / Theme", setClose: "關閉 / Close",
+            lblWisdom: "📜 每日心靈指引 / Daily Wisdom", bgmOn: "音樂狀態：開啟 / ON", bgmOff: "音樂狀態：關閉 / OFF", lblMusic: "🎵 背景冥想音樂 / Ambient Music"
         },
         'zh-CN': {
             title: "✨ 祈星渡仁 — 万用百变存钱大厅 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自定面额：", btnApply: "套用",
@@ -368,7 +391,8 @@
             monthNames: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"], weekTrack: "📅 52周步道挑战",
             bdayBonus: "🎂 [1/19 祈祈生日大加码] 已自动为许愿瓶注入 $1,000 元基金！目前进度已达 ${prog}% 目标【${goal}】！✨",
             statusInit: "🌌 【${name}】正在为您的愿望【${goal}】凝聚最初的储蓄能量...", statusRun: "${icon} 【${name} · 进度 ${prog}%】：储蓄能量稳定灌注中！愿望【${goal}】正在发光！✨",
-            setLang: "🌐 选择语言 / Language", setTheme: "🎨 选择世界观主题 / Theme", setClose: "关闭 / Close"
+            setLang: "🌐 选择语言 / Language", setTheme: "🎨 选择世界观主题 / Theme", setClose: "关闭 / Close",
+            lblWisdom: "📜 每日心灵指引 / Daily Wisdom", bgmOn: "音乐状态：开启 / ON", bgmOff: "音乐状态：关闭 / OFF", lblMusic: "🎵 背景冥想音乐 / Ambient Music"
         },
         'en': {
             title: "✨ Astra Savings — Universal Hall ✨", lblCore: "⚙️ Savings Core:", lblCustomAmt: "🔧 Custom Amount:", btnApply: "Apply",
@@ -383,7 +407,8 @@
             monthNames: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], weekTrack: "📅 52-Week Ladder Challenge",
             bdayBonus: "🎂 [Jan 19 Birthday Bonus] $1,000 automatically injected into your vault! Current progress ${prog}% towards 【${goal}】! ✨",
             statusInit: "🌌 【${name}】 is channeling energy for your goal 【${goal}】...", statusRun: "${icon} 【${name} · ${prog}%】: Energy stabilizing! Your goal 【${goal}】 is closer than ever! ✨",
-            setLang: "🌐 Select Language", setTheme: "🎨 Select Worldview Theme", setClose: "Close"
+            setLang: "🌐 Select Language", setTheme: "🎨 Select Worldview Theme", setClose: "Close",
+            lblWisdom: "📜 Daily Wisdom", bgmOn: "Music: ON", bgmOff: "Music: OFF", lblMusic: "🎵 Ambient Music"
         },
         'ja': {
             title: "✨ 祈星渡仁 — 万能貯金ホール ✨", lblCore: "⚙️ 貯金コア：", lblCustomAmt: "🔧 金額カスタム：", btnApply: "適用",
@@ -398,99 +423,109 @@
             monthNames: ["1月", "2月", "3月", "4月", "5月", "6月", "7月", "8月", "9月", "10月", "11月", "12月"], weekTrack: "📅 52週ラダーチャレンジ",
             bdayBonus: "🎂 [1/19 生日ボーナス] $1,000が自動的に注入されました！【${goal}】への進捗率は ${prog}% です！✨",
             statusInit: "🌌 【${name}】があなたの目標【${goal}】のために、最初のエネルギーを集めています...", statusRun: "${icon} 【${name} · 進捗 ${prog}%】: エネルギー安定注入中！目標【${goal}】が輝いています！✨",
-            setLang: "🌐 言語選択 / Language", setTheme: "🎨 世界観テーマ選択 / Theme", setClose: "閉じる"
+            setLang: "🌐 言語選択 / Language", setTheme: "🎨 世界観テーマ選択 / Theme", setClose: "閉じる",
+            lblWisdom: "📜 今日の心の言葉 / Daily Wisdom", bgmOn: "音楽：オン / ON", bgmOff: "音楽：オフ / OFF", lblMusic: "🎵 背景瞑想音楽 / Ambient Music"
         }
     };
 
-    // ==========================================
-    // 🎨 四大外觀皮膚世界觀資料庫（由小齒輪自由設定連動）
-    // ==========================================
     const THEME_CONTENT_BANK = {
         classic: {
             name: "🌌 經典太空原版", idName: { 'zh-TW': '經典原版', 'zh-CN': '经典原版', 'en': 'Classic Space', 'ja': '宇宙原版' },
-            bgColor: "#f4f7fa", textColor: "#1e293b", btnGradient: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)", checkedBg: "linear-gradient(135deg, #4ea8de 0%, #0077b6 100%)", audioFreq: 600, runnerIcon: "🚀",
+            bgColor: "#f4f7fa", textColor: "#1e293b", btnGradient: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)", checkedBg: "linear-gradient(135deg, #4ea8de 0%, #0077b6 100%)", audioFreq: 144, runnerIcon: "🚀",
             quotes: {
-                'zh-TW': [{ source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" }],
-                'zh-CN': [{ source: "祈星渡仁", text: "每天存下一点意志力，未来的你，一定会感谢现在开始累积的自己。" }],
-                'en': [{ source: "Astra", text: "Save a little willpower every day. Your future self will deeply thank you for starting now." }],
-                'ja': [{ source: "Astra", text: "毎日少しの意志の力を貯金しましょう。未来のあなたは、今積み上げを始めた自分に深く感謝するはずです。" }]
+                'zh-TW': [
+                    { source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" },
+                    { source: "儲蓄美學", text: "紀律不需要驚天動地，將每日多餘的微小碎銀留下，便是對未來生活的最高致敬。" }
+                ],
+                'zh-CN': [
+                    { source: "祈星渡仁", text: "每天存下一点意志力，未来的你，一定会感谢现在开始累积的自己。" },
+                    { source: "储蓄美学", text: "纪律不需要惊天动地，将每日多余的微小碎银留下，便是对未来生活的最高致敬。" }
+                ],
+                'en': [
+                    { source: "Astra", text: "Save a little willpower every day. Your future self will deeply thank you for starting now." },
+                    { source: "Discipline", text: "True financial freedom isn't built overnight. It's woven from the small choices made day by day." }
+                ],
+                'ja': [
+                    { source: "Astra", text: "毎日少しの意志の力を貯金しましょう。未来のあなたは、今積み上げを始めた自分に深く感謝するはずです。" },
+                    { source: "継続の美", text: "小さなしずくも積もれば広大な海となります。日々の小さな貯蓄こそが、未来を切り開く大いなる盾です。" }
+                ]
             }
         },
         buddhism: {
             name: "🏯 禪心福報", idName: { 'zh-TW': '禪心福報', 'zh-CN': '禅心福报', 'en': 'Zen Karma', 'ja': '禪心福報' },
-            bgColor: "#F5F2EB", textColor: "#8C6239", btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)", checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)", audioFreq: 528, runnerIcon: "🪷",
+            bgColor: "#F5F2EB", textColor: "#8C6239", btnGradient: "linear-gradient(135deg, #8C6239 0%, #5C3A21 100%)", checkedBg: "linear-gradient(135deg, #D4AF37 0%, #AA8415 100%)", audioFreq: 220, runnerIcon: "🪷",
             quotes: {
                 'zh-TW': [
-                    { source: "六度波羅蜜", text: "布施、持戒、忍辱、精進、禪定、智慧。今天存下的不只是財富，更是精進修行。" },
-                    { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。安住當下，踏實累積。" },
-                    { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。儲蓄是為了給未來的自己一份安定的底氣。" }
+                    { source: "六度波羅蜜", text: "布施、持戒、忍辱、精進、禪定、智慧。今天克制無明欲望存下的財富，亦是極好的精進修行。" },
+                    { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。唯有安住當下，踏實積累功德與資糧。" },
+                    { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。知足常樂，儲蓄是為了給未來的自己一份安定的心靈底氣。" }
                 ],
                 'zh-CN': [
-                    { source: "六度波罗蜜", text: "布施、持戒、忍辱、精进、禅定、智慧。今天存下的不只是财富，更是精进修行。" },
-                    { source: "金刚经", text: "过去心不可得，现在心不可得，未来心不可得。安住当下，踏实累积。" },
-                    { source: "心经", text: "心无罣碍，无罣碍故，无有恐怖。储蓄是为了给未来的自己一份安定的底气。" }
+                    { source: "六度波罗蜜", text: "布施、持戒、忍辱、精进、禅定、智慧。今天克制无明欲望存下的财富，亦是极好的精进修行。" },
+                    { source: "金刚经", text: "过去心不可得，现在心不可得，未来心不可得。唯有安住当下，踏实积累功德与资粮。" },
+                    { source: "心经", text: "心无罣碍，无罣碍故，无有恐怖。知足常乐，储蓄是为了给未来的自己一份心灵的底气。" }
                 ],
                 'en': [
-                    { source: "The Six Paramitas", text: "Generosity, precepts, patience, diligence, meditation, and wisdom. Today's saving is a mindful practice." },
-                    { source: "Diamond Sutra", text: "Past mind cannot be grasped, present mind cannot be grasped, future mind cannot be grasped. Abide in the now." },
-                    { source: "Heart Sutra", text: "With no hindrance in the mind, no hindrance, therefore no fear. Save to secure deep inner peace." }
+                    { source: "The Six Paramitas", text: "Generosity, precepts, patience, diligence, meditation, and wisdom. Overcoming blind desires today is a profound practice." },
+                    { source: "Diamond Sutra", text: "Past mind cannot be grasped, present mind cannot be grasped, future mind cannot be grasped. Dwell fully in the present accumulation." },
+                    { source: "Heart Sutra", text: "With no hindrance in the mind, no hindrance, therefore no fear. True contentment shelters you from future anxieties." }
                 ],
                 'ja': [
-                    { source: "六波羅蜜", text: "布施・持戒・忍辱・精進・禅定・智慧。今日の貯金は、欲望をコントロールする素晴らしい精進の修行です。" },
-                    { source: "金剛経", text: "過去心不可得、現在心不可得、未来心不可得。今この瞬間に集中し、一歩一歩積み上げましょう。" },
+                    { source: "六波羅蜜", text: "布施・持戒・忍辱・精進・禅定・智慧。無駄な欲望を抑えて貯める富は、自らを高める尊い精進の徳となります。" },
+                    { source: "金剛経", text: "過去心不可得、現在心不可得、未来心不可得。ただ今ここにある歩みを大切にし、徳と資糧を積み上げなさい。" },
                     { source: "般若心経", text: "心無罣礙。心に引っかかりがなければ、恐怖もありません。未来の自分のために揺るぎない安心の土台を作りましょう。" }
                 ]
             }
         },
         gospel: {
             name: "✝️ 恩典管家", idName: { 'zh-TW': '恩典管家', 'zh-CN': '恩典管家', 'en': 'Grace Steward', 'ja': '恵みの執事' },
-            bgColor: "#EAEFf2", textColor: "#2B4C5E", btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)", checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", audioFreq: 392, runnerIcon: "🕊️",
+            bgColor: "#EAEFf2", textColor: "#2B4C5E", btnGradient: "linear-gradient(135deg, #3A6073 0%, #1D313C 100%)", checkedBg: "linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)", audioFreq: 196, runnerIcon: "🕊️",
             quotes: {
                 'zh-TW': [
-                    { source: "創世記·約瑟的智慧", text: "把豐年所剩餘的糧食聚斂起來，積蓄在城裡，以防備將來的饑荒。" },
-                    { source: "馬太福音 6:21", text: "因為你的財寶在哪裡，你的心也在哪裡。" },
-                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理手中的財富，便是忠心的管家。" }
+                    { source: "創世記·約瑟的智慧", text: "法老當把豐年所剩餘的糧食聚斂起來，積蓄在各城裡，以防備將來必行的七年饑荒。" },
+                    { source: "馬太福音 6:21", text: "因為你的財寶在哪裡，你的心也在哪裡。將財富管理好，心便能安穩行在光中。" },
+                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理恩賜與地上的財富，便是忠心的好管家。" }
                 ],
                 'zh-CN': [
-                    { source: "创世记·约瑟的智慧", text: "把丰年所剩余的粮食聚敛起来，积蓄在城里，以防备将来的饥荒。" },
-                    { source: "马太福音 6:21", text: "因为你的财宝在哪里，你的心也在哪里。" },
-                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理手中的财富，便是忠心的管家。" }
+                    { source: "创世记·约瑟的智慧", text: "法老当把丰年所剩余的粮食聚敛起来，积蓄在各城里，以防备将来必行的七年饥荒。" },
+                    { source: "马太福音 6:21", text: "因为你的财宝在哪里，你的心也在哪里。将财富管理好，心便能安稳行在光中。" },
+                    { source: "路加福音 16:10", text: "人在最小的事上忠心，在大事上也忠心。好好管理恩赐与地上的财富，便是忠心的好管家。" }
                 ],
                 'en': [
-                    { source: "Genesis · Joseph's Wisdom", text: "Let them gather all the food of those good years and store up the grain against the famine." },
-                    { source: "Matthew 6:21", text: "For where your treasure is, there your heart will be also." },
-                    { source: "Luke 16:10", text: "Whoever can be trusted with very little can also be trusted with much. Be a faithful steward of wealth." }
+                    { source: "Genesis · Joseph's Wisdom", text: "Let them gather all the food of those good years and store up the grain against the famine, so that the land may not perish." },
+                    { source: "Matthew 6:21", text: "For where your treasure is, there your heart will be also. Guide your assets wisely, and your thoughts will follow peace." },
+                    { source: "Luke 16:10", text: "Whoever can be trusted with very little can also be trusted with much. Be a faithful steward of all gifts provided." }
                 ],
                 'ja': [
-                    { source: "創世記・ヨセフの知恵", text: "豊作の年々の食糧をすべて集め、将来の飢饉に備えて街に蓄えておきなさい。" },
-                    { source: "マタイによる福音書 6:21", text: "あなたの宝のある所には、心もあるからです。" },
-                    { source: "ルカによる福音書 16:10", text: "小さい事に忠実な人は、大きい事にも忠実です。託された富を賢く管理する良き執事となりましょう。" }
+                    { source: "創世記・ヨセフの知恵", text: "豊作の年々の食糧をすべて集め、将来訪れる飢饉に備えて街の倉庫に蓄えておきなさい。" },
+                    { source: "マタイによる福音書 6:21", text: "あなたの宝のある所には、心もあるからです。富を良き場所へ向ければ、心もまた安らかな光へと向かいます。" },
+                    { source: "ルカによる福音書 16:10", text: "小さい事に忠実な人は、大きい事にも忠実です。託された小さな富を大切に育てる者になりなさい。" }
                 ]
             }
         },
         rainbow: {
             name: "🌈 彩虹療癒", idName: { 'zh-TW': '彩虹療癒', 'zh-CN': '彩虹疗愈', 'en': 'Rainbow Healing', 'ja': '虹色の癒やし' },
-            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", textColor: "#6B11B3", btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)", audioFreq: 888, runnerIcon: "🦄",
+            bgColor: "linear-gradient(135deg, #FFAFBD 0%, #FFC3A0 100%)", textColor: "#6B11B3", btnGradient: "linear-gradient(135deg, #7F00FF 0%, #E100FF 100%)", checkedBg: "linear-gradient(135deg, #FF6B6B 0%, #FF416C 100%)", audioFreq: 330, runnerIcon: "🦄",
             quotes: {
                 'zh-TW': [
-                    { source: "脈輪肯定句", text: "我值得擁有富足的人生，我感謝宇宙此刻給予我的一切豐盛。" },
-                    { source: "自我覺察", text: "每一次的儲蓄，都是我對未來生活投下的信任票。" },
-                    { source: "心靈療癒", text: "散發豐盛的能量，生命將以不可思議的溫暖與財富回應你。" }
+                    { source: "脈輪肯定句", text: "我值得擁有安全與富足的人生，我誠摯感謝宇宙在此刻給予我的一切豐盛豐饒。" },
+                    { source: "自我覺察", text: "每一次克制衝動、存下金錢的溫柔舉動，都是我對未來生活投下的巨大信任票。" },
+                    { source: "心靈療癒", text: "當你由內而外散發知足與富裕的能量頻率，生命將以不可思議的溫暖與富足回應你。" }
                 ],
                 'zh-CN': [
-                    { source: "脉轮肯定句", text: "我值得拥有富足的人生，我感谢宇宙此刻给予我的一切丰盛。" },
-                    { source: "自我觉察", text: "每一次的储蓄，都是我对未来生活投下的信任票。" },
-                    { source: "心灵疗愈", text: "散发丰盛的能量，生命将以不可思議的温暖与财富回应你。" }
+                    { source: "脉轮肯定句", text: "我值得拥有安全与富足的人生，我诚挚感谢宇宙在此刻给予我的一切丰盛丰饶。" },
+                    { source: "自我觉察", text: "每一次克制冲动、存下金钱的温柔举动，都是我对未来生活投下的巨大信任票。" },
+                    { source: "心灵疗愈", text: "当你由内而外散发知足与富裕的能量频率，生命将以不可思议的温暖与富足回应你。" }
                 ],
                 'en': [
-                    { source: "Chakra Affirmation", text: "I deserve a prosperous life. I am deeply grateful for the abundance the universe brings me." },
-                    { source: "Self-Awareness", text: "Every single cent I save is a vote of deep confidence and trust in my beautiful future." },
-                    { source: "Healing Energy", text: "Radiate the frequency of true abundance, and life will echo back with miraculous warmth." }
+                    { source: "Chakra Affirmation", text: "I deeply deserve a safe and prosperous life. I am open to the infinite abundance of the universe." },
+                    { source: "Self-Awareness", text: "Every single cent I choose to save is an act of self-love and a deliberate vote of trust in my future." },
+                    { source: "Healing Energy", text: "Align yourself with the frequency of true inner abundance, and reality will mirror back miracle after miracle." }
                 ],
                 'ja': [
-                    { source: "チャクラの言葉", text: "私は豊かで満ち足りた人生を送る価値があります。宇宙が今もたらしてくれる全ての豊かさに感謝します。" },
-                    { source: "自己対話", text: "日々のささやかな貯金は、自分が自分の輝かしい未来へと投じる、何よりの信頼の証です。" },
-                    { source: "心の癒やし", text: "あなたが心から満たされたエネルギーを放つとき、世界は思いがけない温かさと豊かさで応えてくれます。" }
+                    { source: "チャクラの言葉", text: "私は心の平穏と十分な豊かさを受け取る価値があります。今ある全ての恵みに感謝します。" },
+                    { source: "インナー・トーク", text: "衝動を抑え、未来のためにコインを貯めるその優しい選択は、自分への最高の信頼の証です。" },
+                    { source: "スピリチュアル", text: "あなたが内なる充足と豊かさの周波数を放つとき、現実は予期せぬ温かさとギフトを連れて戻ってきます。" }
                 ]
             }
         }
@@ -498,6 +533,7 @@
 
     let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
     let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
+    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true'; // 預設關閉，由使用者手動開啟最貼心
 
     let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
     let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
@@ -513,7 +549,95 @@
     const cellsMap = {};
     let promptCallback = null;
 
-    // 🔊 類比晶片高頻發聲器
+    // 🎵 【全新突破】純代碼合成式多波形背景冥想音樂引擎 (免除外接mp3失敗)
+    let audioCtx = null;
+    let mainLfoNode = null;
+    let mainGainNode = null;
+    let oscillatorNodesPool = [];
+
+    function startSpiritualBgmEngine() {
+        if (!isBgmEnabled) return;
+        try {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            stopSpiritualBgmEngine(false); // 乾淨清空舊聲道
+
+            const baseFreq = THEME_CONTENT_BANK[activeThemeKey].audioFreq;
+            mainGainNode = audioCtx.createGain();
+            mainGainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // 輕柔微音量襯底
+
+            // 建立 LFO 低頻震盪器，模擬大自然「海浪/呼吸」的流動感
+            mainLfoNode = audioCtx.createOscillator();
+            mainLfoNode.type = 'sine';
+            mainLfoNode.frequency.setValueAtTime(0.12, audioCtx.currentTime); // 每8秒一次呼吸起伏
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+            mainLfoNode.connect(lfoGain);
+            lfoGain.connect(mainGainNode.gain);
+            mainLfoNode.start();
+
+            // 根據主題編織不同的五聲調式和弦長音 (Chord Drone)
+            let chords = [1, 1.25, 1.5, 1.875]; // 預設大三和弦
+            let waveType = 'sine';
+            
+            if (activeThemeKey === 'buddhism') {
+                chords = [1, 1.333, 1.5, 2.0]; // 禪意正弦純音
+                waveType = 'sine';
+            } else if (activeThemeKey === 'gospel') {
+                chords = [1, 1.2, 1.5, 1.8]; // 復古聖歌三角波
+                waveType = 'triangle';
+            } else if (activeThemeKey === 'rainbow') {
+                chords = [1, 1.25, 1.6, 2.25]; // 高頻水晶泛音
+                waveType = 'sine';
+            }
+
+            chords.forEach((ratio, idx) => {
+                const osc = audioCtx.createOscillator();
+                osc.type = waveType;
+                // 加入極微小的微調頻差 (Detune)，製造更深邃的環境空間感
+                osc.frequency.setValueAtTime(baseFreq * ratio + (idx * 0.4), audioCtx.currentTime);
+                osc.connect(mainGainNode);
+                osc.start();
+                oscillatorNodesPool.push(osc);
+            });
+
+            mainGainNode.connect(audioCtx.destination);
+        } catch(e) { console.log("等待使用者初次手動互動解鎖音訊"); }
+    }
+
+    function stopSpiritualBgmEngine(clearState = true) {
+        if (clearState) {
+            isBgmEnabled = false;
+            localStorage.setItem('bgm_engine_enabled', 'false');
+            updateBgmBtnUI();
+        }
+        if (mainLfoNode) { try{ mainLfoNode.stop(); }catch(e){} mainLfoNode = null; }
+        oscillatorNodesPool.forEach(osc => { try{ osc.stop(); }catch(e){} });
+        oscillatorNodesPool = [];
+        if (mainGainNode) { mainGainNode.disconnect(); mainGainNode = null; }
+    }
+
+    function toggleBgmState() {
+        if (isBgmEnabled) {
+            stopSpiritualBgmEngine(true);
+        } else {
+            isBgmEnabled = true;
+            localStorage.setItem('bgm_engine_enabled', 'true');
+            updateBgmBtnUI();
+            startSpiritualBgmEngine();
+        }
+    }
+
+    function updateBgmBtnUI() {
+        const btn = document.getElementById('btn-toggle-bgm');
+        if (!btn) return;
+        const d = LANG_DICTIONARY[currentLang];
+        btn.innerText = isBgmEnabled ? d.bgmOn : d.bgmOff;
+        btn.className = isBgmEnabled ? "settings-item-btn active" : "settings-item-btn";
+    }
+
+    // 短投幣短音效
     function playThemeSound() {
         try {
             const ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -522,7 +646,7 @@
             const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
             
             osc.type = (activeThemeKey === 'buddhism') ? 'sine' : ((activeThemeKey === 'gospel') ? 'triangle' : 'sine');
-            osc.frequency.setValueAtTime(config.audioFreq, ctx.currentTime);
+            osc.frequency.setValueAtTime(config.audioFreq * 3, ctx.currentTime); // 提高八度清脆聲
             
             gain.gain.setValueAtTime(0.15, ctx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
@@ -534,11 +658,38 @@
         } catch(e){}
     }
 
-    // ⚙️ 齒輪面板開關
-    function openSettingsPanel() { document.getElementById('settings-modal-layer').classList.add('active'); }
+    // ==========================================
+    // 📜 核心新功能：每日固定大字卡展示與洗牌引擎
+    // ==========================================
+    let customWisdomOffset = 0; // 洗牌洗到第幾張的偏移量
+
+    function refreshDailyWisdom(isUserClick = false) {
+        const config = THEME_CONTENT_BANK[activeThemeKey];
+        const quotePool = config.quotes[currentLang];
+        
+        if (!quotePool || quotePool.length === 0) return;
+
+        // 計算時間種子，讓每天一睜開眼，固定自動顯示同一句經文
+        const todaySeed = new Date().getDate();
+        let index = (todaySeed + customWisdomOffset) % quotePool.length;
+        
+        const selectedQuote = quotePool[index];
+        
+        document.getElementById('display-wisdom-text').innerText = `“${selectedQuote.text}”`;
+        document.getElementById('display-wisdom-src').innerText = `——《${selectedQuote.source}》`;
+
+        if (isUserClick) {
+            customWisdomOffset++;
+            playThemeSound();
+        }
+    }
+
+    function openSettingsPanel() { 
+        updateBgmBtnUI();
+        document.getElementById('settings-modal-layer').classList.add('active'); 
+    }
     function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('active'); }
 
-    // 🎨 外觀主題切換（齒輪面板驅動）
     function selectThemeStyle(themeKey) {
         activeThemeKey = themeKey;
         localStorage.setItem('active_spiritual_theme_v2', themeKey);
@@ -546,7 +697,6 @@
         document.querySelectorAll('.theme-item').forEach(btn => btn.classList.remove('active'));
         if (document.getElementById(`s-theme-${themeKey}`)) document.getElementById(`s-theme-${themeKey}`).classList.add('active');
 
-        // 刷新外觀配色
         const config = THEME_CONTENT_BANK[themeKey];
         const root = document.documentElement;
         if (config.bgColor.includes('linear-gradient')) {
@@ -559,10 +709,16 @@
         root.style.setProperty('--btn-gradient', config.btnGradient);
         root.style.setProperty('--checked-bg', config.checkedBg);
 
-        playThemeSound();
+        // 音樂隨主題連動流暢切換
+        if (isBgmEnabled) {
+            startSpiritualBgmEngine();
+        }
+
+        // 重算字卡
+        customWisdomOffset = 0;
+        refreshDailyWisdom(false);
         updateDashboard();
 
-        // 重新刷新盲盒提示字
         const d = LANG_DICTIONARY[currentLang];
         const bBoxDisplay = document.getElementById('celebrity-display');
         if (bBoxDisplay) {
@@ -570,7 +726,6 @@
         }
     }
 
-    // 🌐 多國語言切換（齒輪面板驅動）
     function changeLanguage(langKey) {
         currentLang = langKey;
         localStorage.setItem('global_app_language', langKey);
@@ -580,7 +735,6 @@
 
         const d = LANG_DICTIONARY[langKey];
         
-        // 靜態翻譯一鍵置換
         document.getElementById('app-title').innerText = d.title;
         document.getElementById('lbl-saving-core').innerText = d.lblCore;
         document.getElementById('lbl-custom-amt').innerText = d.lblCustomAmt;
@@ -599,17 +753,16 @@
         document.getElementById('btn-prompt-ok').innerText = d.btnOk;
         document.getElementById('btn-prompt-cancel').innerText = d.btnCancel;
         
-        // 齒輪內部文字翻譯
         document.getElementById('lbl-setting-lang').innerText = d.setLang;
         document.getElementById('lbl-setting-theme').innerText = d.setTheme;
         document.getElementById('btn-setting-close').innerText = d.setClose;
+        document.getElementById('lbl-wisdom').innerText = d.lblWisdom;
+        document.getElementById('lbl-setting-music').innerText = d.lblMusic;
 
-        // 翻譯核心玩法下拉選單
         const sel = document.getElementById('main-saving-mode-select');
         sel.options[0].text = d.opt1; sel.options[1].text = d.opt2; sel.options[2].text = d.opt3;
         sel.options[3].text = d.opt4; sel.options[4].text = d.opt5;
 
-        // 連動刷新齒輪裡四大主題自己的多國名字
         for (let key in THEME_CONTENT_BANK) {
             const btn = document.getElementById(`s-theme-${key}`);
             if(btn) {
@@ -618,6 +771,7 @@
             }
         }
 
+        updateBgmBtnUI();
         renderGrid();
     }
 
@@ -815,9 +969,7 @@
         document.getElementById('main-saving-mode-select').value = currentMode;
         gridContainer.innerHTML = '';
 
-        // 子面板打開規則
         const isJournalStyle = (currentMode==='365_journal');
-        const is隨喜Style = (currentMode==='隨喜');
 
         document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
         document.getElementById('journal-config-panel').style.display = currentMode === '365_journal' ? 'flex' : 'none';
@@ -880,7 +1032,6 @@
                     } else if (currentMode === 'custom_fixed') {
                         cell.innerText = `$${currentCustomFixedAmt}`; if (checkedDaysCustom.includes(i)) cell.classList.add('checked');
                     } else {
-                        // 隨喜模式
                         if (隨喜Map[i]) {
                             cell.innerHTML = `<span style="font-size:0.75rem; display:block; opacity:0.6;">D${i}</span>$${隨喜Map[i]}`;
                             cell.classList.add('checked');
@@ -895,7 +1046,6 @@
         }
         loadTargetGoal();
         
-        // 刷新外觀皮膚
         selectThemeStyle(activeThemeKey);
     }
 
@@ -995,9 +1145,6 @@
         }
     }
 
-    // ==========================================
-    // 🎲 心靈盲盒抽獎（智慧連動小齒輪設定的主題）
-    // ==========================================
     function pickCelebrity() {
         const d = LANG_DICTIONARY[currentLang];
         
@@ -1007,10 +1154,8 @@
             document.getElementById('celebrity-display').innerHTML = `<b>Target: Weekly Step</b>`; return;
         }
 
-        // 不論是手帳模式還是隨喜，都可以抽盲盒面額
         const pulledAmounts = journalListHistory.map(card => card.amount);
         const availableAmounts = [];
-        
         let isJournalStyle = (currentMode === '365_journal');
         
         for (let i = 1; i <= 365; i++) {
@@ -1028,7 +1173,7 @@
         const selectedAmount = availableAmounts[Math.floor(Math.random() * availableAmounts.length)];
         const config = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK['classic'];
         
-        const quotePool = config.quotes ? config.quotes[currentLang] : null;
+        const quotePool = config.quotes[currentLang];
         let randomQuote = (quotePool && quotePool.length > 0) ? quotePool[Math.floor(Math.random() * quotePool.length)] : { source: "Astra", text: "Keep going!" };
         
         playThemeSound();
@@ -1067,6 +1212,13 @@
             confetti({ particleCount: 60, spread: 50 });
         });
     }
+
+    // 瀏覽器音訊解鎖監聽（滿足現代瀏覽器資安規範）
+    document.addEventListener('click', function() {
+        if (isBgmEnabled && audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume().then(() => { startSpiritualBgmEngine(); });
+        }
+    }, { once: false });
 
     // 啟動預設配置
     changeLanguage(currentLang);
