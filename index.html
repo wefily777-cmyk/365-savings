@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #f7ede2 0%, #f5cac3 100%); /* Plan Joy 馬卡龍柔和雙漸層 */
+            --bg-gradient: linear-gradient(135deg, #f7ede2 0%, #f5cac3 100%);
             --card-bg: rgba(255, 255, 255, 0.78);
             --text-color: #2b2d42;
             --text-muted: #6c757d;
@@ -56,7 +56,6 @@
         }
         .gear-btn:active { transform: scale(0.85) rotate(60deg); }
 
-        /* 🔮 高級磨砂玻璃面板外觀 */
         .app-card {
             background: var(--card-bg); padding: 20px; border-radius: 28px; margin-bottom: 16px;
             box-shadow: var(--app-shadow); border: 1px solid var(--border-color);
@@ -74,14 +73,13 @@
         .refresh-circle-btn { background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-color); transition: transform 0.4s; padding: 4px; }
         .refresh-circle-btn:active { transform: rotate(180deg) scale(1.15); }
 
-        .config-sub-panel { display: none; background-color: rgba(0,0,0,0.02); padding: 12px; border-radius: 16px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); margin-top: 12px; }
+        .config-sub-panel { display: none; align-items: center; justify-content: space-between; background-color: rgba(0,0,0,0.02); padding: 12px; border-radius: 16px; width: 100%; box-sizing: border-box; border: 1px solid var(--border-color); margin-top: 12px; }
         .config-input { border: 1px solid var(--border-color); background: var(--cell-bg); color: var(--text-color); border-radius: 12px; padding: 10px; font-weight: 700; text-align: center; outline: none; }
 
         .target-input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 8px; }
         .target-label { font-size: 0.95rem; font-weight: 800; }
         .target-input { flex: 1; border: none; border-radius: 14px; padding: 12px 14px; font-size: 0.9rem; color: var(--text-color); background-color: rgba(0,0,0,0.03); font-weight: 700; outline: none; text-align: right; box-shadow: var(--inner-shadow); }
 
-        /* 🌊 超飽滿水體儲蓄瓶 */
         .water-bottle-container { position: relative; background-color: rgba(0,0,0,0.04); height: 44px; border-radius: 20px; margin: 14px 0; overflow: visible; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
         .water-fluid { height: 100%; background: var(--water-color); border-radius: 18px 0 0 18px; width: 0%; transition: width 1.2s cubic-bezier(0.1, 0.8, 0.3, 1); position: relative; }
         .water-fluid.full { border-radius: 18px; }
@@ -118,9 +116,10 @@
         .day-cell:active { transform: scale(0.85); }
         .day-cell.checked { background: var(--checked-bg) !important; color: var(--checked-text) !important; box-shadow: 0 8px 20px rgba(132, 165, 157, 0.4); border-color: transparent; }
 
+        /* ⚙️ 控制中心版面 */
         .settings-panel-box { display: flex; flex-direction: column; gap: 18px; text-align: left !important; }
         .settings-row-title { font-size: 0.85rem; font-weight: 800; opacity: 0.6; margin-bottom: 6px; }
-        .settings-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .settings-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; box-sizing: border-box; }
         .settings-item-btn { background: rgba(0,0,0,0.03); border: 1px solid var(--border-color); padding: 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; color: var(--text-color); cursor: pointer; transition: all 0.2s; text-align: center; }
         .settings-item-btn.active { background: var(--btn-gradient); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(242, 132, 130, 0.2); }
 
@@ -151,9 +150,22 @@
                 <option value="隨喜">💖 自由隨喜無壓力存錢法</option>
             </select>
         </div>
+        
+        <div class="config-sub-panel" id="custom-amt-panel">
+            <span class="mode-label" id="lbl-custom-amt">🔧 設定自訂面額：</span>
+            <div style="display:flex; gap:4px;">
+                <input type="number" id="custom-fixed-amt-input" class="config-input" style="width:70px;" value="100">
+                <button id="btn-apply-amt" style="background: var(--btn-gradient); border:none; padding:10px 14px; font-weight:bold; border-radius:12px; color:white; font-size:0.85rem;" onclick="applyCustomFixedAmount()">套用</button>
+            </div>
+        </div>
+
+        <div class="config-sub-panel" id="journal-config-panel">
+            <span class="mode-label" id="lbl-start-date">📅 手帳起始日：</span>
+            <input type="date" id="journal-start-date-picker" class="config-input" onchange="updateJournalDates()">
+        </div>
     </div>
 
-    <!-- 📜 每日心靈大字卡（自動加載，可手動 🔄） -->
+    <!-- 📜 每日心靈大字卡 -->
     <div class="daily-wisdom-card app-card">
         <div class="wisdom-header-line">
             <span id="lbl-wisdom-title">📜 每日心靈指引 / Daily Wisdom</span>
@@ -163,7 +175,7 @@
         <div class="wisdom-src" id="display-wisdom-src">...</div>
     </div>
 
-    <!-- 🎯 願望藍圖卡（自動加載，可手動 🔄） -->
+    <!-- 🎯 願望藍圖卡 -->
     <div class="app-card">
         <div class="header-action-line">
             <span class="target-label" id="lbl-target-goal">🎯 儲蓄目標願望藍圖</span>
@@ -229,38 +241,105 @@
     <div class="custom-modal">
         <div class="settings-panel-box">
             <div>
-                <div class="settings-row-title">🌐 選擇語言 / Language</div>
+                <!-- 🌐 修正點 1：多國語言控制格完美完整復歸 -->
+                <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
                 <div class="settings-btn-grid">
-                    <button class="settings-item-btn lang-item active" id="s-lang-zh-TW" onclick="changeLanguage('zh-TW')">繁體中文</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-zh-TW" onclick="changeLanguage('zh-TW')">繁體中文</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-zh-CN" onclick="changeLanguage('zh-CN')">简体中文</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-en" onclick="changeLanguage('en')">English</button>
+                    <button class="settings-item-btn lang-item" id="s-lang-ja" onclick="changeLanguage('ja')">日本語</button>
                 </div>
             </div>
             <div>
-                <div class="settings-row-title">🎨 選擇世界觀主題 / Theme</div>
+                <!-- 🎨 修正點 2：四大主題（2×2）完美對齊，恩典管家正式歸隊 -->
+                <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
                     <button class="settings-item-btn theme-item" id="s-theme-classic" onclick="selectThemeStyle('classic')">🌌 經典原版</button>
-                    <button class="settings-item-btn theme-item" id="s-theme-buddhism" onclick="selectThemeStyle('buddhism')">🏯 禪心福報</button>
                     <button class="settings-item-btn theme-item" id="s-theme-rainbow" onclick="selectThemeStyle('rainbow')">🌈 彩虹療癒</button>
+                    <button class="settings-item-btn theme-item" id="s-theme-buddhism" onclick="selectThemeStyle('buddhism')">🏯 禪心福報</button>
+                    <button class="settings-item-btn theme-item" id="s-theme-gospel" onclick="selectThemeStyle('gospel')">✝️ 恩典管家</button>
                 </div>
             </div>
             <div>
-                <div class="settings-row-title">🎵 背景沉浸自然音效 / Nature Sounds</div>
+                <div class="settings-row-title" id="lbl-setting-music">🎵 背景沉浸自然音效 / Nature Sounds</div>
                 <div class="settings-btn-grid" style="grid-template-columns: 1fr;">
                     <button class="settings-item-btn" id="btn-toggle-bgm" onclick="toggleBgmState()">環境音效：已關閉</button>
                 </div>
             </div>
         </div>
-        <button class="settings-main-action-btn" onclick="closeSettingsPanel()">儲存變更 / Save</button>
+        <button class="settings-main-action-btn" onclick="closeSettingsPanel()" id="btn-setting-close">儲存變更 / Save</button>
     </div>
 </div>
 
 <script>
-    let currentMode = '365_journal';
-    let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
-    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true';
+    let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
+    let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
     let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
-    
+    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true';
+    let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
+
+    let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
+    let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
+    let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
+    let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
+    let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
+
     let tempPendingAmount = null;
     let webAudioCtx = null; let mainBgmNode = null;
+
+    const LANG_DICTIONARY = {
+        'zh-TW': {
+            title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 儲蓄核心：", lblCustomAmt: "🔧 設定自訂面額：", btnApply: "套用",
+            lblStartDate: "📅 手帳起始日：", lblTarget: "🎯 儲蓄目標願望藍圖", lblJournal: "📝 儲蓄流水手帳", 
+            lblBoxTitle: "🎲 幸運儲蓄盲盒抽獎", btnBoxDraw: "抽取今日驚喜任務",
+            lblDashTotal: "目前已存總金額", lblDashDoneDay: "已完成天數", lblDashDoneWeek: "已完成週數", lblDashProg: "目前總進度",
+            opt1: "🛡️ 365天防誤觸智慧手帳模式 [預設]", opt2: "💎 365天階梯存錢法 (經典自選)", opt3: "📊 萬用自訂固定金額法",
+            opt4: "📈 52週階梯存錢法 (每週步道)", opt5: "💖 自由隨喜無壓力存錢法",
+            boxWelcome: "🔮 歡迎來到【${name}】大廳<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>點擊下方按鈕，抽取今日專屬指引面額</span>",
+            setLang: "🌐 選擇語言 / Language", setTheme: "🎨 選擇世界觀主題 / Theme", setClose: "儲存變更 / Save", 
+            lblWisdom: "📜 每日心靈指引 / Daily Wisdom", lblMusic: "🎵 背景沉浸自然音效 / Nature Sounds"
+        },
+        'zh-CN': {
+            title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自订面额：", btnApply: "套用",
+            lblStartDate: "📅 手账起始日：", lblTarget: "🎯 储蓄目标愿望蓝图", lblJournal: "📝 储蓄流水手账", 
+            lblBoxTitle: "🎲 幸运储蓄盲盒抽奖", btnBoxDraw: "抽取今日惊喜任务",
+            lblDashTotal: "目前已存总金额", lblDashDoneDay: "已完成天数", lblDashDoneWeek: "已完成周数", lblDashProg: "目前总进度",
+            opt1: "🛡️ 365天防误触智慧手账模式 [预设]", opt2: "💎 365天阶梯存钱法 (经典自选)", opt3: "📊 萬用自订固定金额法",
+            opt4: "📈 52周阶梯存钱法 (每周步道)", opt5: "💖 自由随喜无压力存钱法",
+            boxWelcome: "🔮 欢迎来到【${name}】大厅<br><span style='font-size:0.8rem; font-weight:normal; opacity:0.7; margin-top:4px; display:inline-block;'>点击下方按钮，抽取今日专属指引面额</span>",
+            setLang: "🌐 选择语言 / Language", setTheme: "🎨 选择世界观主题 / Theme", setClose: "储存变更 / Save", 
+            lblWisdom: "📜 每日心灵指引 / Daily Wisdom", lblMusic: "🎵 背景沉浸自然音效 / Nature Sounds"
+        },
+        'en': {
+            title: "✨ Spiritual Saving Hub ✨", lblCore: "⚙️ Core Engine:", lblCustomAmt: "🔧 Custom Amount:", btnApply: "Apply",
+            lblStartDate: "📅 Start Date:", lblTarget: "🎯 Wish Blueprint Goals", lblJournal: "📝 Savings Ledger", 
+            lblBoxTitle: "🎲 Lucky Saving Blind Box", btnBoxDraw: "Draw Today's Task",
+            lblDashTotal: "Total Balance Saved", lblDashDoneDay: "Completed Days", lblDashDoneWeek: "Completed Weeks", lblDashProg: "Total Progress",
+            opt1: "🛡️ 365-Day Intelligent Smart Ledger [Default]", opt2: "💎 365-Day Progressive Saving Method", opt3: "📊 Custom Universal Fixed Amount Method",
+            opt4: "📈 52-Week Progressive Step Challenge", opt5: "💖 Free Will Open Flow Saving Vault",
+            boxWelcome: "🔮 Welcome to the 【${name}】 Hall<br><span style='font-size:0.8rem;'>Click the button below to draw today's target card.</span>",
+            setLang: "🌐 Select Language / 選擇語言", setTheme: "🎨 Select Universe Theme", setClose: "Save & Close", 
+            lblWisdom: "📜 Daily Wisdom Guide", lblMusic: "🎵 Ambient Nature Sounds"
+        },
+        'ja': {
+            title: "✨ 祈星渡仁 — 貯金大殿堂 ✨", lblCore: "⚙️ 貯金コア：", lblCustomAmt: "🔧 カスタム金額：", btnApply: "適用",
+            lblStartDate: "📅 開始日設定：", lblTarget: "🎯 願いの設計図目標", lblJournal: "📝 貯金履歴手帳", 
+            lblBoxTitle: "🎲 ラッキー貯金ガチャ", btnBoxDraw: "今日のミッションを引く",
+            lblDashTotal: "現在の総貯金額", lblDashDoneDay: "達成日数", lblDashDoneWeek: "達成週数", lblDashProg: "現在の進捗率",
+            opt1: "🛡️ 365日誤操作防止スマート手帳モード [標準]", opt2: "💎 365日ステップ貯金法 (自由選択)", opt3: "📊 万能カスタム固定金額法",
+            opt4: "📈 52週間ステップ貯金法 (ウォーキング)", opt5: "💖 自由随喜ノンストレス貯金法",
+            boxWelcome: "🔮 【${name}】のホールへようこそ<br><span style='font-size:0.8rem;'>下のボタンを押して、今日の運命の金額を引きましょう。</span>",
+            setLang: "🌐 言語選択 / Language", setTheme: "🎨 テーマ世界観選択", setClose: "変更を保存 / Save", 
+            lblWisdom: "📜 今日の心の格言ガイド", lblMusic: "🎵 環境自然サウンド"
+        }
+    };
+
+    const THEME_CONTENT_BANK = {
+        classic: { name: "🌌 經典原版", runnerIcon: "🚀" },
+        buddhism: { name: "🏯 禪心福報", runnerIcon: "🪷" },
+        rainbow: { name: "🌈 彩虹療癒", runnerIcon: "🦄" },
+        gospel: { name: "✝️ 恩典管家", runnerIcon: "🕊️" }
+    };
 
     const quotesBank = [
         { source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" },
@@ -299,15 +378,33 @@
         let index = (new Date().getDate() + customBlueprintOffset) % blueprintTextBank.length;
         const baseText = blueprintTextBank[index];
         const goalStr = document.getElementById('target-saving-input').value || '夢想計劃';
-        let pct = ((journalListHistory.length / 365) * 100).toFixed(2);
-
-        let runner = activeThemeKey === 'buddhism' ? '🪷' : (activeThemeKey === 'rainbow' ? '🦄' : '🚀');
-        document.getElementById('blueprint-status-text').innerText = `${runner} 【進度 ${pct}%】：${baseText} 願望【${goalStr}】正在發光！`;
         
+        let maxUnits = 365; let currentCount = 0;
+        if (currentMode === '365_journal') currentCount = journalListHistory.length;
+        else if (currentMode === '365_阶梯') currentCount = checkedDays365.length;
+        else if (currentMode === 'custom_fixed') currentCount = checkedDaysCustom.length;
+        else if (currentMode === 'week_52') { currentCount = checkedWeeks52.length; maxUnits = 52; }
+        else currentCount = Object.keys(隨喜Map).length;
+
+        let pct = ((currentCount / maxUnits) * 100).toFixed(2);
+        let runner = THEME_CONTENT_BANK[activeThemeKey]?.runnerIcon || '🚀';
+        document.getElementById('blueprint-status-text').innerText = `${runner} 【進度 ${pct}%】：${baseText} 願望【${goalStr}】`;
         if (isClick) { customBlueprintOffset++; playThemeSound(); }
     }
 
+    function changeSavingMode(newMode) {
+        currentMode = newMode; localStorage.setItem('global_saving_mode', newMode); renderGrid();
+    }
+    function applyCustomFixedAmount() {
+        const amt = parseInt(document.getElementById('custom-fixed-amt-input').value) || 100;
+        currentCustomFixedAmt = amt; localStorage.setItem('custom_fixed_config_amt', amt); renderGrid();
+    }
+    function updateJournalDates() {
+        localStorage.setItem('365_journal_start_date', document.getElementById('journal-start-date-picker').value); updateDashboard();
+    }
+
     function pickCelebrity() {
+        if (currentMode !== '365_journal') { alert("🎰 盲盒功能專屬於【365天防誤觸智慧手帳模式】喔！"); return; }
         const pulled = journalListHistory.map(c => c.amount); const avail = [];
         for (let i = 1; i <= 365; i++) { if (!pulled.includes(i)) avail.push(i); }
         if (avail.length === 0) return;
@@ -322,45 +419,93 @@
 
     function confirmJournalSaving() {
         if (!tempPendingAmount) return;
-        const nextDay = journalListHistory.length + 1;
-        const todayStr = new Date().toISOString().split('T')[0];
-        
+        const nextDay = journalListHistory.length + 1; const todayStr = new Date().toISOString().split('T')[0];
         journalListHistory.push({ dayIndex: nextDay, dateStr: todayStr, amount: tempPendingAmount, isPatched: false });
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
-
         document.getElementById('confirm-modal-layer').classList.remove('active');
         confetti({ particleCount: 50, spread: 50 }); playThemeSound();
-        
-        renderGrid();
-        refreshBlueprintStatus(false);
-        tempPendingAmount = null;
+        renderGrid(); tempPendingAmount = null;
     }
 
     function renderGrid() {
         document.getElementById('months-grid').innerHTML = '';
-        monthsData.forEach((month) => {
-            const col = document.createElement('div'); col.className = 'month-column';
-            const header = document.createElement('div'); header.className = 'month-header';
-            header.innerHTML = `<span>${month.name}</span>`; col.appendChild(header);
-            const daysList = document.createElement('div'); daysList.className = 'days-list';
+        const isJournalStyle = (currentMode === '365_journal');
+        
+        document.getElementById('custom-amt-panel').style.display = currentMode === 'custom_fixed' ? 'flex' : 'none';
+        document.getElementById('journal-config-panel').style.display = isJournalStyle ? 'flex' : 'none';
+        document.getElementById('app-journal-ui-area').style.display = isJournalStyle ? 'block' : 'none';
+        document.getElementById('blindbox-ui-area').style.display = isJournalStyle ? 'block' : 'none';
 
-            for (let i = month.start; i <= month.end; i++) {
-                const cell = document.createElement('div'); cell.className = 'day-cell'; cell.innerText = i;
-                if (journalListHistory.some(c => c.amount === i)) cell.className = 'day-cell checked';
-                daysList.appendChild(cell);
+        const d = LANG_DICTIONARY[currentLang];
+        document.getElementById('label-completed-unit').innerText = currentMode === 'week_52' ? d.lblDashDoneWeek : d.lblDashDoneDay;
+
+        if (currentMode === 'week_52') {
+            const col = document.createElement('div'); col.className = 'month-column';
+            const daysList = document.createElement('div'); daysList.className = 'days-list';
+            daysList.style.gridTemplateColumns = "repeat(4, 1fr)";
+            for (let w = 1; w <= 52; w++) {
+                const cell = document.createElement('div'); cell.className = 'day-cell';
+                cell.innerHTML = `<span style="font-size:0.7rem; opacity:0.5; display:block;">W${w}</span>$${w * 10}`;
+                if (checkedWeeks52.includes(w)) cell.className = 'day-cell checked';
+                cell.onclick = () => toggleDayOrWeek(w, cell); daysList.appendChild(cell);
             }
             col.appendChild(daysList); document.getElementById('months-grid').appendChild(col);
-        });
-        updateDashboard();
+        } else {
+            monthsData.forEach((month, mIdx) => {
+                const col = document.createElement('div'); col.className = 'month-column';
+                const header = document.createElement('div'); header.className = 'month-header';
+                header.innerHTML = `<span>${d.title.includes('貯金') ? month.name.replace('月','月') : month.name}</span>`; col.appendChild(header);
+                const daysList = document.createElement('div'); daysList.className = 'days-list';
+
+                for (let i = month.start; i <= month.end; i++) {
+                    const cell = document.createElement('div'); cell.className = 'day-cell';
+                    if (currentMode === '365_阶梯' || isJournalStyle) {
+                        cell.innerText = i;
+                        if (isJournalStyle) {
+                            if (journalListHistory.some(c => c.amount === i)) cell.className = 'day-cell checked';
+                        } else { if (checkedDays365.includes(i)) cell.className = 'day-cell checked'; }
+                    } else if (currentMode === 'custom_fixed') {
+                        cell.innerText = `$${currentCustomFixedAmt}`;
+                        if (checkedDaysCustom.includes(i)) cell.className = 'day-cell checked';
+                    } else {
+                        if (隨喜Map[i]) { cell.innerHTML = `$${隨喜Map[i]}`; cell.className = 'day-cell checked'; }
+                        else cell.innerHTML = `💸`;
+                    }
+                    if (!isJournalStyle) cell.onclick = () => toggleDayOrWeek(i, cell);
+                    daysList.appendChild(cell);
+                }
+                col.appendChild(daysList); document.getElementById('months-grid').appendChild(col);
+            });
+        }
+        updateDashboard(); selectThemeStyle(activeThemeKey);
+    }
+
+    function toggleDayOrWeek(id, element) {
+        if (currentMode === '隨喜') {
+            if (隨喜Map[id]) { delete 隨喜Map[id]; } 
+            else {
+                let val = prompt(`💖 Day ${id} 自由隨喜 金額：`, "100"); let amt = parseInt(val) || 0;
+                if (amt > 0) 隨喜Map[id] = amt;
+            }
+            localStorage.setItem('any_any_savings_map', JSON.stringify(隨喜Map)); renderGrid(); return;
+        }
+        let arr = currentMode === '365_阶梯' ? checkedDays365 : (currentMode === 'custom_fixed' ? checkedDaysCustom : checkedWeeks52);
+        let key = currentMode === '365_阶梯' ? '365_savings_progress' : (currentMode === 'custom_fixed' ? 'custom_fixed_savings_progress' : 'week_52_savings_progress');
+        let idx = arr.indexOf(id); if (idx === -1) arr.push(id); else arr.splice(idx, 1);
+        localStorage.setItem(key, JSON.stringify(arr)); playThemeSound(); renderGrid();
     }
 
     function updateDashboard() {
-        let totalSaved = journalListHistory.reduce((a, b) => a + b.amount, 0);
-        let daysCount = journalListHistory.length;
-        let pct = ((daysCount / 365) * 100).toFixed(2);
+        let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
+        if (currentMode === '365_阶梯') { totalSaved = checkedDays365.reduce((a,b)=>a+b,0); daysCount = checkedDays365.length; }
+        else if (currentMode === '365_journal') { totalSaved = journalListHistory.reduce((a,b)=>a+b.amount,0); daysCount = journalListHistory.length; }
+        else if (currentMode === 'custom_fixed') { totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length; }
+        else if (currentMode === 'week_52') { totalSaved = checkedWeeks52.reduce((a,b)=>a+(b*10),0); daysCount = checkedWeeks52.length; maxUnits = 52; }
+        else { for(let k in 隨喜Map) totalSaved += 隨喜Map[k]; daysCount = Object.keys(隨喜Map).length; }
 
+        let pct = ((daysCount / maxUnits) * 100).toFixed(2);
         document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
-        document.getElementById('days-count').innerText = `${daysCount} / 365`;
+        document.getElementById('days-count').innerText = `${daysCount} / ${maxUnits}`;
         document.getElementById('progress-percent').innerText = `${pct}%`;
         document.getElementById('dynamic-water-fluid').style.width = `${pct}%`;
 
@@ -377,7 +522,7 @@
                 });
             }
         }
-        document.getElementById('journal-total-count-label').innerText = `${daysCount} 筆`;
+        document.getElementById('journal-total-count-label').innerText = `${journalListHistory.length} 筆`;
     }
 
     function startSpiritualBgmEngine() {
@@ -399,24 +544,30 @@
                 for (let i = 0; i < bufferSize; i++) { output[i] = (Math.random() * 2 - 1) * 0.05; }
                 const noiseSource = webAudioCtx.createBufferSource();
                 noiseSource.buffer = noiseBuffer; noiseSource.loop = true;
-
                 const filter = webAudioCtx.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.setValueAtTime(350, webAudioCtx.currentTime);
                 const lfo = webAudioCtx.createOscillator(); lfo.frequency.setValueAtTime(0.12, webAudioCtx.currentTime);
                 const lfoGain = webAudioCtx.createGain(); lfoGain.gain.setValueAtTime(200, webAudioCtx.currentTime);
                 lfo.connect(lfoGain); lfoGain.connect(filter.frequency);
-
-                noiseSource.connect(filter); filter.connect(mainBgmNode);
-                lfo.start(); noiseSource.start();
+                noiseSource.connect(filter); filter.connect(mainBgmNode); lfo.start(); noiseSource.start();
                 mainBgmNode.lfo = lfo; mainBgmNode.src = noiseSource;
             } else if (activeThemeKey === 'buddhism') {
                 let ticks = 0;
                 mainBgmNode.timer = setInterval(() => {
-                    ticks++;
-                    const osc = webAudioCtx.createOscillator(); const g = webAudioCtx.createGain();
+                    ticks++; const osc = webAudioCtx.createOscillator(); const g = webAudioCtx.createGain();
                     osc.type = 'sine'; osc.frequency.setValueAtTime(ticks % 4 === 0 ? 150 : 170, webAudioCtx.currentTime);
                     g.gain.setValueAtTime(0.12, webAudioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, webAudioCtx.currentTime + 0.2);
                     osc.connect(g); g.connect(mainBgmNode); osc.start(); osc.stop(webAudioCtx.currentTime + 0.2);
                 }, 1000);
+            } else if (activeThemeKey === 'gospel') {
+                // ✝️ 恩典管家：高質感低沉教堂風管風琴環境共鳴演算法！
+                const osc1 = webAudioCtx.createOscillator(); const osc2 = webAudioCtx.createOscillator();
+                const g1 = webAudioCtx.createGain();
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(65.41, webAudioCtx.currentTime); // C2 低音
+                osc2.type = 'triangle'; osc2.frequency.setValueAtTime(130.81, webAudioCtx.currentTime); // C3 諧音
+                g1.gain.setValueAtTime(0.03, webAudioCtx.currentTime);
+                osc1.connect(g1); osc2.connect(g1); g1.connect(mainBgmNode);
+                osc1.start(); osc2.start();
+                mainBgmNode.osc1 = osc1; mainBgmNode.osc2 = osc2;
             } else {
                 mainBgmNode.timer = setInterval(() => {
                     const osc = webAudioCtx.createOscillator(); const g = webAudioCtx.createGain();
@@ -431,7 +582,11 @@
     function toggleBgmState() {
         if (isBgmEnabled) {
             isBgmEnabled = false; localStorage.setItem('bgm_engine_enabled', 'false');
-            if (mainBgmNode) { if(mainBgmNode.src)mainBgmNode.src.stop(); if(mainBgmNode.timer)clearInterval(mainBgmNode.timer); mainBgmNode.disconnect(); mainBgmNode = null; }
+            if (mainBgmNode) {
+                if(mainBgmNode.src)mainBgmNode.src.stop(); if(mainBgmNode.lfo)mainBgmNode.lfo.stop();
+                if(mainBgmNode.osc1)mainBgmNode.osc1.stop(); if(mainBgmNode.osc2)mainBgmNode.osc2.stop();
+                if(mainBgmNode.timer)clearInterval(mainBgmNode.timer); mainBgmNode.disconnect(); mainBgmNode = null;
+            }
         } else { isBgmEnabled = true; localStorage.setItem('bgm_engine_enabled', 'true'); startSpiritualBgmEngine(); }
         updateBgmBtnUI();
     }
@@ -442,6 +597,7 @@
         if (isBgmEnabled) {
             if (activeThemeKey === 'classic') t = "🌊 環境音效：輕柔海浪中";
             else if (activeThemeKey === 'buddhism') t = "🪵 環境音效：禪心木魚中";
+            else if (activeThemeKey === 'gospel') t = "✝️ 環境音效：恩典管風琴中";
             else t = "🌈 環境音效：夏夜蟬鳴中";
         }
         btn.innerText = t; btn.className = isBgmEnabled ? "settings-item-btn active" : "settings-item-btn";
@@ -458,26 +614,55 @@
     }
 
     function openSettingsPanel() { updateBgmBtnUI(); document.getElementById('settings-modal-layer').classList.add('active'); }
-    function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('active'); }
+    function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('remove'); document.getElementById('settings-modal-layer').classList.remove('active'); }
     
     function selectThemeStyle(k) { 
         activeThemeKey = k; localStorage.setItem('active_spiritual_theme_v2', k); 
         document.querySelectorAll('.theme-item').forEach(b => b.classList.remove('active'));
         if(document.getElementById(`s-theme-${k}`)) document.getElementById(`s-theme-${k}`).classList.add('active');
-        if (isBgmEnabled) {
-            isBgmEnabled = false; toggleBgmState(); // 重啟對應音效
-        }
+        if (isBgmEnabled) { isBgmEnabled = false; toggleBgmState(); } else { updateBgmBtnUI(); }
         refreshBlueprintStatus(false);
     }
     
-    function changeSavingMode(m) {}
+    function changeLanguage(langKey) {
+        currentLang = langKey; localStorage.setItem('global_app_language', langKey);
+        document.querySelectorAll('.lang-item').forEach(btn => btn.classList.remove('active'));
+        if(document.getElementById(`s-lang-${langKey}`)) document.getElementById(`s-lang-${langKey}`).classList.add('active');
+
+        const d = LANG_DICTIONARY[langKey];
+        document.getElementById('app-title').innerText = d.title;
+        document.getElementById('lbl-saving-core').innerText = d.lblCore;
+        document.getElementById('lbl-custom-amt').innerText = d.lblCustomAmt;
+        document.getElementById('btn-apply-amt').innerText = d.btnApply;
+        document.getElementById('lbl-start-date').innerText = d.lblStartDate;
+        document.getElementById('lbl-target-goal').innerText = d.lblTarget;
+        document.getElementById('lbl-journal-title').innerText = d.lblJournal;
+        document.getElementById('lbl-blindbox-title').innerText = d.lblBoxTitle;
+        document.getElementById('main-action-random-btn').innerText = d.btnBoxDraw;
+        document.getElementById('lbl-dash-total').innerText = d.lblDashTotal;
+        document.getElementById('lbl-dash-progress').innerText = d.lblDashProg;
+        document.getElementById('lbl-setting-lang').innerText = d.setLang;
+        document.getElementById('lbl-setting-theme').innerText = d.setTheme;
+        document.getElementById('btn-setting-close').innerText = d.setClose;
+        document.getElementById('lbl-wisdom').innerText = d.lblWisdom;
+        document.getElementById('lbl-setting-music').innerText = d.lblMusic;
+
+        const sel = document.getElementById('main-saving-mode-select');
+        sel.options[0].text = d.opt1; sel.options[1].text = d.opt2; sel.options[2].text = d.opt3; sel.options[3].text = d.opt4; sel.options[4].text = d.opt5;
+
+        const config = THEME_CONTENT_BANK[activeThemeKey];
+        const bBoxDisplay = document.getElementById('celebrity-display');
+        if (bBoxDisplay && config) bBoxDisplay.innerHTML = d.boxWelcome.replace('${name}', config.name);
+        
+        refreshDailyWisdom(false); refreshBlueprintStatus(false);
+    }
+    
     function saveTargetGoal() { localStorage.setItem('goal_365_journal', document.getElementById('target-saving-input').value); refreshBlueprintStatus(false); }
 
     window.onload = function() {
+        document.getElementById('main-saving-mode-select').value = currentMode;
         document.getElementById('target-saving-input').value = localStorage.getItem('goal_365_journal') || '夢想計劃';
-        renderGrid();
-        refreshDailyWisdom(false);
-        refreshBlueprintStatus(false);
+        changeLanguage(currentLang);
     }
     document.addEventListener('click', function() { if(isBgmEnabled) startSpiritualBgmEngine(); }, { once: false });
 </script>
