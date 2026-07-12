@@ -94,7 +94,6 @@
         .blueprint-status { font-size: 0.85rem; color: var(--text-color); opacity: 0.9; text-align: center; font-weight: 700; background-color: rgba(0,0,0,0.02); padding: 12px 16px; border-radius: 16px; line-height: 1.5; box-shadow: var(--inner-shadow); }
 
         .journal-title-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 12px; font-weight: 800; font-size: 1rem; }
-        .patch-toggle-btn { background-color: rgba(0,0,0,0.03); color: var(--text-color); border: 1px solid var(--border-color); width: 100%; padding: 12px; border-radius: 16px; font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
         
         .journal-container-list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 14px 16px; border-radius: 16px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); }
@@ -241,7 +240,6 @@
     <div class="custom-modal">
         <div class="settings-panel-box">
             <div>
-                <!-- 🌐 修正點 1：多國語言控制格完美完整復歸 -->
                 <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
                 <div class="settings-btn-grid">
                     <button class="settings-item-btn lang-item" id="s-lang-zh-TW" onclick="changeLanguage('zh-TW')">繁體中文</button>
@@ -251,7 +249,6 @@
                 </div>
             </div>
             <div>
-                <!-- 🎨 修正點 2：四大主題（2×2）完美對齊，恩典管家正式歸隊 -->
                 <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
                     <button class="settings-item-btn theme-item" id="s-theme-classic" onclick="selectThemeStyle('classic')">🌌 經典原版</button>
@@ -334,19 +331,37 @@
         }
     };
 
+    // 🌟 修正點 1：將四大主題各自的世界觀語句直接包進對應的資料庫中，徹底與按鈕按鍵同步連動！
     const THEME_CONTENT_BANK = {
-        classic: { name: "🌌 經典原版", runnerIcon: "🚀" },
-        buddhism: { name: "🏯 禪心福報", runnerIcon: "🪷" },
-        rainbow: { name: "🌈 彩虹療癒", runnerIcon: "🦄" },
-        gospel: { name: "✝️ 恩典管家", runnerIcon: "🕊️" }
+        classic: { 
+            name: "🌌 經典原版", runnerIcon: "🚀",
+            quotes: [
+                { source: "祈星渡仁", text: "每天存下一點意念，未來的你，一定會感謝現在開始默默累積的自己。" },
+                { source: "當下覺察", text: "克制物質衝動、存下財富的溫柔舉動，都是你對未來美好生活投下的巨大信任票。" }
+            ]
+        },
+        buddhism: { 
+            name: "🏯 禪心福報", runnerIcon: "🪷",
+            quotes: [
+                { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。安住當下，踏實積累功德與淨瓶資糧。" },
+                { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。知足常樂，儲蓄是為了給未來的自己一份安定的心靈底氣。" }
+            ]
+        },
+        rainbow: { 
+            name: "🌈 彩虹療癒", runnerIcon: "🦄",
+            quotes: [
+                { source: "脈輪肯定句", text: "我值得擁有安全與富足的人生，我誠摯感謝宇宙與大地在此刻給予我的一切豐盛財富。" },
+                { source: "自我療癒", text: "每一次為存錢罐投入能量，都是在對自己的根基與海底輪進行最深層的滋養與豐盛灌注。" }
+            ]
+        },
+        gospel: { 
+            name: "✝️ 恩典管家", runnerIcon: "🕊️",
+            quotes: [
+                { source: "馬太福音", text: "因為你的財寶在哪裡，你的心也在哪裡。好好管理手中的資產，便是忠心智慧的管家。" },
+                { source: "箴言", text: "手懶的，要受貧窮；手勤的，卻要富足。智慧的財務規劃，能在恩典中得享心靈的真正安穩。" }
+            ]
+        }
     };
-
-    const quotesBank = [
-        { source: "祈星渡仁", text: "每天存下一點意志力，未來的你，一定會感謝現在開始累積的自己。" },
-        { source: "當下覺察", text: "克制衝動、存下金錢的溫柔舉動，都是你對未來生活投下的信任票。" },
-        { source: "心靈指引", text: "知足常樂，儲蓄是為了給未來的自己一份安定的心靈底氣。" },
-        { source: "財富密碼", text: "溪流匯聚終成汪洋。每一塊錢的累積，都是為夢想城堡奠定的最穩固基石。" }
-    ];
 
     const blueprintTextBank = [
         "正在穩定凝聚最初的儲蓄能量...",
@@ -365,9 +380,14 @@
     ];
 
     let customWisdomOffset = 0;
+    // 🌟 修正點 2：字卡隨機讀取邏輯100%根據目前當前選中的 activeThemeKey 撈對應的主題字句！
     function refreshDailyWisdom(isClick = false) {
-        let index = (new Date().getDate() + customWisdomOffset) % quotesBank.length;
-        const q = quotesBank[index];
+        const themeConfig = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK.classic;
+        const currentQuotes = themeConfig.quotes;
+        
+        let index = (new Date().getDate() + customWisdomOffset) % currentQuotes.length;
+        const q = currentQuotes[index];
+        
         document.getElementById('display-wisdom-text').innerText = `“${q.text}”`;
         document.getElementById('display-wisdom-src').innerText = `——《${q.source}》`;
         if (isClick) { customWisdomOffset++; playThemeSound(); }
@@ -559,11 +579,10 @@
                     osc.connect(g); g.connect(mainBgmNode); osc.start(); osc.stop(webAudioCtx.currentTime + 0.2);
                 }, 1000);
             } else if (activeThemeKey === 'gospel') {
-                // ✝️ 恩典管家：高質感低沉教堂風管風琴環境共鳴演算法！
                 const osc1 = webAudioCtx.createOscillator(); const osc2 = webAudioCtx.createOscillator();
                 const g1 = webAudioCtx.createGain();
-                osc1.type = 'sine'; osc1.frequency.setValueAtTime(65.41, webAudioCtx.currentTime); // C2 低音
-                osc2.type = 'triangle'; osc2.frequency.setValueAtTime(130.81, webAudioCtx.currentTime); // C3 諧音
+                osc1.type = 'sine'; osc1.frequency.setValueAtTime(65.41, webAudioCtx.currentTime);
+                osc2.type = 'triangle'; osc2.frequency.setValueAtTime(130.81, webAudioCtx.currentTime);
                 g1.gain.setValueAtTime(0.03, webAudioCtx.currentTime);
                 osc1.connect(g1); osc2.connect(g1); g1.connect(mainBgmNode);
                 osc1.start(); osc2.start();
@@ -614,13 +633,17 @@
     }
 
     function openSettingsPanel() { updateBgmBtnUI(); document.getElementById('settings-modal-layer').classList.add('active'); }
-    function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('remove'); document.getElementById('settings-modal-layer').classList.remove('active'); }
+    function closeSettingsPanel() { document.getElementById('settings-modal-layer').classList.remove('active'); }
     
+    // 🌟 修正點 3：主題切換後，自動重設 offset 偏移並強制重新載入當前對應主題的字句
     function selectThemeStyle(k) { 
         activeThemeKey = k; localStorage.setItem('active_spiritual_theme_v2', k); 
         document.querySelectorAll('.theme-item').forEach(b => b.classList.remove('active'));
         if(document.getElementById(`s-theme-${k}`)) document.getElementById(`s-theme-${k}`).classList.add('active');
         if (isBgmEnabled) { isBgmEnabled = false; toggleBgmState(); } else { updateBgmBtnUI(); }
+        
+        customWisdomOffset = 0;
+        refreshDailyWisdom(false); // 強制秒切指引字句世界觀
         refreshBlueprintStatus(false);
     }
     
