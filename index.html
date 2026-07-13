@@ -193,6 +193,9 @@
             <input type="number" id="manual-journal-amt" placeholder="金額 ($)" style="width: 38%; border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color);">
             <button onclick="handleManualJournalSubmit()" style="flex: 1; background: var(--btn-gradient); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer;">登載手帳</button>
         </div>
+        
+        <button id="manual-journal-delete-btn" onclick="handleManualJournalDelete()" style="display: none; width: 100%; background: linear-gradient(135deg, #e63946 0%, #d90429 100%); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.85rem; cursor: pointer; padding: 10px 0; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);">🗑️ 刪除此筆手帳紀錄</button>
+
         <div class="journal-container-list" id="journal-list-render-target"></div>
     </div>
 
@@ -370,10 +373,11 @@
             btnConfirm: "貯金箱に投入する", btnCancel: "キャンセル", btnMilestoneClose: "祝福を受け取り進む",
             resetBtn: "🔄 殿堂の全貯金データをリセット", resetConfirm: "⚠️ 本当にデータをリセットしますか？これまでのすべての記録、進捗、金額が完全に消去され、復元することはできません！",
             resetSuccess: "データがクリアされました！大殿堂を再読み込みします。", noLedger: "🫙 現在手帳に記録はありません", ledgerUnit: "件",
-            blueprintProgress: "進捗", blueprintWish: "願い", blindboxAlert: "🎰 ガチャ機能は【365日スマート手帳モード】専用です！",隨喜Prompt: "💖 Day ${id} 自由随喜 金額を入力："
+            blueprintProgress: "進捗", blueprintWish: "願い", blindboxAlert: "🎰 ガチャ功能は【365日スマート手帳モード】専用です！",隨喜Prompt: "💖 Day ${id} 自由随喜 金額を入力："
         }
     };
 
+    // 🌟 已整合 txt 完整字庫並修正語法 Bug
     const THEME_CONTENT_BANK = {
         classic: { 
             name: { 'zh-TW': "🌌 經典原版", 'zh-CN': "🌌 经典原版", 'en': "🌌 Ultimate Classic", 'ja': "🌌 クラシック原版" },
@@ -381,7 +385,17 @@
             quotes: {
                 'zh-TW': [
                     { source: "巴菲特", text: "開始存錢並及早投資，這是最值得養成的一種習慣。溪流匯聚，終成汪洋。" },
-                    { source: "查理·芒格", text: "走到更高的層次需要極大的自律。每一筆存下的資金，都是未來自由的籌碼。" }
+                    { source: "查理·芒格", text: "走到更高的層次需要極大的自律。每一筆存下的資金，都是未來自由的籌碼。" },
+                    { source: "詹姆斯·克利爾", text: "原子習慣的威力在於累積。今天克制衝動存下的每一塊錢，都是對未來投下的信任票。" },
+                    { source: "財富密碼", text: "財富並非源於賺了多少，而是源於留住了多少。每一滴儲蓄都是為夢想城堡奠定的穩固基石。" },
+                    { source: "卡內基", text: "儲蓄不只是理財，它幕後更是心靈意志力的一種高級修煉與自我掌控。" },
+                    { source: "長期主義", text: "耐得住枯燥的累積，才配得上無憂的未來。今天存下意志，明天收穫自由。" },
+                    { source: "思考致富", text: "財富是思維的產物。將多餘的物質慾望轉化為永續的儲蓄瓶，探索未知的廣闊世界。" },
+                    { source: "富爸爸", text: "資產是把錢放進你口袋的東西。每天往存錢罐注入能量，就是在持續買入未來的安全感。" },
+                    { source: "習慣的力量", text: "防誤觸的每一次點擊，都是在大腦皮層鞏固富足思維，開啟智慧大廳的第一步。" },
+                    { source: "理財哲學", text: "當你不再為無謂的消費買單，你便開始真正主宰自己的財富命運與人生藍圖。" },
+                    { source: "拿破崙·希爾", text: "如果你不能在小事上自律，你就永遠無法在大事上建立真正的財富王國。" },
+                    { source: "梭羅", text: "一個人的富有程度，與他所能放下的無謂物質多寡成正比。回歸純粹的積累。" }
                 ],
                 'zh-CN': [
                     { source: "巴菲特", text: "开始存钱并及早投资，这是最值得养成的一种习惯。溪流汇聚，终成汪洋。" },
@@ -392,8 +406,8 @@
                     { source: "Charlie Munger", text: "To get what you want, you have to deserve what you want. Discipline is the core." }
                 ],
                 'ja': [
-                    { source: "ウォーレン・バフェット", text: "買い物の後でお金を残すのではなく、貯金をした後でお金を使いなさい。" },
-                    { source: "チャーリー・マンガー", text: "欲しいものを得るためには、それに値する人間にならなければならない。自律がすべてだ。" }
+                    { source: "ウォーレン・バフェット", text: "貯金を始めて早めに投資すること、これは最も身につける価値のある習慣です。川が集まれば、やがて大海原になります。" },
+                    { source: "チャーリー・マンガー", text: "より高いレベルに到達するには、並外れた自律が必要です。貯蓄されたすべての資金は、未来の自由へのチップです。" }
                 ]
             },
             milestones: {
@@ -410,13 +424,13 @@
                     'ja': { title: "🪵 百日の礎：100日達成", body: "100日達成！これは三日坊主ではなく、雨だれ石を穿つ本物の力です。\nあなたの自律によって口座が潤っていく姿は本当に誇らしいです！" }
                 },
                 200: {
-                    'zh-TW': { title: "🌿 枝繁葉茂．底氣漸濃", body: "突破雙百大關！200天的自律已內化為你的第二本能。\n你攢下的不節是數字，更是自由選擇權！" },
-                    'zh-CN': { title: "🌿 枝繁叶茂．底气渐浓", body: "突破双百大关！200天的自律已内化为你的第二本能。\n\n你攒下的不节是数字，更是自由选择权！" },
+                    'zh-TW': { title: "🌿 枝繁葉茂．底氣漸濃", body: "突破雙百大關！200天的自律已內化為你的第二本能。\n你攢下的不只是數字，更是自由選擇權！" },
+                    'zh-CN': { title: "🌿 枝繁叶茂．底气渐浓", body: "突破双百大关！200天的自律已内化为你的第二本能。\n\n你攒下的不節是数字，更是自由选择权！" },
                     'en': { title: "🌿 Branching Out: 200 Days", body: "Breaking 200 Days! Discipline is now your second nature.\nWhat you accumulated is not just numbers, it is absolute freedom." },
                     'ja': { title: "🌿 枝葉の繁栄：200日達成", body: "200日の大台突破！自律は完全にあなたの第二の本能となりました。\n蓄えたのはただの数字ではなく、未来への自由な選択権です！" }
                 },
                 365: {
-                    'zh-TW': { title: "🌳 功功德圓滿．歲稔年豐", body: "✨ 奇蹟誕生！365天全滿簽通關！ ✨\n你獨自一人走完了這場宏大的儲蓄長征，徹底解鎖財富自由的高階習慣！" },
+                    'zh-TW': { title: "🌳 功德圓滿．歲稔年豐", body: "✨ 奇蹟誕生！365天全滿簽通關！ ✨\n你獨自一人走完了這場宏大的儲蓄長征，徹底解鎖財富自由的高階習慣！" },
                     'zh-CN': { title: "🌳 功德圆满．岁稔年丰", body: "✨ 奇迹诞生！365天全满签通关！ ✨\n你独自一人走完了这场宏大的储蓄长征，彻底解锁财富自由的高阶习惯！" },
                     'en': { title: "🌳 Grand Completion: 365 Days", body: "✨ A Miracle Happened! 365-Day Full Victory! ✨\nOur journey is completed. You unlocked the highest rank of ultimate abundance." },
                     'ja': { title: "🌳 功徳円満：365日グランドスラム", body: "✨ 奇跡降臨！365日完全制覇達成！ ✨\nあなたはこの壮大な貯金の長征を一人で走り抜きました。究極の富と自由の習慣が今ここに開放されました！" }
@@ -430,18 +444,6 @@
                 'zh-TW': [
                     { source: "金剛經", text: "過去心不可得，現在心不可得，未來心不可得。安住當下，踏實積累淨瓶資糧。" },
                     { source: "心經", text: "心無罣礙，無罣礙故，無有恐怖。知足常樂，儲蓄是為未來種下一福，得大清靜。" }
-                ],
-                'zh-CN': [
-                    { source: "金刚经", text: "过去心不可得，现在心不可得，未来心不可得。安住当下，踏实积累净瓶资粮。" },
-                    { source: "心经", text: "心无挂碍，无挂碍故，无有恐怖。知足常乐，储蓄是为未来种下一福，得大清静。" }
-                ],
-                'en': [
-                    { source: "Zen Mind", text: "Be at peace with what you have. Every drop into the jar seeds a flower in your future paradise." },
-                    { source: "Diamond Sutra", text: "Abide in the present moment. True wealth is an unshakeable, peaceful inner vault." }
-                ],
-                'ja': [
-                    { source: "般若心経", text: "心に罣礙（けいげ）なし。足るを知れば常に楽し。貯金は未来に一善の福徳を植える行為なり。" },
-                    { source: "禅の教え", text: "今この瞬間に安住せよ。一滴の水がやがて大河となるように、日々の積み重ねが清らかなる功德を成す。" }
                 ]
             },
             milestones: {
@@ -464,7 +466,7 @@
                     'ja': { title: "🌊 観心自照：200日の心の富", body: "二百日の精進、心は静かなる水の如く、蔵は徐々に満ちる。\n物に支配されぬことこそ自由。あなたは真の豊かさの境地を悟りました。" }
                 },
                 365: {
-                    'zh-TW': { title: "🕉️ 圓滿無礙．見性成佛", body: "🏮 365日功功德大圓滿！ 🏮\n一歲榮枯，唯你初心不改。此番圓滿，身心俱足，隨心自在。" },
+                    'zh-TW': { title: "🕉️ 圓滿無礙．見性成佛", body: "🏮 365日功德大圓滿！ 🏮\n一歲榮枯，唯你初心不改。此番圓滿，身心俱足，隨心自在。" },
                     'zh-CN': { title: "🕉️ 圆满无碍．见性成佛", body: "🏮 365日功功德大圆满！ 🏮\n一岁荣枯，唯你初心不改。此番圆满，身心俱足，随心自在。" },
                     'en': { title: "🕉️ Great Nirvana Perfection: 365 Days", body: "🏮 365 Days Supreme Accomplishment! 🏮\nA whole year passed, your vow remained unbroken. Soul and wealth are fully awakened." },
                     'ja': { title: "🕉️ 大円満：365日の功徳", body: "🏮 365日功徳大円満成就！ 🏮\n一年の巡りの中で、あなたの初心だけは変わりませんでした。心身ともに満たされ、自由自在の境地です。" }
@@ -512,7 +514,7 @@
                     'ja': { title: "💎 輝くブループリント：200日通過", body: "200日の大関門クリア！虹の架け橋が半分以上完成しました！\n未来のワクワクと豊かさが、もの凄いスピードであなたに向かって走ってきています！" }
                 },
                 365: {
-                    'zh-TW': { title: "🌈 彩虹盡頭．黃金寶藏", body: "🎉 恭喜通關！365天彩虹大滿貫！ 🎉\n你成功抵達了彩虹的盡頭，那裡裝滿了死你一整年自律與汗水換來的黃金寶藏！" },
+                    'zh-TW': { title: "🌈 彩虹盡頭．黃金寶藏", body: "🎉 恭喜通關！365天彩虹大滿貫！ 🎉\n你成功抵達了彩虹的盡頭，那裡裝滿了你一整年自律與汗水換來的黃金寶藏！" },
                     'zh-CN': { title: "🌈 彩虹尽头．黄金宝藏", body: "🎉 恭喜通关！365天彩虹大满贯！ 🎉\n你成功抵达了彩虹的尽头，那里装满了你一整年自律与汗水换来的黄金宝藏！" },
                     'en': { title: "🌈 Rainbow's End Vault: 365 Days All In", body: "🎉 Grand Slam Victory! 365 Days Completed! 🎉\nYou stood at the end of the colorful aurora, receiving the legendary gold pot of your focus." },
                     'ja': { title: "🌈 虹の彼方：365日グランドコンプリート", body: "🎉 おめでとう！365日レインボー大満貫！ 🎉\nついに虹の終着点へ到達しました。そこには一年間の自律がもたらした、最高の黄金の宝箱が待っています！" }
@@ -528,7 +530,7 @@
                     { source: "箴言", text: "手懶的，要受貧窮；手勤的，卻要富足。智慧的財務規劃，能在恩典中得享心靈的真正安穩。" }
                 ],
                 'zh-CN': [
-                    { source: "马太福音", text: "because 你的财宝在哪里，你的心也在哪里。好好管理手中的资产，便是忠心、良善又智慧的管家。" },
+                    { source: "马太福音", text: "你的财宝在哪里，你的心也在哪里。好好管理手中的资产，便是忠心、良善又智慧的管家。" },
                     { source: "箴言", text: "手懒的，要受贫穷；手勤的，却要富足。智慧的财务规划，能在恩典中得享心灵的真正安稳。" }
                 ],
                 'en': [
@@ -581,13 +583,12 @@
         { name: "三月", start: 60, end: 90 }, { name: "四月", start: 91, end: 120 },
         { name: "五月", start: 121, end: 151 }, { name: "六月", start: 152, end: 181 },
         { name: "七月", start: 182, end: 212 }, { name: "八月", start: 213, end: 243 },
-        { name: "九月", start: 244, end: 273 }, { name: "十月", start: 274, end: 304 },
+        { name: "九月", start: 244, end: 273 }, { name: "十月", start: 274, open: 274, end: 304 },
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
     let customWisdomOffset = 0;
     function refreshDailyWisdom(isClick = false) {
-        // 🌟 生日彩蛋：1/19 獨家壽星金句優先攔截
         if (isBirthdayToday()) {
             document.getElementById('display-wisdom-text').innerText = "“新的一歲，榮枯流轉，初心不變。今天存下的每一筆自由，都是全宇宙為妳慶生的賀禮。”";
             document.getElementById('display-wisdom-src').innerText = "——《星空祝願大廳》";
@@ -622,7 +623,6 @@
         let pct = ((currentCount / maxUnits) * 100).toFixed(2);
         let runner = THEME_CONTENT_BANK[activeThemeKey]?.runnerIcon || '🚀';
         
-        // 🌟 生日彩蛋：1/19 藍圖抬頭置換
         if (isBirthdayToday()) {
             runner = "👑🎂";
             baseText = "生日快樂！星光凝聚中，屬於你的自律新征程正在全速擴張！";
@@ -643,7 +643,7 @@
         localStorage.setItem('365_journal_start_date', document.getElementById('journal-start-date-picker').value); updateDashboard();
     }
 
-    // 核心修復：手帳模式下手動登載/編輯新增的功能入口
+    // 🛠️ 核心修改：升級手動登載功能，使其具備覆蓋編輯功能
     function handleManualJournalSubmit() {
         const dayInput = document.getElementById('manual-journal-day').value;
         const amtInput = document.getElementById('manual-journal-amt').value;
@@ -654,8 +654,11 @@
             alert(currentLang === 'en' ? "Please enter a valid Day (1-365)" : "請輸入有效的天數 (1-365)");
             return;
         }
+        if (isNaN(amt) || amt <= 0) {
+            alert("請輸入有效的金額喔！");
+            return;
+        }
 
-        // 起始日連動計算
         let dateStr = new Date().toISOString().split('T')[0];
         const startDateVal = document.getElementById('journal-start-date-picker').value;
         if (startDateVal) {
@@ -664,29 +667,50 @@
             dateStr = sDate.toISOString().split('T')[0];
         }
 
-        // 檢查是否原本就存在此格 (若存在則進行覆蓋編輯，若金額填0或空則刪除)
+        // 尋找是否已有此格紀錄
         const existIdx = journalListHistory.findIndex(c => c.amount === day);
 
-        if (isNaN(amt) || amt <= 0) {
-            if (existIdx !== -1) journalListHistory.splice(existIdx, 1);
+        if (existIdx !== -1) {
+            // 編輯覆蓋舊資料
+            journalListHistory[existIdx].dateStr = dateStr;
+            journalListHistory[existIdx].dayIndex = day;
+            journalListHistory[existIdx].customValue = amt;
         } else {
-            if (existIdx !== -1) {
-                // 編輯舊資料
-                journalListHistory[existIdx].dateStr = dateStr;
-                journalListHistory[existIdx].dayIndex = day; // 用 dayIndex 對齊格子序號
-            } else {
-                // 新增資料
-                journalListHistory.push({ dayIndex: day, dateStr: dateStr, amount: day, customValue: amt, isPatched: true });
-            }
+            // 新增全新資料
+            journalListHistory.push({ dayIndex: day, dateStr: dateStr, amount: day, customValue: amt, isPatched: true });
         }
 
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
-        triggerConfettiStorm(); // 🌟 生日連動改呼叫新噴灑功能
+        triggerConfettiStorm();
         playThemeSound();
         
+        clearManualInputs();
+        renderGrid();
+    }
+
+    // 🛠️ 核心新增：獨立手帳刪除功能
+    function handleManualJournalDelete() {
+        const dayInput = document.getElementById('manual-journal-day').value;
+        const day = parseInt(dayInput);
+
+        if (isNaN(day) || day < 1 || day > 365) return;
+
+        const existIdx = journalListHistory.findIndex(c => c.amount === day);
+        if (existIdx !== -1) {
+            journalListHistory.splice(existIdx, 1);
+            localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+            playThemeSound();
+        }
+
+        clearManualInputs();
+        renderGrid();
+    }
+
+    // 🛠️ 輔助功能：重置輸入框並隱藏刪除按鈕
+    function clearManualInputs() {
         document.getElementById('manual-journal-day').value = '';
         document.getElementById('manual-journal-amt').value = '';
-        renderGrid();
+        document.getElementById('manual-journal-delete-btn').style.display = 'none';
     }
 
     function pickCelebrity() {
@@ -732,7 +756,7 @@
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
         
         const finalCount = journalListHistory.length;
-        triggerConfettiStorm(); // 🌟 生日連動改呼叫新噴灑功能
+        triggerConfettiStorm();
         playThemeSound();
         renderGrid(); 
         tempPendingAmount = null;
@@ -812,11 +836,11 @@
                     if (currentMode === '365_阶梯' || isJournalStyle) {
                         cell.innerText = i;
                         if (isJournalStyle) {
-                            // 核心修復：智慧手帳模式支援點擊帶入編輯
                             const histItem = journalListHistory.find(c => c.amount === i);
                             if (histItem) {
                                 cell.className = 'day-cell checked';
-                                if(histItem.customValue) cell.innerHTML = `<div>${i}</div><span style="font-size:0.65rem;opacity:0.85;">$${histItem.customValue}</span>`;
+                                let finalVal = histItem.customValue !== undefined ? histItem.customValue : i;
+                                cell.innerHTML = `<div>${i}</div><span style="font-size:0.65rem;opacity:0.85;">$${finalVal}</span>`;
                             }
                         } else { if (checkedDays365.includes(i)) cell.className = 'day-cell checked'; }
                     } else if (currentMode === 'custom_fixed') {
@@ -827,12 +851,18 @@
                         else cell.innerHTML = `💸`;
                     }
                     
-                    // 核心修復：手帳模式點擊格子可以將編號直接代入上方手帳編輯區
+                    // 🛠️ 核心修改：點擊網格格子，完美帶入天數、金額，並判斷是否秀出「刪除按鈕」
                     cell.onclick = () => {
                         if(isJournalStyle) {
                             document.getElementById('manual-journal-day').value = i;
                             const currentLogged = journalListHistory.find(c => c.amount === i);
-                            document.getElementById('manual-journal-amt').value = currentLogged ? (currentLogged.customValue || i) : i;
+                            document.getElementById('manual-journal-amt').value = currentLogged ? (currentLogged.customValue !== undefined ? currentLogged.customValue : i) : i;
+                            
+                            if (currentLogged) {
+                                document.getElementById('manual-journal-delete-btn').style.display = 'block';
+                            } else {
+                                document.getElementById('manual-journal-delete-btn').style.display = 'none';
+                            }
                         } else {
                             toggleDayOrWeek(i, cell);
                         }
@@ -874,7 +904,7 @@
         let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
         if (currentMode === '365_阶梯') { totalSaved = checkedDays365.reduce((a,b)=>a+b,0); daysCount = checkedDays365.length; }
         else if (currentMode === '365_journal') { 
-            totalSaved = journalListHistory.reduce((a,b)=>a + (b.customValue || b.amount), 0); 
+            totalSaved = journalListHistory.reduce((a,b)=>a + (b.customValue !== undefined ? b.customValue : b.amount), 0); 
             daysCount = journalListHistory.length; 
         }
         else if (currentMode === 'custom_fixed') { totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length; }
@@ -893,14 +923,15 @@
             if (journalListHistory.length === 0) {
                 listContainer.innerHTML = `<div style="text-align:center; padding:12px; font-size:0.85rem; opacity:0.5;">${d.noLedger}</div>`;
             } else {
-                // 核心修復：流水帳點擊任一項目，亦可同步帶回上方輸入框進行修改編輯
+                // 🛠️ 核心修改：點擊流水手帳卡片，一樣可以完美帶回上方輸入框，並顯示刪除按鈕
                 [...journalListHistory].reverse().forEach(item => {
                     const card = document.createElement('div'); card.className = 'journal-row-card';
-                    const displayAmt = item.customValue || item.amount;
+                    const displayAmt = item.customValue !== undefined ? item.customValue : item.amount;
                     card.innerHTML = `<span class="j-day-tag">Grid ${item.amount}</span><span style="font-weight:bold; font-size:0.85rem;">📅 ${item.dateStr}</span><span style="font-weight:900; color:#84a59d;">+$${displayAmt}</span>`;
                     card.onclick = () => {
                         document.getElementById('manual-journal-day').value = item.amount;
                         document.getElementById('manual-journal-amt').value = displayAmt;
+                        document.getElementById('manual-journal-delete-btn').style.display = 'block';
                     };
                     listContainer.appendChild(card);
                 });
@@ -909,7 +940,6 @@
         document.getElementById('journal-total-count-label').innerText = `${journalListHistory.length} ${d.ledgerUnit}`;
     }
 
-    // 核心音訊修復：重整環境背景音播放邏輯，不再於切換主題時強行摧毀狀態
     function startSpiritualBgmEngine() {
         if (!isBgmEnabled) return;
         try {
@@ -1018,13 +1048,11 @@
         document.querySelectorAll('.theme-item').forEach(b => b.classList.remove('active'));
         if(document.getElementById(`s-theme-${k}`)) document.getElementById(`s-theme-${k}`).classList.add('active');
         
-        // 核心修復：切換主題時，先安全重啟硬體，不再直接暴力卡死
         if (isBgmEnabled) {
             shutDownBgmHardware();
             startSpiritualBgmEngine();
         }
         updateBgmBtnUI();
-        
         customWisdomOffset = 0;
         
         const config = THEME_CONTENT_BANK[k];
@@ -1091,9 +1119,8 @@
 
     window.onload = function() {
         document.getElementById('main-saving-mode-select').value = currentMode;
-        document.getElementById('target-saving-input').value = localStorage.getItem('goal_365_journal') || '夢 dream計劃';
+        document.getElementById('target-saving-input').value = localStorage.getItem('goal_365_journal') || '夢想計劃';
         
-        // 核心修復：載入快取中的起始日回填到網頁欄位上
         const savedStartDate = localStorage.getItem('365_journal_start_date');
         if (savedStartDate) {
             document.getElementById('journal-start-date-picker').value = savedStartDate;
