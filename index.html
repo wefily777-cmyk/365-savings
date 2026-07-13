@@ -189,13 +189,13 @@
             <span id="journal-total-count-label" style="font-size:0.8rem; color: var(--text-muted);">0 筆</span>
         </div>
         
-        <div style="display: flex; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 14px; border: 1px dashed var(--border-color); align-items: center;">
-            <input type="number" id="manual-journal-day" min="1" max="365" placeholder="第幾天" style="width: 20%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.85rem;">
-            <input type="number" id="manual-journal-amt" placeholder="多少錢" style="width: 22%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.85rem;">
-            <input type="date" id="manual-journal-date" style="width: 36%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.8rem;">
-            <button onclick="handleManualJournalSubmit()" style="flex: 1; background: var(--btn-gradient); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer; padding: 9px 0;">登載手帳</button>
+        <div style="display: flex; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 14px; border: 1px dashed var(--border-color); flex-wrap: wrap; align-items: center;">
+            <input type="number" id="manual-journal-day" min="1" max="365" placeholder="第幾天" style="width: 22%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.85rem;">
+            <input type="number" id="manual-journal-amt" placeholder="多少錢" style="width: 24%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.85rem;">
+            <input type="date" id="manual-journal-date" placeholder="儲存日期" style="width: 36%; border: 1px solid var(--border-color); border-radius: 10px; padding: 8px 4px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color); font-size: 0.8rem;">
+            <button onclick="handleManualJournalSubmit()" style="flex: 1; min-width: 60px; background: var(--btn-gradient); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.8rem; padding: 9px 0; cursor: pointer;">登載</button>
         </div>
-        
+
         <button id="manual-journal-delete-btn" onclick="handleManualJournalDelete()" style="display: none; width: 100%; background: linear-gradient(135deg, #e63946 0%, #d90429 100%); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.85rem; cursor: pointer; padding: 10px 0; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(230, 57, 70, 0.2);">🗑️ 刪除此筆手帳紀錄</button>
         
         <div class="journal-container-list" id="journal-list-render-target"></div>
@@ -327,7 +327,7 @@
             btnConfirm: "確認放入儲蓄瓶", btnCancel: "取消", btnMilestoneClose: "收下祝福，繼續前行",
             resetBtn: "🔄 重置大廳所有儲蓄數據", resetConfirm: "⚠️ 確定要重置大廳資料嗎？這將會清空本地快取中累積的手帳天數、完成進度與金額，清除後資料將完全無法復原喔！",
             resetSuccess: "數據清空成功！即將為您重新載入大廳網頁。", noLedger: "🫙 目前手帳尚無登載紀錄", ledgerUnit: "筆",
-            blueprintProgress: "進度", blueprintWish: "願望", blindboxAlert: "🎰 盲盒功能專屬於【365天防誤觸智慧手帳模式】喔！",隨喜Prompt: "💖 Day ${id} 自由隨喜 金額："
+            blueprintProgress: "進度", blueprintWish: "願望", blindboxAlert: "🎰 盲盒功能專專屬於【365天防誤觸智慧手帳模式】喔！",隨喜Prompt: "💖 Day ${id} 自由隨喜 金額："
         },
         'zh-CN': {
             title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自订面额：", btnApply: "套用",
@@ -2945,7 +2945,7 @@
         'zh-TW': ["正在穩定凝聚最初的儲蓄能量...", "儲蓄能量穩定灌注中！願望種子正在發芽！🌱", "富足磁場正在全速擴張，距離藍圖實現更近一步！✨", "每一步都算數！宇宙正在悄悄為你的意志力點讚！"],
         'zh-CN': ["正在稳定凝聚最初的储蓄能量...", "储蓄能量稳定灌注中！愿望种子正在发芽！🌱", "富足磁场正在全速扩张，距离蓝图实现更近一步！✨", "每一步都算数！宇宙正在悄悄为你的意志力点赞！"],
         'en': ["Stabilizing and gathering initial financial energy...", "Energy stream active! Wish seeds are sprouting! 🌱", "Abundance frequency expanding at full speed. Destiny is near! ✨", "Every single micro-step counts. The universe celebrates your will!"],
-        'ja': ["最初の貯金エネルギーが安定して凝縮されています...", "エネルギー注入中！願いの種が芽生えています！🌱", "豊かさの磁場が全速力為に拡大中。設計図の実現へまた一歩！✨", "どんな小さな一歩も力になります。宇宙があなたの自律に拍手を送っています！"]
+        'ja': ["最初の貯金エネルギーが安定して凝縮されています...", "エネルギー注入中！願いの種が芽生えています！🌱", "豊かさの磁場が全速力で拡大中。設計図の実現へまた一歩！✨", "どんな小さな一歩も力になります。宇宙があなたの自律に拍手を送っています！"]
     };
 
     const monthsData = [
@@ -2959,7 +2959,6 @@
 
     let customWisdomOffset = 0;
     function refreshDailyWisdom(isClick = false) {
-        // 🌟 生日彩蛋：1/19 獨家壽星金句優先攔截
         if (isBirthdayToday()) {
             document.getElementById('display-wisdom-text').innerText = "“新的一歲，榮枯流轉，初心不變。今天存下的每一筆自由，都是全宇宙為妳慶生的賀禮。”";
             document.getElementById('display-wisdom-src').innerText = "——《星空祝願大廳》";
@@ -2994,7 +2993,6 @@
         let pct = ((currentCount / maxUnits) * 100).toFixed(2);
         let runner = THEME_CONTENT_BANK[activeThemeKey]?.runnerIcon || '🚀';
         
-        // 🌟 生日彩蛋：1/19 藍圖抬頭置換
         if (isBirthdayToday()) {
             runner = "👑🎂";
             baseText = "生日快樂！星光凝聚中，屬於你的自律新征程正在全速擴張！";
@@ -3015,7 +3013,7 @@
         localStorage.setItem('365_journal_start_date', document.getElementById('journal-start-date-picker').value); updateDashboard();
     }
 
-    // 🛠️ 核心修正：手帳模式下手動登載/編輯更新的功能入口
+    // 🛠️ 核心功能：手帳手動登載 / 修改編輯入口
     function handleManualJournalSubmit() {
         const dayInput = document.getElementById('manual-journal-day').value;
         const amtInput = document.getElementById('manual-journal-amt').value;
@@ -3028,7 +3026,7 @@
             return;
         }
         if (isNaN(amt) || amt <= 0) {
-            alert("請輸入有效的金額喔！");
+            alert("請輸入有效的儲蓄金額喔！");
             return;
         }
 
@@ -3043,11 +3041,11 @@
             }
         }
 
-        // 檢查此天數格子原先是否已經存在
+        // 檢查此格是否已經存在
         const existIdx = journalListHistory.findIndex(c => c.amount === day);
 
         if (existIdx !== -1) {
-            // 直接編輯覆蓋舊資料
+            // 直接覆蓋並更新舊資料
             journalListHistory[existIdx].dateStr = dateStr;
             journalListHistory[existIdx].dayIndex = day;
             journalListHistory[existIdx].customValue = amt;
@@ -3057,14 +3055,14 @@
         }
 
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
-        triggerConfettiStorm();
+        triggerConfettiStorm(); 
         playThemeSound();
         
         clearManualInputs();
         renderGrid();
     }
 
-    // 🛠️ 新增：處理獨立按鈕的刪除歷史手帳功能
+    // 🛠️ 核心功能：獨立一鍵刪除手帳功能
     function handleManualJournalDelete() {
         const dayInput = document.getElementById('manual-journal-day').value;
         const day = parseInt(dayInput);
@@ -3082,7 +3080,7 @@
         renderGrid();
     }
 
-    // 🛠️ 輔助函式：重置並清空手帳輸入欄位，並將刪除按鈕隱藏
+    // 🛠️ 輔助功能：重置清空欄位並將刪除按鈕收起
     function clearManualInputs() {
         document.getElementById('manual-journal-day').value = '';
         document.getElementById('manual-journal-amt').value = '';
@@ -3133,7 +3131,7 @@
         localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
         
         const finalCount = journalListHistory.length;
-        triggerConfettiStorm();
+        triggerConfettiStorm(); 
         playThemeSound();
         renderGrid(); 
         tempPendingAmount = null;
@@ -3228,7 +3226,7 @@
                         else cell.innerHTML = `💸`;
                     }
                     
-                    // 🛠️ 點擊網格：同步帶入 編輯/刪除 資料庫，並解鎖刪除按鈕
+                    // 🛠️ 網格點擊事件優化：帶入歷史紀錄到上方輸入框，並偵測是否秀出刪除鍵
                     cell.onclick = () => {
                         if(isJournalStyle) {
                             document.getElementById('manual-journal-day').value = i;
@@ -3313,12 +3311,11 @@
             if (journalListHistory.length === 0) {
                 listContainer.innerHTML = `<div style="text-align:center; padding:12px; font-size:0.85rem; opacity:0.5;">${d.noLedger}</div>`;
             } else {
+                // 🛠️ 流水帳點擊項目：亦能觸發編輯與「刪除按鈕」顯示
                 [...journalListHistory].reverse().forEach(item => {
                     const card = document.createElement('div'); card.className = 'journal-row-card';
                     const displayAmt = item.customValue !== undefined ? item.customValue : item.amount;
                     card.innerHTML = `<span class="j-day-tag">Grid ${item.amount}</span><span style="font-weight:bold; font-size:0.85rem;">📅 ${item.dateStr}</span><span style="font-weight:900; color:#84a59d;">+$${displayAmt}</span>`;
-                    
-                    // 🛠️ 歷史清單點擊時也同步啟動「刪除模式」
                     card.onclick = () => {
                         document.getElementById('manual-journal-day').value = item.amount;
                         document.getElementById('manual-journal-amt').value = displayAmt;
@@ -3451,7 +3448,7 @@
         const d = LANG_DICTIONARY[currentLang];
         const bBoxDisplay = document.getElementById('celebrity-display');
         if (bBoxDisplay && config) {
-            let tName = config.name[currentLang] || config.name['zh-TW'];
+            let tName = config.name[k] || config.name['zh-TW'];
             bBoxDisplay.innerHTML = d.boxWelcome.replace('${name}', tName);
         }
         
