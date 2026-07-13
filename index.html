@@ -2963,20 +2963,16 @@ function isBirthdayToday() {
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
     ];
 
-    function refreshDailyWisdom(isClick = false) {
-    // 🌟 生日彩蛋：1/19 獨家壽星金句 (直接插入在 function 內的最頂部)
+    let customWisdomOffset = 0;
+function refreshDailyWisdom(isClick = false) {
+    // 🌟 生日彩蛋：1/19 獨家壽星金句
     if (isBirthdayToday()) {
-        document.getElementById('display-wisdom-text').innerText = "“新的一歲，榮枯流轉，初心不變。今天存下的每一筆自由，都是全宇宙為你慶生的賀禮。”";
+        document.getElementById('display-wisdom-text').innerText = "“新的一歲，榮枯流轉，初心不變。今天存下的每一筆自由，都是全宇宙為妳慶生的賀禮。”";
         document.getElementById('display-wisdom-src').innerText = "——《星空祝願大廳》";
         if (isClick) playThemeSound();
-        return; // 這裡會直接 return，不會動到你後面原本的上百條語錄邏輯
+        return; // 成功攔截
     }
-
-    // ... 你原本後續的語錄讀取代碼不變 ...
-}
     
-    let customWisdomOffset = 0;
-    function refreshDailyWisdom(isClick = false) {
         const themeConfig = THEME_CONTENT_BANK[activeThemeKey] || THEME_CONTENT_BANK.classic;
         const currentQuotes = themeConfig.quotes[currentLang] || themeConfig.quotes['zh-TW'];
         let index = (new Date().getDate() + customWisdomOffset) % currentQuotes.length;
@@ -3001,26 +2997,23 @@ function isBirthdayToday() {
         else if (currentMode === 'week_52') { currentCount = checkedWeeks52.length; maxUnits = 52; }
         else currentCount = Object.keys(隨喜Map).length;
 
+        function refreshBlueprintStatus(isClick = false) {
+        // 1. 保留你原本前面抓取 currentCount, maxUnits, baseText, goalStr, d 的所有計算代碼
+        // (畫面上沒顯示完全，但請確保這幾行計算有在最上面)
         let pct = ((currentCount / maxUnits) * 100).toFixed(2);
         let runner = THEME_CONTENT_BANK[activeThemeKey]?.runnerIcon || '🚀';
+
+        // 🌟 生日彩蛋：1/19 藍圖抬頭冠上壽星圖示 (安全收納在 Function 內部)
+        if (isBirthdayToday()) {
+            runner = "👑🎂";
+            baseText = "生日快樂！星光凝聚中，屬於你的自律新征程正在全速擴張！";
+        }
+
+        // 2. 最終渲染 (全網頁「唯一」負責將結果塞入畫面的關鍵行)
         document.getElementById('blueprint-status-text').innerText = `${runner} 【${d.blueprintProgress} ${pct}%】：${baseText} ${d.blueprintWish}【${goalStr}】`;
+        
         if (isClick) { customBlueprintOffset++; playThemeSound(); }
     }
-
-        function refreshBlueprintStatus(isClick = false) {
-    // ... 你原本前面計算百分比、抓取願望清單的代碼不變 ...
-
-    // 🌟 生日彩蛋：1/19 藍圖抬頭冠上壽星圖示 (放在最後 innerText 渲染之前)
-    if (isBirthdayToday()) {
-        runner = "👑🎂";
-        baseText = "生日快樂！星光凝聚中，屬於你的自律新征程正在全速擴張！";
-    }
-
-    // 這是你原本就有的渲染指令，它會自動套用上面改寫後的 runner 與 baseText
-    document.getElementById('blueprint-status-text').innerText = `${runner} 【${d.blueprintProgress} ${pct}%】：${baseText} ${d.blueprintWish}【${goalStr}】`;
-    
-    // ... 後續不變 ...
-}
         
     function changeSavingMode(newMode) {
         currentMode = newMode; localStorage.setItem('global_saving_mode', newMode); renderGrid();
