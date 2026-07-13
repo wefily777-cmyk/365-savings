@@ -85,9 +85,16 @@
         .journal-title-bar { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; margin-bottom: 12px; font-weight: 800; font-size: 1rem; }
         
         .journal-container-list { max-height: 240px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        
+        /* 流水帳行卡片排版優化：加入 flex 與對齊，方便右側垃圾桶擺放 */
         .journal-row-card { display: flex; align-items: center; justify-content: space-between; background-color: var(--cell-bg); padding: 14px 16px; border-radius: 16px; box-shadow: var(--inner-shadow); border: 1px solid var(--border-color); cursor: pointer; transition: transform 0.2s; }
         .journal-row-card:active { transform: scale(0.98); }
         .j-day-tag { font-size: 0.7rem; font-weight: 800; color: #f28482; background-color: rgba(242, 132, 130, 0.1); padding: 3px 8px; border-radius: 8px; }
+
+        /* 🛠️ 新增：垃圾桶按鈕精緻化樣式與動態縮放效果 */
+        .j-delete-icon-btn { background: none; border: none; font-size: 1.15rem; cursor: pointer; padding: 4px 8px; margin-left: 6px; border-radius: 8px; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+        .j-delete-icon-btn:hover { background-color: rgba(230, 57, 70, 0.15); transform: scale(1.15); }
+        .j-delete-icon-btn:active { transform: scale(0.85); }
 
         .random-btn { background: var(--btn-gradient); color: white; border: none; padding: 16px; font-size: 0.95rem; font-weight: 800; border-radius: 18px; cursor: pointer; box-shadow: 0 8px 24px rgba(242, 132, 130, 0.2); width: 100%; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .random-btn:active { transform: scale(0.96); }
@@ -110,7 +117,7 @@
         .settings-btn-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; width: 100%; box-sizing: border-box; }
         .settings-btn-grid button { width: 100%; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; }
         .settings-item-btn { background: rgba(0,0,0,0.03); border: 1px solid var(--border-color); padding: 12px; border-radius: 15px; font-size: 0.8rem; font-weight: bold; color: var(--text-color); cursor: pointer; transition: all 0.2s; text-align: center; }
-        .settings-item-btn.active { background: var(--btn-gradient); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(242, 132, 130, 0.2); }
+        .settings-item-btn.active { background: var(--btn-gradient); color: white; border-color: transparent; box-shadow: 0 4px 12px rgba(242, 132, 165, 0.2); }
 
         .custom-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.3); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; z-index: 9999; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .custom-modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -289,13 +296,11 @@
     let tempPendingAmount = null;
     let webAudioCtx = null; let mainBgmNode = null;
 
-    // 🌟 生日彩蛋：判斷今天是否為 1/19
     function isBirthdayToday() {
         const today = new Date();
         return (today.getMonth() === 0 && today.getDate() === 19);
     }
 
-    // 🌟 生日彩蛋：集中管理的豪華噴花功能
     function triggerConfettiStorm() {
         if (isBirthdayToday()) {
             const end = Date.now() + 1500;
@@ -339,7 +344,7 @@
             lblWisdom: "📜 每日心灵指引 / Daily Wisdom", lblMusic: "🎵 背景沉浸自然音效 / Nature Sounds",
             boxOpenTitle: "🎰 盲盒指引开启", boxOpenBody: "今日面额：<span style='font-size:1.6rem; color:#84a59d;'>$${amt}</span> 元<br><br>确定要将此交易登载手账吗？",
             btnConfirm: "确认放入储蓄瓶", btnCancel: "取消", btnMilestoneClose: "收下祝福，继续前行",
-            resetBtn: "🔄 重置大厅所有储蓄数据", resetConfirm: "⚠️ 确定要重置大厅资料吗？这将会清空本地快取中累积的手账天数、完成进度与金额，清除后资料将完全无法复原喔！",
+            resetBtn: "🔄 重置大厅所有储蓄数据", resetConfirm: "⚠️ 确定要重置大厅资料吗？这将会清空本地快取中累积的手账天数、完成进度与金額，清除后资料将完全无法复原喔！",
             resetSuccess: "数据清空成功！即将为您重新载入大厅网页。", noLedger: "🫙 目前手账尚无登载纪录", ledgerUnit: "笔",
             blueprintProgress: "进度", blueprintWish: "愿望", blindboxAlert: "🎰 盲盒功能专属于【365天防误触智慧手账模式】喔！",隨喜Prompt: "💖 Day ${id} 自由随喜 金額："
         },
@@ -377,7 +382,6 @@
         }
     };
 
-    // 🌟 已整合 txt 完整字庫並修正語法 Bug
     const THEME_CONTENT_BANK = {
         classic: { 
             name: { 'zh-TW': "🌌 經典原版", 'zh-CN': "🌌 经典原版", 'en': "🌌 Ultimate Classic", 'ja': "🌌 クラシック原版" },
@@ -406,7 +410,7 @@
                     { source: "Charlie Munger", text: "To get what you want, you have to deserve what you want. Discipline is the core." }
                 ],
                 'ja': [
-                    { source: "ウォーレン・バフェット", text: "貯金を始めて早めに投資すること、これは最も身につける価値のある習慣です。川が集まれば、やがて大海原になります。" },
+                    { source: "ウォーレン・バフェット", text: "貯金を始めて早めに投資すること、这是最も身につける価値のある習慣です。川が集まれば、やがて大海原になります。" },
                     { source: "チャーリー・マンガー", text: "より高いレベルに到達するには、並外れた自律が必要です。貯蓄されたすべての資金は、未来の自由へのチップです。" }
                 ]
             },
@@ -451,7 +455,7 @@
                     'zh-TW': { title: "🧘 靜水流深．初窺定力", body: "一月之期，心不隨物轉，銀錢自聚。\n你在喧囂的世界裡，為自己存下了一份篤定與清靜。" },
                     'zh-CN': { title: "🧘 静水流深．初窥定力", body: "一月之期，心不随物转，银钱自聚。\n你在喧嚣的世界里，为自己存下了一份笃定与清静。" },
                     'en': { title: "🧘 Quiet Stream: 30 Days Of Calm", body: "One month has filled. Your mind stays calm and wealth accumulates naturally.\nYou saved a field of inner peace in this noisy world." },
-                    'ja': { title: "🧘 静水流深：30日の定力", body: "一ヶ月が経過。心が物質に振り回されず、金銀が自然と集まります。\nあなたは喧騒に満ちた世界の中で、確かなる静寂を蓄えました。" }
+                    'ja': { title: "🧘 定力：30日達成", body: "一ヶ月が経過。心が物質に振り回されず、金銀が自然と集まります。\nあなたは喧騒に満ちた世界の中で、確かなる静寂を蓄えました。" }
                 },
                 100: {
                     'zh-TW': { title: "⏳ 百日功成．因果福報", body: "百日守恆，念茲在茲。\n這100天的定力是一場修行，你親手種下的善因，正結出豐碩的福果。" },
@@ -581,7 +585,7 @@
     const monthsData = [
         { name: "一月", start: 1, end: 31 }, { name: "二月", start: 32, end: 59 },
         { name: "三月", start: 60, end: 90 }, { name: "四月", start: 91, end: 120 },
-        { name: "五月", start: 121, end: 151 }, { name: "六月", start: 152, end: 181 },
+        { name: "五月", start: 121, end: 151 }, { name: "六月", start: 152, open: 152, end: 181 },
         { name: "七月", start: 182, end: 212 }, { name: "八月", start: 213, end: 243 },
         { name: "九月", start: 244, end: 273 }, { name: "十月", start: 274, open: 274, end: 304 },
         { name: "十一月", start: 305, end: 334 }, { name: "十二月", start: 335, end: 365 }
@@ -643,7 +647,6 @@
         localStorage.setItem('365_journal_start_date', document.getElementById('journal-start-date-picker').value); updateDashboard();
     }
 
-    // 🛠️ 核心修改：升級手動登載功能，使其具備覆蓋編輯功能
     function handleManualJournalSubmit() {
         const dayInput = document.getElementById('manual-journal-day').value;
         const amtInput = document.getElementById('manual-journal-amt').value;
@@ -667,16 +670,13 @@
             dateStr = sDate.toISOString().split('T')[0];
         }
 
-        // 尋找是否已有此格紀錄
         const existIdx = journalListHistory.findIndex(c => c.amount === day);
 
         if (existIdx !== -1) {
-            // 編輯覆蓋舊資料
             journalListHistory[existIdx].dateStr = dateStr;
             journalListHistory[existIdx].dayIndex = day;
             journalListHistory[existIdx].customValue = amt;
         } else {
-            // 新增全新資料
             journalListHistory.push({ dayIndex: day, dateStr: dateStr, amount: day, customValue: amt, isPatched: true });
         }
 
@@ -688,25 +688,39 @@
         renderGrid();
     }
 
-    // 🛠️ 核心新增：獨立手帳刪除功能
-    function handleManualJournalDelete() {
-        const dayInput = document.getElementById('manual-journal-day').value;
-        const day = parseInt(dayInput);
-
-        if (isNaN(day) || day < 1 || day > 365) return;
-
+    // 🛠️ 輔助功能：執行指定天數紀錄的刪除 (獨立抽出以供多處調用)
+    function executeJournalItemDelete(day) {
         const existIdx = journalListHistory.findIndex(c => c.amount === day);
         if (existIdx !== -1) {
             journalListHistory.splice(existIdx, 1);
             localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
             playThemeSound();
         }
-
         clearManualInputs();
         renderGrid();
     }
 
-    // 🛠️ 輔助功能：重置輸入框並隱藏刪除按鈕
+    // 🛠️ 核心修改：原有頂端手動刪除區塊按鈕邏輯同步加入跳出詢問
+    function handleManualJournalDelete() {
+        const dayInput = document.getElementById('manual-journal-day').value;
+        const day = parseInt(dayInput);
+        if (isNaN(day) || day < 1 || day > 365) return;
+
+        if (confirm(`⚠️ 確定要刪除 Grid ${day} 的手帳紀錄嗎？`)) {
+            executeJournalItemDelete(day);
+        }
+    }
+
+    // 🛠️ 核心新增：點擊每條清單最右側垃圾桶專用的獨立刪除問詢邏輯
+    function handleListRowTrashDelete(day, event) {
+        // 阻止點擊事件向外擴散冒泡，以避免誤觸整條卡片的帶回編輯功能
+        if (event) event.stopPropagation();
+        
+        if (confirm(`⚠️ 確定要刪除此筆手帳紀錄 (Grid ${day}) 嗎？`)) {
+            executeJournalItemDelete(day);
+        }
+    }
+
     function clearManualInputs() {
         document.getElementById('manual-journal-day').value = '';
         document.getElementById('manual-journal-amt').value = '';
@@ -851,7 +865,6 @@
                         else cell.innerHTML = `💸`;
                     }
                     
-                    // 🛠️ 核心修改：點擊網格格子，完美帶入天數、金額，並判斷是否秀出「刪除按鈕」
                     cell.onclick = () => {
                         if(isJournalStyle) {
                             document.getElementById('manual-journal-day').value = i;
@@ -923,11 +936,22 @@
             if (journalListHistory.length === 0) {
                 listContainer.innerHTML = `<div style="text-align:center; padding:12px; font-size:0.85rem; opacity:0.5;">${d.noLedger}</div>`;
             } else {
-                // 🛠️ 核心修改：點擊流水手帳卡片，一樣可以完美帶回上方輸入框，並顯示刪除按鈕
+                // 🛠️ 核心修改：清單中包入垃圾桶容器布局，並綁定 handleListRowTrashDelete 進行詢問刪除
                 [...journalListHistory].reverse().forEach(item => {
                     const card = document.createElement('div'); card.className = 'journal-row-card';
                     const displayAmt = item.customValue !== undefined ? item.customValue : item.amount;
-                    card.innerHTML = `<span class="j-day-tag">Grid ${item.amount}</span><span style="font-weight:bold; font-size:0.85rem;">📅 ${item.dateStr}</span><span style="font-weight:900; color:#84a59d;">+$${displayAmt}</span>`;
+                    
+                    card.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+                            <span class="j-day-tag">Grid ${item.amount}</span>
+                            <span style="font-weight:bold; font-size:0.85rem;">📅 ${item.dateStr}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <span style="font-weight:900; color:#84a59d;">+$${displayAmt}</span>
+                            <button class="j-delete-icon-btn" onclick="handleListRowTrashDelete(${item.amount}, event)">🗑️</button>
+                        </div>
+                    `;
+                    
                     card.onclick = () => {
                         document.getElementById('manual-journal-day').value = item.amount;
                         document.getElementById('manual-journal-amt').value = displayAmt;
