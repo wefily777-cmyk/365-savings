@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>祈星渡仁 — 萬用百變存錢大廳</title>
+    <title>萬用百變存錢大廳</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -135,7 +135,7 @@
 
 <div class="container">
     <div class="top-header-bar">
-        <h1 id="app-title">✨ 祈星渡仁 — 萬用百變存錢大廳 ✨</h1>
+        <h1 id="app-title">✨ 萬用百變存錢大廳 ✨</h1>
         <button class="gear-btn" onclick="openSettingsPanel()">⚙️</button>
     </div>
 
@@ -248,9 +248,23 @@
 </div>
 
 <div class="custom-modal-overlay" id="settings-modal-layer">
+
+    <div>
+    <div class="settings-row-title" id="lbl-setting-birthday">🎂 個人生日設定</div>
+    <div style="display: flex; gap: 8px;">
+        <input type="date" id="user-birthday-picker" class="config-input" style="flex: 1;" onchange="saveBirthdaySetting(this.value)">
+    </div>
+</div>
+
     <div class="custom-modal">
         <div class="settings-panel-box">
-            <div>
+           <!-- 貼在 settings-panel-box 內部的最上方 -->
+<div>
+    <div class="settings-row-title" id="lbl-setting-birthday">🎂 個人生日設定</div>
+    <div style="display: flex; gap: 8px;">
+        <input type="date" id="user-birthday-picker" class="config-input" style="flex: 1;" onchange="saveBirthdaySetting(this.value)">
+    </div>
+</div>
                 <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
                 <div class="settings-btn-grid">
                     <button class="settings-item-btn lang-item" id="s-lang-zh-TW" onclick="changeLanguage('zh-TW')">繁體中文</button>
@@ -280,26 +294,53 @@
 </div>
 
 <script>
-    let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
-    let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
-    let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
-    let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true';
-    let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
+// 讀取與儲存生日設定
+let userBirthday = localStorage.getItem('user_birthday_config') || '';
 
-    let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
-    let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
-    let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
-    let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
-    let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
-    let triggeredMilestones = JSON.parse(localStorage.getItem('triggered_milestones_v2')) || [];
-
-    let tempPendingAmount = null;
-    let webAudioCtx = null; let mainBgmNode = null;
-
-    function isBirthdayToday() {
-        const today = new Date();
-        return (today.getMonth() === 0 && today.getDate() === 19);
+// 頁面初始化時自動載入日期
+document.addEventListener('DOMContentLoaded', () => {
+    const bdayInput = document.getElementById('user-birthday-picker');
+    if (bdayInput && userBirthday) {
+        bdayInput.value = userBirthday;
     }
+});
+
+function saveBirthdaySetting(val) {
+    userBirthday = val;
+    localStorage.setItem('user_birthday_config', val);
+}
+
+// 修正後的生日判斷函式（連動設定框 + 避開時區偏差）
+function isBirthdayToday() {
+    if (!userBirthday) return false;
+    const today = new Date();
+    // 使用字串切割，最準確且不會受時區影響
+    const parts = userBirthday.split('-');
+    if (parts.length !== 3) return false;
+    
+    const bMonth = parseInt(parts[1], 10) - 1; // 月份從 0 開始計算
+    const bDay = parseInt(parts[2], 10);
+    
+    return (today.getMonth() === bMonth && today.getDate() === bDay);
+}
+
+// 全局變數初始化
+let currentMode = localStorage.getItem('global_saving_mode') || '365_journal';
+let currentLang = localStorage.getItem('global_app_language') || 'zh-TW';
+let activeThemeKey = localStorage.getItem('active_spiritual_theme_v2') || 'classic';
+let isBgmEnabled = localStorage.getItem('bgm_engine_enabled') === 'true';
+let currentCustomFixedAmt = parseInt(localStorage.getItem('custom_fixed_config_amt')) || 100;
+
+let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
+let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
+let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
+let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
+let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
+let triggeredMilestones = JSON.parse(localStorage.getItem('triggered_milestones_v2')) || [];
+
+let tempPendingAmount = null;
+let webAudioCtx = null; 
+let mainBgmNode = null;
 
     function triggerConfettiStorm() {
         if (isBirthdayToday()) {
@@ -317,7 +358,7 @@
 
     const LANG_DICTIONARY = {
         'zh-TW': {
-            title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 儲蓄核心：", lblCustomAmt: "🔧 設定自訂面額：", btnApply: "套用",
+            title: "✨ 萬用百變存錢大廳 ✨", lblCore: "⚙️ 儲蓄核心：", lblCustomAmt: "🔧 設定自訂面額：", btnApply: "套用",
             lblStartDate: "📅 手帳起始日：", lblTarget: "🎯 儲蓄目標願望藍圖", lblJournal: "📝 儲蓄流水手帳", 
             lblBoxTitle: "🎲 幸運儲蓄盲盒抽獎", btnBoxDraw: "抽取今日驚喜任務",
             lblDashTotal: "目前已存總金額", lblDashDoneDay: "已完成天數", lblDashDoneWeek: "已完成週數", lblDashProg: "目前總進度",
@@ -333,7 +374,7 @@
             blueprintProgress: "進度", blueprintWish: "願望", blindboxAlert: "🎰 盲盒功能專屬於【365天防誤觸智慧手帳模式】喔！",隨喜Prompt: "💖 Day ${id} 自由隨喜 金額："
         },
         'zh-CN': {
-            title: "✨ 祈星渡仁 — 萬用百變存錢大廳 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自订面额：", btnApply: "套用",
+            title: "✨ 萬用百變存錢大廳 ✨", lblCore: "⚙️ 储蓄核心：", lblCustomAmt: "🔧 设定自订面额：", btnApply: "套用",
             lblStartDate: "📅 手账起始日：", lblTarget: "🎯 储蓄目标愿望蓝图", lblJournal: "📝 储蓄流水手账", 
             lblBoxTitle: "🎲 幸运储蓄盲盒抽奖", btnBoxDraw: "抽取今日惊喜任务",
             lblDashTotal: "目前已存总金额", lblDashDoneDay: "已完成天数", lblDashDoneWeek: "已完成周数", lblDashProg: "目前总进度",
@@ -365,7 +406,7 @@
             blueprintProgress: "Progress", blueprintWish: "Wish", blindboxAlert: "🎰 Blind Box feature is exclusive to the [365-Day Intelligent Ledger Mode]!",隨喜Prompt: "💖 Day ${id} Free Flow Open Amount:"
         },
         'ja': {
-            title: "✨ 祈星渡仁 — 貯金大殿堂 ✨", lblCore: "⚙️ 貯金コア：", lblCustomAmt: "🔧 カスタム金額：", btnApply: "適用",
+            title: "✨ 貯金大殿堂 ✨", lblCore: "⚙️ 貯金コア：", lblCustomAmt: "🔧 カスタム金額：", btnApply: "適用",
             lblStartDate: "📅 開始日設定：", lblTarget: "🎯 願いの設計図目標", lblJournal: "📝 貯金履歴手帳", 
             lblBoxTitle: "🎲 ラッキー貯金ガチャ", btnBoxDraw: "今日のミッションを引く",
             lblDashTotal: "現在の総貯金額", lblDashDoneDay: "達成日数", lblDashDoneWeek: "達成週数", lblDashProg: "現在の進捗率",
@@ -2965,7 +3006,7 @@
                     'zh-CN': { title: "👑 荣耀冠冕．岁月冠冕", body: "🔔 哈利路亚！365天丰盛通关！ 🔔\n你用一整年的坚持为岁月冠上恩典的冠冕，得享终极的富足与平安！" },
                     'en': { title: "👑 Golden Crown Won: 365 Days Eternal", body: "🔔 Hallelujah! 365 Days Complete Triumph! 🔔\nYou crowned the year with your absolute iron consistency. Enter into the palace of true peace." },
                     'ja': { title: "👑 栄光の冠：365日の栄誉", body: "🔔 ハレルヤ！365日豊かなる大勝利！ 🔔\nあなたの一年間の粘り強さは、歳月に素晴らしい栄光の冠を授けました。究極の富と平安があなたと共にあります！" }
-                }
+                ]
             }
         }
     };
@@ -3043,19 +3084,36 @@
     }
 
     function handleManualJournalSubmit() {
-        const dayInput = document.getElementById('manual-journal-day').value;
-        const amtInput = document.getElementById('manual-journal-amt').value;
-        const day = parseInt(dayInput);
-        const amt = parseInt(amtInput);
+    const dayInput = document.getElementById('manual-journal-day');
+    const amtInput = document.getElementById('manual-journal-amt');
+    
+    const day = parseInt(dayInput.value);
+    const amt = Number(amtInput.value); // 強制轉為純數字，防止金額暴增
 
-        if (isNaN(day) || day < 1 || day > 365) {
-            alert(currentLang === 'en' ? "Please enter a valid Day (1-365)" : "請輸入有效的天數 (1-365)");
-            return;
-        }
-        if (isNaN(amt) || amt <= 0) {
-            alert("請輸入有效的金額喔！");
-            return;
-        }
+    if (!day || day < 1 || day > 365 || isNaN(amt) || amt <= 0) {
+        alert('請輸入有效的 Day (1-365) 與正確金額！');
+        return;
+    }
+
+    // 1. 新增手帳流水帳歷史
+    journalListHistory.push({ day: day, amt: amt, date: new Date().toLocaleDateString() });
+    localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+
+    // 2. 自動點亮下方對應 Day 格子（變綠色）
+    if (!checkedDays365.includes(day)) {
+        checkedDays365.push(day);
+        localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays365));
+    }
+
+    // 3. 清空輸入框並刷新
+    dayInput.value = '';
+    amtInput.value = '';
+    
+    if (typeof renderJournalList === 'function') renderJournalList();
+    if (typeof renderMonthsGrid === 'function') renderMonthsGrid();
+    if (typeof updateDashboard === 'function') updateDashboard();
+    if (typeof triggerConfettiStorm === 'function') triggerConfettiStorm();
+}
 
         let dateStr = new Date().toISOString().split('T')[0];
         const startDateVal = document.getElementById('journal-start-date-picker').value;
@@ -3308,22 +3366,43 @@
     }
 
     function updateDashboard() {
-        const d = LANG_DICTIONARY[currentLang];
-        let totalSaved = 0; let daysCount = 0; let maxUnits = 365;
-        if (currentMode === '365_阶梯') { totalSaved = checkedDays365.reduce((a,b)=>a+b,0); daysCount = checkedDays365.length; }
-        else if (currentMode === '365_journal') { 
-            totalSaved = journalListHistory.reduce((a,b)=>a + (b.customValue !== undefined ? b.customValue : b.amount), 0); 
-            daysCount = journalListHistory.length; 
-        }
-        else if (currentMode === 'custom_fixed') { totalSaved = checkedDaysCustom.length * currentCustomFixedAmt; daysCount = checkedDaysCustom.length; }
-        else if (currentMode === 'week_52') { totalSaved = checkedWeeks52.reduce((a,b)=>a+(b*10),0); daysCount = checkedWeeks52.length; maxUnits = 52; }
-        else { for(let k in 隨喜Map) totalSaved += 隨喜Map[k]; daysCount = Object.keys(隨喜Map).length; }
+    let totalSaved = 0;
 
-        let pct = ((daysCount / maxUnits) * 100).toFixed(2);
-        document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
-        document.getElementById('days-count').innerText = `${daysCount} / ${maxUnits}`;
-        document.getElementById('progress-percent').innerText = `${pct}%`;
-        document.getElementById('dynamic-water-fluid').style.width = `${pct}%`;
+    if (currentMode === '365_journal') {
+        // 從手帳紀錄計算加總，確保每一筆 amt 都被轉成純數字
+        totalSaved = journalListHistory.reduce((sum, item) => {
+            const val = Number(item.amt) || 0;
+            return sum + val;
+        }, 0);
+    } else if (currentMode === '365_阶梯') {
+        // 經典 365 階梯：Day 1 = $1, Day N = $N
+        totalSaved = checkedDays365.reduce((sum, day) => sum + Number(day), 0);
+    } else if (currentMode === 'custom_fixed') {
+        // 固定金額法：勾選天數 * 單筆固定面額
+        totalSaved = checkedDaysCustom.length * Number(currentCustomFixedAmt);
+    } else if (currentMode === 'week_52') {
+        // 52 週階梯：第 W 週 = W * 10 (或自訂比率)
+        totalSaved = checkedWeeks52.reduce((sum, week) => sum + (Number(week) * 10), 0);
+    } else if (currentMode === '隨喜') {
+        // 隨喜模式：加總物件內數值
+        totalSaved = Object.values(隨喜Map).reduce((sum, val) => sum + (Number(val) || 0), 0);
+    }
+
+    // 更新 Dashboard 面板數據
+    document.getElementById('total-saved').innerText = `$${totalSaved.toLocaleString()}`;
+    
+    // 更新天數與百分比
+    const doneCount = checkedDays365.length;
+    document.getElementById('days-count').innerText = `${doneCount} / 365`;
+    const percent = ((doneCount / 365) * 100).toFixed(1);
+    document.getElementById('progress-percent').innerText = `${percent}%`;
+
+    // 同步更新水瓶水位進度
+    const waterFluid = document.getElementById('dynamic-water-fluid');
+    if (waterFluid) {
+        waterFluid.style.width = `${Math.min(percent, 100)}%`;
+    }
+}
 
         const listContainer = document.getElementById('journal-list-render-target');
         if (listContainer) {
@@ -3537,18 +3616,156 @@
     }
 
     window.onload = function() {
-        document.getElementById('main-saving-mode-select').value = currentMode;
-        document.getElementById('target-saving-input').value = localStorage.getItem('goal_365_journal') || '夢想計劃';
+        // 恢復 UI 選擇狀態
+        const modeSelect = document.getElementById('main-saving-mode-select');
+        if (modeSelect && typeof currentMode !== 'undefined') modeSelect.value = currentMode;
+        
+        const targetInput = document.getElementById('target-saving-input');
+        if (targetInput) targetInput.value = localStorage.getItem('goal_365_journal') || '夢想計劃';
         
         const savedStartDate = localStorage.getItem('365_journal_start_date');
-        if (savedStartDate) {
-            document.getElementById('journal-start-date-picker').value = savedStartDate;
+        const startDatePicker = document.getElementById('journal-start-date-picker');
+        if (savedStartDate && startDatePicker) {
+            startDatePicker.value = savedStartDate;
         }
 
-        changeLanguage(currentLang);
-        if(isBgmEnabled) startSpiritualBgmEngine();
+        if (typeof changeLanguage === 'function' && typeof currentLang !== 'undefined') {
+            changeLanguage(currentLang);
+        }
+        if (typeof isBgmEnabled !== 'undefined' && isBgmEnabled && typeof startSpiritualBgmEngine === 'function') {
+            startSpiritualBgmEngine();
+        }
+
+        // 執行 365 格子與儀表板渲染
+        initApp();
     }
-    document.addEventListener('click', function() { if(isBgmEnabled) startSpiritualBgmEngine(); }, { once: false });
+
+    document.addEventListener('click', function() { 
+        if (typeof isBgmEnabled !== 'undefined' && isBgmEnabled && typeof startSpiritualBgmEngine === 'function') {
+            startSpiritualBgmEngine(); 
+        }
+    }, { once: false });
+
+    // 2. 初始化核心功能
+    function initApp() {
+        renderMainGrid();
+        updateDashboard();
+        if (typeof refreshDailyWisdom === 'function') {
+            refreshDailyWisdom(false);
+        }
+    }
+
+    // 3. 渲染 365 天格圖
+    function renderMainGrid() {
+        const gridTarget = document.getElementById('months-grid');
+        if (!gridTarget) return;
+        gridTarget.innerHTML = '';
+
+        if (typeof checkedDays365 === 'undefined') {
+            window.checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
+        }
+
+        let html = '<div class="month-column"><div class="days-list">';
+        for (let i = 1; i <= 365; i++) {
+            const isChecked = checkedDays365.includes(i);
+            html += `<button class="day-cell ${isChecked ? 'checked' : ''}" onclick="toggleDay(${i})">Day ${i}</button>`;
+        }
+        html += '</div></div>';
+        gridTarget.innerHTML = html;
+    }
+
+    // 4. 點擊天數開關
+    function toggleDay(day) {
+        if (typeof checkedDays365 === 'undefined') {
+            window.checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
+        }
+        
+        const idx = checkedDays365.indexOf(day);
+        if (idx > -1) {
+            checkedDays365.splice(idx, 1);
+        } else {
+            checkedDays365.push(day);
+            if (typeof triggerConfettiStorm === 'function') {
+                triggerConfettiStorm();
+            }
+        }
+        localStorage.setItem('365_savings_progress', JSON.stringify(checkedDays365));
+        
+        renderMainGrid();
+        updateDashboard();
+    }
+
+    // 5. 即時更新儀表板金額與進度
+    function updateDashboard() {
+        if (typeof checkedDays365 === 'undefined') {
+            window.checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
+        }
+
+        const totalSavedEl = document.getElementById('total-saved');
+        const daysCountEl = document.getElementById('days-count');
+        const progressPercentEl = document.getElementById('progress-percent');
+
+        let total = checkedDays365.reduce((sum, d) => sum + d, 0);
+        let count = checkedDays365.length;
+        let percent = ((count / 365) * 100).toFixed(1);
+
+        if (totalSavedEl) totalSavedEl.innerText = `$${total.toLocaleString()}`;
+        if (daysCountEl) daysCountEl.innerText = `${count} / 365`;
+        if (progressPercentEl) progressPercentEl.innerText = `${percent}%`;
+    }
+// ====== 第三步：設定彈窗開關與生日彩蛋對接 ======
+
+// 1. 設定彈窗開啟與關閉控制
+function openSettingsPanel() {
+    const modal = document.getElementById('settings-modal-layer');
+    if (modal) modal.classList.add('active');
+}
+
+function closeSettingsPanel() {
+    const modal = document.getElementById('settings-modal-layer');
+    if (modal) modal.classList.remove('active');
+}
+
+// 2. 讀取與儲存生日設定
+let userBirthday = localStorage.getItem('user_birthday_config') || '';
+
+function saveBirthdaySetting(val) {
+    userBirthday = val;
+    localStorage.setItem('user_birthday_config', val);
+}
+
+// 3. 判斷今天是否為使用者生日
+function isBirthdayToday() {
+    if (!userBirthday) return false;
+    const today = new Date();
+    const parts = userBirthday.split('-');
+    if (parts.length !== 3) return false;
+    
+    const bMonth = parseInt(parts[1], 10) - 1;
+    const bDay = parseInt(parts[2], 10);
+    
+    return (today.getMonth() === bMonth && today.getDate() === bDay);
+}
+
+// 4. 生日彩蛋 / 存錢慶祝特效 (Confetti)
+function triggerConfettiStorm() {
+    if (typeof confetti !== 'function') return;
+
+    // 若當天是生日，噴出長達 1.5 秒的金黃色特別禮花！
+    if (isBirthdayToday()) {
+        const end = Date.now() + 1500;
+        const colors = ['#fbc531', '#e1b12c', '#4cd137', '#00a8ff', '#e84118'];
+        (function frame() {
+            confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 }, colors: colors });
+            confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 }, colors: colors });
+            if (Date.now() < end) requestAnimationFrame(frame);
+        }());
+    } else {
+        // 平時點擊時的輕快小禮花
+        confetti({ particleCount: 30, spread: 40 });
+    }
+}
+
 </script>
 </body>
 </html>
