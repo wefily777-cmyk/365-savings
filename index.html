@@ -2665,12 +2665,155 @@
     let userBirthday = localStorage.getItem('user_birthday_date') || '';
     let targetGoalText = localStorage.getItem('target_saving_goal_text') || '夢想計劃';
 
-    let journalListHistory = JSON.parse(localStorage.getItem('365_journal_mode_history')) || [];
-    let checkedDays365 = JSON.parse(localStorage.getItem('365_savings_progress')) || [];
-    let checkedDaysCustom = JSON.parse(localStorage.getItem('custom_fixed_savings_progress')) || [];
-    let checkedWeeks52 = JSON.parse(localStorage.getItem('week_52_savings_progress')) || [];
-    let 隨喜Map = JSON.parse(localStorage.getItem('any_any_savings_map')) || {};
-    let triggeredMilestones = JSON.parse(localStorage.getItem('triggered_milestones_v2')) || [];
+    // 🛡️ 舊資料相容層：先讀取並自動轉換舊版手帳格式，再交給新版 UI 使用。
+    // 這一層非常重要：舊版資料如果不是 { day, amt, date }，直接 render 會出現
+    // "Day undefined"、"$NaN"、"undefined"。原始資料會先備份，不會直接丟掉。
+    function safeJsonParse(value, fallback) {
+        if (value === null || value === undefined || value === '') return fallback;
+        try {
+            const parsed = JSON.parse(value);
+            return parsed === null || parsed === undefined ? fallback : parsed;
+        } catch (error) {
+            console.warn('JSON 資料解析失敗：', error);
+            return fallback;
+        }
+    }
+
+    function toFiniteNumber(value) {
+        if (typeof value === 'number' && Number.isFinite(value)) return value;
+        if (typeof value === 'string') {
+            const cleaned = value.replace(/[$,\s]/g, '');
+            if (cleaned !== '' && Number.isFinite(Number(cleaned))) return Number(cleaned);
+        }
+        return NaN;
+    }
+
+    function pickFirstDefined(obj, keys) {
+        if (!obj || typeof obj !== 'object') return undefined;
+        for (const key of keys) {
+            if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+                return obj[key];
+            }
+        }
+        return undefined;
+    }
+
+    function normalizeJournalRecord(record, fallbackIndex = 0) {
+        let dayValue;
+        let amountValue;
+        let dateValue;
+
+        // 舊版若以陣列儲存，例如 [day, amount, date]
+        if (Array.isArray(record)) {
+            dayValue = record[0];
+            amountValue = record[1];
+            dateValue = record[2];
+        }
+        // 舊版若直接儲存數字：視為 Day n，金額沿用 Day n 的 365 儲蓄邏輯
+        else if (typeof record === 'number' || (typeof record === 'string' && /^\s*\d+(?:\.\d+)?\s*$/.test(record))) {
+            dayValue = record;
+            amountValue = record;
+        }
+        else if (record && typeof record === 'object') {
+            dayValue = pickFirstDefined(record, [
+                'day', 'dayNumber', 'dayIndex', 'index', 'd', 'number', 'no', 'n', 'week', 'weekNumber'
+            ]);
+            amountValue = pickFirstDefined(record, [
+                'amt', 'amount', 'money', 'savedAmount', 'savingAmount', 'value', 'cash', 'moneyAmount', 'a'
+            ]);
+            dateValue = pickFirstDefined(record, [
+                'date', 'savedDate', 'savingDate', 'createdAt', 'timestamp', 'time', 't'
+            ]);
+        }
+
+        // 某些早期格式可能只有一段文字，例如「Day 12 $500 2026/8/1」
+        if ((dayValue === undefined || amountValue === undefined) && typeof record === 'string') {
+            const dayMatch = record.match(/(?:Day|D|第)\s*(\d+)/i);
+            const amountMatch = record.match(/(?:[$＄]|金額|amount)?\s*([0-9][0-9,]*)/i);
+            if (dayValue === undefined && dayMatch) dayValue = dayMatch[1];
+            if (amountValue === undefined && amountMatch) amountValue = amountMatch[1];
+        }
+
+        const day = Math.round(toFiniteNumber(dayValue));
+        let amount = Math.round(toFiniteNumber(amountValue));
+
+        // 如果舊資料只保存 Day，而沒有保存金額，依原 365 手帳/盲盒規則以 Day 作為金額。
+        if (!Number.isFinite(amount) && Number.isFinite(day)) amount = day;
+
+        if (!Number.isFinite(day) || day < 1 || day > 365) return null;
+        if (!Number.isFinite(amount) || amount <= 0) return null;
+
+        let date = (dateValue !== undefined && dateValue !== null)
+            ? String(dateValue)
+            : '';
+
+        if (!date || date === 'undefined' || date === 'null') {
+            date = getJournalDateByDay(day);
+        }
+
+        return {
+            day,
+            amt: amount,
+            date
+        };
+    }
+
+    function loadJournalHistoryWithMigration() {
+        const key = '365_journal_mode_history';
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+
+        const parsed = safeJsonParse(raw, null);
+        if (parsed === null) return [];
+
+        // 已是標準陣列時也重新正規化，避免其中某幾筆壞掉造成 NaN。
+        let sourceRecords = [];
+
+        if (Array.isArray(parsed)) {
+            sourceRecords = parsed;
+        } else if (parsed && typeof parsed === 'object') {
+            // 支援舊版可能使用 { records: [...] } / { history: [...] }
+            if (Array.isArray(parsed.records)) sourceRecords = parsed.records;
+            else if (Array.isArray(parsed.history)) sourceRecords = parsed.history;
+            else if (Array.isArray(parsed.data)) sourceRecords = parsed.data;
+            else {
+                // 支援 { "1": 100, "2": 200, ... } 這類 Day → 金額格式
+                sourceRecords = Object.entries(parsed).map(([day, amount]) => ({ day, amount }));
+            }
+        }
+
+        const normalized = sourceRecords
+            .map((record, index) => normalizeJournalRecord(record, index))
+            .filter(Boolean);
+
+        const invalidCount = sourceRecords.length - normalized.length;
+        const alreadyStandard = sourceRecords.every(record =>
+            record && typeof record === 'object' && !Array.isArray(record) &&
+            Number.isFinite(toFiniteNumber(record.day)) &&
+            Number.isFinite(toFiniteNumber(record.amt))
+        );
+
+        if (normalized.length > 0 && (!alreadyStandard || invalidCount > 0)) {
+            try {
+                const backupKey = `${key}_backup_before_migration_${Date.now()}`;
+                localStorage.setItem(backupKey, raw);
+                localStorage.setItem(key, JSON.stringify(normalized));
+                console.info(`手帳舊資料已相容轉換：${normalized.length} 筆；無法辨識 ${invalidCount} 筆。原始資料已備份至 ${backupKey}`);
+            } catch (error) {
+                console.warn('手帳資料備份/轉換失敗，保留原始資料：', error);
+                return normalized;
+            }
+        }
+
+        return normalized;
+    }
+
+    let journalListHistory = loadJournalHistoryWithMigration();
+    let checkedDays365 = safeJsonParse(localStorage.getItem('365_savings_progress'), []);
+    let checkedDaysCustom = safeJsonParse(localStorage.getItem('custom_fixed_savings_progress'), []);
+    let checkedWeeks52 = safeJsonParse(localStorage.getItem('week_52_savings_progress'), []);
+    let 隨喜Map = safeJsonParse(localStorage.getItem('any_any_savings_map'), {});
+    let triggeredMilestones = safeJsonParse(localStorage.getItem('triggered_milestones_v2'), []);
 
     let tempPendingAmount = null;
     let tempPendingDay = null;
