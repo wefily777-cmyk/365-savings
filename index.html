@@ -2833,7 +2833,10 @@
             normalized.push({
                 day: day,
                 amt: day,
-                date: preservedDate
+                date: preservedDate,
+                source: item && (item.source === 'manual' || item.source === 'blindbox')
+                    ? item.source
+                    : 'legacy'
             });
         }
 
@@ -2843,7 +2846,9 @@
                 return !old ||
                     Math.round(toFiniteNumber(old.day)) !== item.day ||
                     Math.round(toFiniteNumber(old.amt)) !== item.amt ||
-                    String(old.date || '') !== item.date;
+                    String(old.date || '') !== item.date ||
+                    !['manual', 'blindbox', 'legacy'].includes(old.source)
+                ;
             });
 
         if (changed) {
@@ -3042,36 +3047,79 @@
     }
 
     // 📝 7. 手帳防誤觸手動登載（支援語系化提示）
+    // 🛡️ 365 天手帳唯一登錄入口：手動登載與驚喜任務共用同一套防重複機制。
+    // 同一個 Day 在任何時間都只能存在一筆；金額永遠等於 Day 編號。
+    function save365JournalEntry(day, source = 'manual') {
+        day = Math.round(toFiniteNumber(day));
+
+        if (!Number.isFinite(day) || day < 1 || day > 365) {
+            const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
+            alert(langDict.errValidDay);
+            return false;
+        }
+
+        // 再次從目前記憶體中的資料檢查，避免：
+        // 1. 手動登載 vs. 盲盒抽取重複
+        // 2. 盲盒確認視窗開啟期間，手動登載同一天
+        // 3. 使用者快速連點造成重複
+        const duplicateIndex = journalListHistory.findIndex(
+            item => Math.round(toFiniteNumber(item && item.day)) === day
+        );
+
+        if (duplicateIndex !== -1) {
+            const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
+            alert(langDict.errDuplicateDay(day));
+            return false;
+        }
+
+        const entry = {
+            day: day,
+            amt: day,
+            date: getJournalDateByDay(day),
+            source: source
+        };
+
+        journalListHistory.push(entry);
+        journalListHistory.sort((a, b) => a.day - b.day);
+
+        try {
+            localStorage.setItem(
+                '365_journal_mode_history',
+                JSON.stringify(journalListHistory)
+            );
+        } catch (error) {
+            // 儲存失敗時回滾記憶體，避免畫面看似成功但重新整理後消失。
+            journalListHistory = journalListHistory.filter(
+                item => item !== entry
+            );
+            console.error('365 手帳資料儲存失敗：', error);
+            alert('⚠️ 儲存資料失敗，這筆紀錄尚未完成儲存。');
+            return false;
+        }
+
+        return true;
+    }
+
     function handleManualJournalSubmit() {
         const dayInput = document.getElementById('manual-journal-day');
         const amtInput = document.getElementById('manual-journal-amt');
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
 
         const day = parseInt(dayInput.value, 10);
-        const maxLimit = 365;
 
-        if (isNaN(day) || day < 1 || day > maxLimit) {
+        if (isNaN(day) || day < 1 || day > 365) {
             alert(langDict.errValidDay);
             return;
         }
 
-        if (journalListHistory.some(item => Math.round(item.day) === day)) {
-            alert(langDict.errDuplicateDay(day));
-            return;
-        }
-
-        // 365 天防誤觸智慧手帳的規則：Day n 固定存 $n。
+        // 365 天防誤觸智慧手帳：金額永遠由 Day 自動決定。
         const amt = day;
         if (amtInput) amtInput.value = amt;
 
-        journalListHistory.push({
-            day: day,
-            amt: amt,
-            date: getJournalDateByDay(day)
-        });
-
-        journalListHistory.sort((a, b) => a.day - b.day);
-        localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+        // 手動與盲盒共用同一個唯一 Day 資料表，因此不能重複。
+        if (!save365JournalEntry(day, 'manual')) {
+            return;
+        }
 
         dayInput.value = '';
         if (amtInput) amtInput.value = '';
@@ -3328,9 +3376,21 @@
             alert(langDict.blindboxModeAlert);
             return;
         }
+        // 已經有一個待確認的驚喜任務時，不再重新抽取，避免覆蓋暫存資料。
+        if (tempPendingDay !== null) {
+            alert('🎲 目前已有一個待確認的驚喜任務，請先確認或取消。');
+            return;
+        }
+
+        const savedDaySet = new Set(
+            journalListHistory
+                .map(item => Math.round(toFiniteNumber(item && item.day)))
+                .filter(day => Number.isFinite(day) && day >= 1 && day <= 365)
+        );
+
         const availableDays = [];
         for (let i = 1; i <= 365; i++) {
-            if (!journalListHistory.some(item => Math.round(item.day) === i)) availableDays.push(i);
+            if (!savedDaySet.has(i)) availableDays.push(i);
         }
         if (availableDays.length === 0) {
             alert(langDict.blindboxCompleteAlert);
@@ -3359,28 +3419,20 @@
 
     function confirmJournalSaving() {
         if (tempPendingDay !== null && tempPendingAmount !== null) {
-            const day = tempPendingDay;
-            const amount = Math.round(tempPendingAmount);
+            const day = Math.round(toFiniteNumber(tempPendingDay));
 
-            // 365 天手帳固定規則：Day n 永遠存 $n。
-            journalListHistory.push({
-                day: day,
-                amt: day,
-                date: getJournalDateByDay(day)
-            });
+            // 再次檢查 Day 是否已被手動登載或其他操作使用。
+            // 這個檢查很重要：抽獎視窗開啟後，使用者仍可能先手動登載同一天。
+            const saved = save365JournalEntry(day, 'blindbox');
 
-            journalListHistory.sort((a, b) => a.day - b.day);
-
-            localStorage.setItem(
-                '365_journal_mode_history',
-                JSON.stringify(journalListHistory)
-            );
-
-            renderJournalList();
-            updateDashboard();
-            triggerConfettiStorm();
+            if (saved) {
+                renderJournalList();
+                updateDashboard();
+                triggerConfettiStorm();
+            }
         }
 
+        // 無論確認成功或失敗，都清除暫存，避免下一次誤用上一筆抽獎資料。
         tempPendingDay = null;
         tempPendingAmount = null;
         closeConfirmModal();
