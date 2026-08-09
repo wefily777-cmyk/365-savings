@@ -1,140 +1,373 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>瀑布音效測試</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>365 療癒音效測試</title>
+
+<style>
+body {
+    font-family: sans-serif;
+    padding: 30px;
+    line-height: 1.8;
+}
+
+button {
+    padding: 12px 18px;
+    margin: 5px;
+    font-size: 16px;
+}
+
+#status {
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 10px;
+}
+</style>
+
 </head>
 
 <body>
 
-<h2>🌊 Google Drive 瀑布音效測試</h2>
+<h2>🎧 365 療癒音效測試</h2>
 
-<p id="status">等待測試...</p>
+<div id="status">
+等待播放...
+</div>
 
-<audio id="waterfall" controls preload="metadata">
-  <source
-    src="https://drive.google.com/uc?export=download&id=1cuZSwJ3HW7HWoul4cs7bschJCTEg6VyN"
-    type="audio/mpeg">
-</audio>
+<h3>單一音效</h3>
+
+<button onclick="playSound('smallWaves')">
+🌊 小海浪
+</button>
+
+<button onclick="playSound('rain')">
+🌧️ 細雨
+</button>
+
+<button onclick="playSound('forestBirds')">
+🐦 森林鳥鳴
+</button>
+
+<button onclick="playSound('crickets')">
+🦗 蟋蟀
+</button>
+
+<button onclick="playSound('fire')">
+🔥 柴火
+</button>
+
+<h3>混音測試</h3>
+
+<button onclick="playSummerNight()">
+🌙 夏夜聲景
+</button>
+
+<button onclick="playSpring()">
+🌱 春季聲景
+</button>
+
+<button onclick="playWinter()">
+❄️ 冬季聲景
+</button>
 
 <br><br>
 
-<button onclick="testPlay()">
-  ▶ 播放瀑布
+<button onclick="stopAll()">
+⏹ 停止所有聲音
 </button>
 
-<button onclick="stopAudio()">
-  ⏸ 停止
-</button>
 
 <script>
 
-const audio = document.getElementById("waterfall");
-const status = document.getElementById("status");
+const R2_BASE =
+"https://pub-a2859f8c83524448bc30ea83e308bc1a.r2.dev/";
 
-audio.volume = 0.5;
-audio.loop = true;
+const SOUND_LIBRARY = {
+
+    smallWaves: {
+        name: "小海浪",
+        file: "小海浪.mp3"
+    },
+
+    rain: {
+        name: "細雨",
+        file: "細雨.mp3"
+    },
+
+    forestBirds: {
+        name: "森林鳥鳴",
+        file: "森林鳥鳴.mp3"
+    },
+
+    crickets: {
+        name: "蟋蟀",
+        file: "蟋蟀.mp3"
+    },
+
+    fire: {
+        name: "柴火",
+        file: "柴火.mp3"
+    },
+
+    softWind: {
+        name: "柔風",
+        file: "柔風.mp3"
+    },
+
+    river: {
+        name: "河水",
+        file: "河水.mp3"
+    },
+
+    summerNight: {
+        name: "夏夜蟲鳴與蛙鳴",
+        file: "夏夜蟲鳴與蛙鳴.mp3"
+    }
+
+};
 
 
-/* 成功載入 */
+function getAudioUrl(file) {
 
-audio.addEventListener("loadedmetadata", () => {
-
-  status.innerHTML =
-    "✅ Google Drive 音訊已成功載入<br>" +
-    "音訊長度：" +
-    Math.round(audio.duration) +
-    " 秒";
-
-});
-
-
-/* 已經可以播放 */
-
-audio.addEventListener("canplay", () => {
-
-  status.innerHTML =
-    "✅ 音訊已準備完成，可以播放";
-
-});
-
-
-/* 播放 */
-
-async function testPlay() {
-
-  status.innerHTML =
-    "⏳ 正在嘗試播放 Google Drive 音效...";
-
-  try {
-
-    await audio.play();
-
-    status.innerHTML =
-      "🔊 播放成功！Google Drive 音效可以使用。";
-
-  }
-
-  catch(error) {
-
-    status.innerHTML =
-      "❌ 播放失敗：" + error.message;
-
-    console.error(error);
-
-  }
+    return R2_BASE +
+        encodeURIComponent(file);
 
 }
 
 
-/* 停止 */
+let activeAudio = [];
 
-function stopAudio() {
 
-  audio.pause();
+function createTrack(soundKey, volume = 0.5) {
 
-  status.innerHTML =
-    "⏸ 音效已暫停";
+    const sound =
+        SOUND_LIBRARY[soundKey];
+
+    if (!sound) return null;
+
+    const audio =
+        new Audio(
+            getAudioUrl(sound.file)
+        );
+
+    audio.loop = true;
+
+    audio.volume =
+        Math.max(
+            0,
+            Math.min(1, volume)
+        );
+
+    return audio;
 
 }
 
 
-/* 音訊錯誤 */
+async function playSound(soundKey) {
 
-audio.addEventListener("error", () => {
+    stopAll();
 
-  let message = "未知錯誤";
+    const sound =
+        SOUND_LIBRARY[soundKey];
 
-  if(audio.error){
+    if (!sound) return;
 
-    switch(audio.error.code){
+    const audio =
+        createTrack(
+            soundKey,
+            0.5
+        );
 
-      case 1:
-        message = "MEDIA_ERR_ABORTED";
-        break;
+    activeAudio.push(audio);
 
-      case 2:
-        message = "MEDIA_ERR_NETWORK";
-        break;
+    try {
 
-      case 3:
-        message = "MEDIA_ERR_DECODE";
-        break;
+        await audio.play();
 
-      case 4:
-        message = "MEDIA_ERR_SRC_NOT_SUPPORTED";
-        break;
+        document.getElementById(
+            "status"
+        ).innerHTML =
+            "✅ 正在播放：" +
+            sound.name;
 
     }
 
-  }
+    catch(error) {
 
-  status.innerHTML =
-    "❌ Google Drive 音效載入失敗：" +
-    message;
+        document.getElementById(
+            "status"
+        ).innerHTML =
+            "❌ 播放失敗：" +
+            error.message;
 
-});
+        console.error(error);
+
+    }
+
+}
+
+
+/* 🌙 夏夜 */
+
+async function playSummerNight() {
+
+    stopAll();
+
+    const tracks = [
+
+        createTrack(
+            "summerNight",
+            0.45
+        ),
+
+        createTrack(
+            "softWind",
+            0.15
+        ),
+
+        createTrack(
+            "river",
+            0.15
+        )
+
+    ];
+
+    activeAudio =
+        tracks.filter(Boolean);
+
+    try {
+
+        await Promise.all(
+            activeAudio.map(
+                audio =>
+                    audio.play()
+            )
+        );
+
+        document.getElementById(
+            "status"
+        ).innerHTML =
+            "🌙 夏夜聲景播放中<br>" +
+            "蟲鳴蛙鳴 45% + 柔風 15% + 河水 15%";
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+    }
+
+}
+
+
+/* 🌱 春季 */
+
+async function playSpring() {
+
+    stopAll();
+
+    const tracks = [
+
+        createTrack(
+            "forestBirds",
+            0.40
+        ),
+
+        createTrack(
+            "river",
+            0.20
+        ),
+
+        createTrack(
+            "softWind",
+            0.15
+        )
+
+    ];
+
+    activeAudio =
+        tracks.filter(Boolean);
+
+    await Promise.all(
+        activeAudio.map(
+            audio =>
+                audio.play()
+        )
+    );
+
+    document.getElementById(
+        "status"
+    ).innerHTML =
+        "🌱 春季聲景播放中<br>" +
+        "森林鳥鳴 40% + 河水 20% + 柔風 15%";
+
+}
+
+
+/* ❄️ 冬季 */
+
+async function playWinter() {
+
+    stopAll();
+
+    const tracks = [
+
+        createTrack(
+            "fire",
+            0.45
+        ),
+
+        createTrack(
+            "softWind",
+            0.12
+        )
+
+    ];
+
+    activeAudio =
+        tracks.filter(Boolean);
+
+    await Promise.all(
+        activeAudio.map(
+            audio =>
+                audio.play()
+        )
+    );
+
+    document.getElementById(
+        "status"
+    ).innerHTML =
+        "❄️ 冬季聲景播放中<br>" +
+        "柴火 45% + 柔風 12%";
+
+}
+
+
+/* 停止全部 */
+
+function stopAll() {
+
+    activeAudio.forEach(
+        audio => {
+
+            audio.pause();
+
+            audio.currentTime = 0;
+
+        }
+    );
+
+    activeAudio = [];
+
+    document.getElementById(
+        "status"
+    ).innerHTML =
+        "⏹ 已停止所有音效";
+
+}
 
 </script>
 
