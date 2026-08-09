@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-settings-scroll-fix-2">
+    <meta name="app-version" content="2026.08.09-full-health-report-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -529,7 +529,7 @@
 
         <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
             <button type="button" class="settings-main-action-btn" style="margin:0;flex:1;min-width:150px;" onclick="run365DataHealthCheck(false)">🔄 重新檢查</button>
-            <button type="button" class="settings-main-action-btn" style="margin:0;flex:1;min-width:150px;background:rgba(0,0,0,.07);color:var(--text-color);box-shadow:none;" onclick="copy365HealthReport()">📋 複製健檢報告</button>
+            <button type="button" class="settings-main-action-btn" style="margin:0;flex:1;min-width:150px;background:rgba(0,0,0,.07);color:var(--text-color);box-shadow:none;" onclick="copy365HealthReport()">📋 複製完整健檢報告</button>
         </div>
     </div>
 </div>
@@ -4786,24 +4786,159 @@
             `;
         }
 
+        // 📋 完整複製報告：畫面維持摘要，但複製內容保留完整診斷資料。
+        const sortedCurrentRows = validActiveRows
+            .slice()
+            .sort((a, b) => a.day - b.day);
+
+        const currentRowsText = sortedCurrentRows.length
+            ? sortedCurrentRows.map(x => {
+                const raw = x.raw || {};
+                const date = raw.date || getJournalDateByDay(x.day) || '';
+                const sourceLabel =
+                    x.source === 'blindbox' ? '盲盒' :
+                    x.source === 'manual' ? '手動' :
+                    x.source || '未知';
+                return `Day ${x.day} → ${formatHealthMoney(x.amt)}｜${sourceLabel}｜${date}`;
+            }).join('\n')
+            : '目前輪次沒有紀錄';
+
+        const allMissingDaysText = missingDays.length
+            ? missingDays.join('、')
+            : '無';
+
+        const allMissingAmountsText = missingAmounts.length
+            ? missingAmounts.map(x => '$' + x).join('、')
+            : '無';
+
+        const duplicateDaysText = duplicateDays.length
+            ? duplicateDays.map(([day, rows]) =>
+                `Day ${day}：${rows.map(x => formatHealthMoney(x.amt)).join('、')}`
+              ).join('\n')
+            : '無';
+
+        const duplicateAmountsText = duplicateAmounts.length
+            ? duplicateAmounts.map(([amt, rows]) =>
+                `${formatHealthMoney(amt)}：${rows.map(x => `Day ${x.day}`).join('、')}`
+              ).join('\n')
+            : '無';
+
+        const archiveSummaryText = archivedRoundIds.length
+            ? archivedRoundIds
+                .slice()
+                .sort((a,b)=>a-b)
+                .map(round => {
+                    const rows = storedArchive.filter(x =>
+                        (Number(x && x.round) || 1) === round
+                    );
+                    const sum = rows.reduce((n, x) => {
+                        const amt = Math.round(toFiniteNumber(
+                            x && (x.amt ?? x.customValue ?? x.amount)
+                        ));
+                        return n + (Number.isFinite(amt) ? amt : 0);
+                    }, 0);
+                    return `第 ${round} 輪：${rows.length} 筆｜總額 ${formatHealthMoney(sum)}`;
+                }).join('\n')
+            : '無封存輪次';
+
+        // 比對記憶體與 LocalStorage 的逐筆差異
+        const memoryMap = new Map(
+            memoryActive.map(x => [
+                `${Math.round(toFiniteNumber(x.day))}`,
+                getJournalActualAmount(x)
+            ])
+        );
+
+        const storedMap = new Map(
+            storedActive.map(x => [
+                `${Math.round(toFiniteNumber(x && (x.day ?? x.dayIndex)))}`,
+                Math.round(toFiniteNumber(x && (x.amt ?? x.customValue ?? x.amount)))
+            ])
+        );
+
+        const syncDiffs = [];
+        const allDayKeys = new Set([...memoryMap.keys(), ...storedMap.keys()]);
+        [...allDayKeys]
+            .sort((a,b)=>Number(a)-Number(b))
+            .forEach(dayKey => {
+                const mem = memoryMap.get(dayKey);
+                const sto = storedMap.get(dayKey);
+
+                if (mem === undefined && sto !== undefined) {
+                    syncDiffs.push(`Day ${dayKey}：只存在 LocalStorage（${formatHealthMoney(sto)}）`);
+                } else if (mem !== undefined && sto === undefined) {
+                    syncDiffs.push(`Day ${dayKey}：只存在畫面記憶體（${formatHealthMoney(mem)}）`);
+                } else if (mem !== sto) {
+                    syncDiffs.push(
+                        `Day ${dayKey}：畫面 ${formatHealthMoney(mem)} / LocalStorage ${formatHealthMoney(sto)}`
+                    );
+                }
+            });
+
+        const syncDiffText = syncDiffs.length
+            ? syncDiffs.join('\n')
+            : '無，畫面與 LocalStorage 一致';
+
+        // LocalStorage 原始內容只記錄長度與是否存在，不直接把超長 JSON 全貼出，
+        // 但保留目前輪次逐筆內容供除錯。
+        const rawStatusText = [
+            `365_journal_mode_history：${rawHistory === null ? '不存在' : `存在，${rawHistory.length} 字元`}`,
+            `365_journal_archive：${rawArchive === null ? '不存在' : `存在，${rawArchive.length} 字元`}`,
+            `365_active_round：${rawRound === null ? '不存在' : rawRound}`,
+            `舊備份數量：${backupKeys.length}`
+        ].join('\n');
+
         last365HealthReportText = [
-            '365 手帳資料健檢',
+            '==============================',
+            '365 手帳資料健檢｜完整報告',
+            '==============================',
             `檢查時間：${new Date().toLocaleString()}`,
+            `App Version：${document.querySelector('meta[name="app-version"]')?.content || '未知'}`,
             `狀態：${statusText}`,
+            '',
+            '【目前輪次摘要】',
             `目前輪次：第 ${active365Round} 輪`,
             `紀錄筆數：${validActiveRows.length}/365`,
             `唯一 Day：${uniqueDays.size}/365`,
             `唯一金額：${uniqueAmounts.size}/365`,
             `目前總額：${formatHealthMoney(totalAmount)}`,
+            `完整 365 正常總額：$66,795`,
             '',
-            issues.length ? '【異常】\n- ' + issues.join('\n- ') : '【異常】無',
+            '【異常】',
+            issues.length ? '- ' + issues.join('\n- ') : '無',
             '',
-            warnings.length ? '【提醒】\n- ' + warnings.join('\n- ') : '【提醒】無',
+            '【提醒】',
+            warnings.length ? '- ' + warnings.join('\n- ') : '無',
             '',
-            '【通過】\n- ' + (passes.length ? passes.join('\n- ') : '無'),
+            '【通過項目】',
+            passes.length ? '- ' + passes.join('\n- ') : '無',
             '',
-            `尚未使用 Day：${missingDayPreview}`,
-            `尚未使用金額：${missingAmountPreview}`
+            '【重複 Day】',
+            duplicateDaysText,
+            '',
+            '【重複金額】',
+            duplicateAmountsText,
+            '',
+            '【尚未使用 Day｜完整】',
+            allMissingDaysText,
+            '',
+            '【尚未使用金額｜完整】',
+            allMissingAmountsText,
+            '',
+            '【目前輪次逐筆紀錄】',
+            currentRowsText,
+            '',
+            '【畫面 vs LocalStorage 差異】',
+            syncDiffText,
+            '',
+            '【封存輪次摘要】',
+            archiveSummaryText,
+            '',
+            '【LocalStorage 狀態】',
+            rawStatusText,
+            '',
+            '==============================',
+            '報告結束'
         ].join('\n');
 
         return {
@@ -4934,7 +5069,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-settings-scroll-fix-2";
+    const CURRENT_APP_VERSION = "2026.08.09-full-health-report-1";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
