@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="app-version" content="2026.08.09-storage-cache-fix-1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>萬用百變存錢大廳</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
@@ -284,8 +288,8 @@
         </div>
         <div style="display: flex; gap: 6px; margin-bottom: 12px; background: rgba(0,0,0,0.02); padding: 10px; border-radius: 14px; border: 1px dashed var(--border-color);">
             <input type="number" id="manual-journal-day" min="1" max="365" placeholder="Day (1-365)" style="width: 32%; border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color);">
-            <input type="number" id="manual-journal-amt" placeholder="金額 ($)" aria-label="請輸入實際儲蓄金額" style="width: 38%; border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color);">
-            <button id="btn-manual-journal-submit" onclick="handleManualJournalSubmit()" style="flex: 1; background: var(--btn-gradient); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer;">登載手帳</button>
+            <input type="number" id="manual-journal-amt" min="1" max="365" step="1" inputmode="numeric" placeholder="金額 ($1-365)" aria-label="請輸入 1 到 365 的實際儲蓄金額" style="width: 38%; border: 1px solid var(--border-color); border-radius: 10px; padding: 6px; text-align: center; font-weight: bold; background: var(--cell-bg); color: var(--text-color);">
+            <button type="button" id="btn-manual-journal-submit" onclick="handleManualJournalSubmit()" style="flex: 1; background: var(--btn-gradient); border: none; color: white; border-radius: 10px; font-weight: bold; font-size: 0.8rem; cursor: pointer;">登載手帳</button>
         </div>
 
         <div class="journal-container-list" id="journal-list-render-target"></div>
@@ -2817,41 +2821,69 @@
         const key = '365_journal_mode_history';
         const currentRaw = localStorage.getItem(key);
 
-        // ⚠️ 重要：舊版 365$$.txt 有兩種不同的紀錄格式：
-        // 1) 手動：{ dayIndex: Day, amount: Day, customValue: 實際金額, isPatched: true }
-        // 2) 盲盒：{ dayIndex: Day, amount: 實際抽到金額, isPatched: false }
-        // 因此「amount」絕對不能直接當成金額，也不能直接當成 Day；必須依 isPatched 判斷。
-        // 若目前資料已被前一版錯誤 Migration 成 {day, amt}，優先尋找仍保有 dayIndex/customValue 的原始備份。
+        // ✅ 2026-08 修正：
+        // 「目前正在使用的資料」永遠優先於任何歷史備份。
+        // 舊版曾在 currentRaw 已是新版 {day, amt} 格式時，
+        // 仍去 _backup_ 尋找 dayIndex/customValue 舊格式，
+        // 導致重新開啟網頁後，新手動登載的資料被舊備份覆蓋。
+        function inspectRaw(raw) {
+            if (raw === null || raw === undefined || raw === '') {
+                return { usable:false, parsed:null, isLegacy:false };
+            }
 
-        function containsLegacyRecords(raw) {
-            if (!raw) return false;
             const parsed = safeJsonParse(raw, null);
-            if (!parsed) return false;
+            if (parsed === null) {
+                return { usable:false, parsed:null, isLegacy:false };
+            }
+
+            // 空陣列 [] 也是「合法且有意義的目前狀態」，
+            // 例如使用者剛重置新一輪，因此不能因為它是空的就自動復原舊備份。
+            const structurallyUsable =
+                Array.isArray(parsed) ||
+                (parsed && typeof parsed === 'object');
+
+            if (!structurallyUsable) {
+                return { usable:false, parsed, isLegacy:false };
+            }
+
             const records = Array.isArray(parsed)
                 ? parsed
                 : (Array.isArray(parsed.records) ? parsed.records
                     : Array.isArray(parsed.history) ? parsed.history
                     : Array.isArray(parsed.data) ? parsed.data
                     : Object.values(parsed));
-            return records.some(r => r && typeof r === 'object' && (
+
+            const isLegacy = records.some(r => r && typeof r === 'object' && (
                 Object.prototype.hasOwnProperty.call(r, 'dayIndex') ||
                 Object.prototype.hasOwnProperty.call(r, 'customValue') ||
                 Object.prototype.hasOwnProperty.call(r, 'isPatched')
             ));
+
+            return { usable:true, parsed, isLegacy };
         }
 
-        // 先使用目前 LocalStorage 中仍然存在的真正舊格式。
-        if (containsLegacyRecords(currentRaw)) {
-            return { raw: currentRaw, fromBackup: false, backupKey: null, isLegacy: true };
+        const current = inspectRaw(currentRaw);
+
+        // ✅ 目前資料只要 JSON 結構正常，就直接使用它。
+        // 若它是舊格式，後面的 Migration 會在「同一份目前資料」上轉換；
+        // 絕不因為備份比較舊／欄位比較完整就覆蓋目前紀錄。
+        if (current.usable) {
+            return {
+                raw: currentRaw,
+                fromBackup: false,
+                backupKey: null,
+                isLegacy: current.isLegacy,
+                recoveryReason: null
+            };
         }
 
-        // 再從所有備份中尋找「真正含舊欄位」的版本；不要盲目使用最新備份，
-        // 因為前幾版修正程式也可能已經建立過一份錯誤標準化資料的備份。
+        // ⚠️ 只有目前資料「不存在或真的損壞」時，才啟用備份救援。
         const backupKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
             if (k && k.startsWith(key + '_backup_')) backupKeys.push(k);
         }
+
         backupKeys.sort((a, b) => {
             const na = Number(a.match(/_(\d+)$/)?.[1] || 0);
             const nb = Number(b.match(/_(\d+)$/)?.[1] || 0);
@@ -2860,12 +2892,28 @@
 
         for (const backupKey of backupKeys) {
             const raw = localStorage.getItem(backupKey);
-            if (containsLegacyRecords(raw)) {
-                return { raw, fromBackup: true, backupKey, isLegacy: true };
+            const inspected = inspectRaw(raw);
+            if (inspected.usable) {
+                console.warn(
+                    `目前手帳資料不存在或已損壞，改由備份 ${backupKey} 進行救援。`
+                );
+                return {
+                    raw,
+                    fromBackup: true,
+                    backupKey,
+                    isLegacy: inspected.isLegacy,
+                    recoveryReason: currentRaw ? 'current_corrupted' : 'current_missing'
+                };
             }
         }
 
-        return { raw: currentRaw, fromBackup: false, backupKey: null, isLegacy: false };
+        return {
+            raw: currentRaw,
+            fromBackup: false,
+            backupKey: null,
+            isLegacy: false,
+            recoveryReason: null
+        };
     }
 
     function loadJournalHistoryWithMigration() {
@@ -3019,9 +3067,23 @@
     }
     function is365Complete() { return getUsedAmountsSet().size === 365; }
     function persist365Data() {
-        localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
-        localStorage.setItem('365_journal_archive', JSON.stringify(journalArchive));
+        const historyJson = JSON.stringify(journalListHistory);
+        const archiveJson = JSON.stringify(journalArchive);
+
+        localStorage.setItem('365_journal_mode_history', historyJson);
+        localStorage.setItem('365_journal_archive', archiveJson);
         localStorage.setItem('365_active_round', String(active365Round));
+
+        // 儲存後立即驗證，避免 Safari / 無痕模式 / 儲存空間異常時
+        // 畫面看似成功但資料其實沒有真正寫入。
+        const verifyHistory = localStorage.getItem('365_journal_mode_history');
+        const verifyRound = localStorage.getItem('365_active_round');
+
+        if (verifyHistory !== historyJson || verifyRound !== String(active365Round)) {
+            throw new Error('LOCAL_STORAGE_VERIFY_FAILED');
+        }
+
+        return true;
     }
 
     // 🗓️ 3. 二十四節氣與節慶檢測邏輯
@@ -3193,17 +3255,93 @@
     function save365JournalEntry(day, amt, source = 'manual') {
         day = Math.round(toFiniteNumber(day));
         amt = Math.round(toFiniteNumber(amt));
+
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
-        if (!Number.isFinite(day) || day < 1 || day > 365) { alert(langDict.errValidDay); return false; }
-        if (!Number.isFinite(amt) || amt < 1 || amt > 365) { alert('⚠️ 365 挑戰的金額必須是 $1～$365。'); return false; }
+
+        if (!Number.isFinite(day) || day < 1 || day > 365) {
+            alert(langDict.errValidDay);
+            return false;
+        }
+
+        if (!Number.isFinite(amt) || amt < 1 || amt > 365) {
+            alert('⚠️ 365 挑戰的金額必須是 $1～$365。');
+            return false;
+        }
+
         const active = getActiveJournalEntries();
-        if (active.some(item => Math.round(toFiniteNumber(item.day)) === day)) { alert(langDict.errDuplicateDay(day)); return false; }
-        if (getUsedAmountsSet().has(amt)) { alert(`⚠️ $${amt.toLocaleString()} 已在第 ${active365Round} 輪使用過，抽取或手動登錄都不能重複。`); return false; }
-        const entry = { day, amt, date: getJournalDateByDay(day), source: source === 'blindbox' ? 'blindbox' : 'manual', round: active365Round };
-        journalListHistory.push(entry);
-        journalListHistory.sort((a,b) => (Number(a.round)-Number(b.round)) || (a.day-b.day));
-        try { persist365Data(); } catch(e) { journalListHistory=journalListHistory.filter(x=>x!==entry); alert('⚠️ 儲存資料失敗，這筆紀錄尚未完成儲存。'); return false; }
-        return true;
+
+        // Day 與金額是兩套獨立規則：
+        // 1. 同一 Day 本輪只能登載一次。
+        // 2. $1～$365 每個金額本輪只能使用一次，不論來源是盲盒或手動。
+        if (active.some(item => Math.round(toFiniteNumber(item.day)) === day)) {
+            alert(langDict.errDuplicateDay(day));
+            return false;
+        }
+
+        if (getUsedAmountsSet().has(amt)) {
+            alert(`⚠️ $${amt.toLocaleString()} 已在第 ${active365Round} 輪使用過。\n\n手動登載與盲盒抽取共用同一組 $1～$365，不能重複。`);
+            return false;
+        }
+
+        const entry = {
+            day,
+            amt,
+            date: getJournalDateByDay(day),
+            source: source === 'blindbox' ? 'blindbox' : 'manual',
+            round: active365Round
+        };
+
+        // 先保存記憶體與 LocalStorage 原始狀態，若寫入失敗可以完整回復。
+        const oldHistory = journalListHistory.slice();
+        const oldRawHistory = localStorage.getItem('365_journal_mode_history');
+        const oldRawArchive = localStorage.getItem('365_journal_archive');
+        const oldRawRound = localStorage.getItem('365_active_round');
+
+        try {
+            journalListHistory.push(entry);
+            journalListHistory.sort((a, b) =>
+                (Number(a.round) - Number(b.round)) || (Number(a.day) - Number(b.day))
+            );
+
+            persist365Data();
+
+            // 再從 LocalStorage 解析一次確認這筆真的存在。
+            const stored = safeJsonParse(
+                localStorage.getItem('365_journal_mode_history'),
+                []
+            );
+
+            const exists = Array.isArray(stored) && stored.some(item =>
+                Number(item.round || 1) === Number(active365Round) &&
+                Math.round(toFiniteNumber(item.day)) === day &&
+                Math.round(toFiniteNumber(item.amt)) === amt
+            );
+
+            if (!exists) {
+                throw new Error('ENTRY_VERIFY_FAILED');
+            }
+
+            return true;
+
+        } catch (error) {
+            console.error('365 journal save failed:', error);
+
+            journalListHistory = oldHistory;
+
+            try {
+                if (oldRawHistory === null) localStorage.removeItem('365_journal_mode_history');
+                else localStorage.setItem('365_journal_mode_history', oldRawHistory);
+
+                if (oldRawArchive === null) localStorage.removeItem('365_journal_archive');
+                else localStorage.setItem('365_journal_archive', oldRawArchive);
+
+                if (oldRawRound === null) localStorage.removeItem('365_active_round');
+                else localStorage.setItem('365_active_round', oldRawRound);
+            } catch (_) {}
+
+            alert('⚠️ 這筆紀錄沒有成功寫入瀏覽器儲存空間。\n\n請確認瀏覽器沒有使用限制儲存的無痕／隱私模式，或重新整理頁面後再試一次。');
+            return false;
+        }
     }
 
     function handleManualJournalSubmit() {
@@ -3211,23 +3349,34 @@
         const amtInput = document.getElementById('manual-journal-amt');
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
 
-        const day = parseInt(dayInput.value, 10);
-        const amt = parseInt(amtInput.value, 10);
+        if (!dayInput || !amtInput) {
+            alert('⚠️ 找不到手帳輸入欄位，請重新整理頁面後再試。');
+            return;
+        }
 
-        if (isNaN(day) || day < 1 || day > 365) {
+        const day = Math.round(Number(dayInput.value));
+        const amt = Math.round(Number(amtInput.value));
+
+        if (!Number.isFinite(day) || day < 1 || day > 365) {
             alert(langDict.errValidDay);
+            dayInput.focus();
             return;
         }
 
-        if (isNaN(amt) || amt <= 0) {
-            alert(langDict.errValidAmt);
+        if (!Number.isFinite(amt) || amt < 1 || amt > 365) {
+            alert('⚠️ 請輸入 $1～$365 的有效金額。');
+            amtInput.focus();
             return;
         }
 
-        // 如果剛才是盲盒抽出的金額，必須使用原本抽到的金額，不能自行改成其他數字。
-        if (tempPendingAmount !== null && Math.round(toFiniteNumber(tempPendingAmount)) !== amt) {
-            alert(`🎲 本次盲盒抽到的是 $${Math.round(toFiniteNumber(tempPendingAmount))}，請使用這個金額登載。`);
-            amtInput.value = Math.round(toFiniteNumber(tempPendingAmount));
+        // 如果剛才是盲盒抽出的金額，金額欄只能使用該次抽到的數字。
+        if (
+            tempPendingAmount !== null &&
+            Math.round(toFiniteNumber(tempPendingAmount)) !== amt
+        ) {
+            const pending = Math.round(toFiniteNumber(tempPendingAmount));
+            alert(`🎲 本次盲盒抽到的是 $${pending}，請使用這個金額登載。`);
+            amtInput.value = pending;
             return;
         }
 
@@ -3237,15 +3386,28 @@
             return;
         }
 
+        // 只有「確認已寫入 LocalStorage」之後才清空輸入欄。
         dayInput.value = '';
         amtInput.value = '';
+
         tempPendingAmount = null;
         tempPendingDay = null;
+
         amtInput.readOnly = false;
         amtInput.removeAttribute('data-from-blindbox');
 
+        // ✅ 修正重點：三個區域同步刷新
         renderJournalList();
+        renderGrid();
         updateDashboard();
+        refreshBlueprintStatus(false);
+
+        const display = document.getElementById('celebrity-display');
+        if (display) {
+            display.innerText =
+                `✅ 已登載 Day ${day}・$${amt.toLocaleString()}｜本輪 ${getUsedAmountsSet().size}/365`;
+        }
+
         triggerConfettiStorm();
     }
 
@@ -4253,5 +4415,83 @@
         }
     };
 </script>
+
+<script>
+/* =========================================================
+   🔄 GitHub Pages 版本更新偵測
+   - 不使用 Service Worker。
+   - 每次啟動以 cache:"no-store" 取得同一頁最新版。
+   - 若遠端 app-version 與目前不同，自動用版本參數重新載入。
+   - localStorage 儲蓄資料不會因為重新載入而被清除。
+   ========================================================= */
+(function () {
+    const CURRENT_APP_VERSION = "2026.08.09-storage-cache-fix-1";
+    const LAST_CHECK_KEY = "365_last_version_check_at";
+    const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
+
+    async function checkFor365Update(force = false) {
+        try {
+            const now = Date.now();
+            const last = Number(sessionStorage.getItem(LAST_CHECK_KEY) || 0);
+
+            if (!force && now - last < CHECK_INTERVAL_MS) return;
+            sessionStorage.setItem(LAST_CHECK_KEY, String(now));
+
+            const cleanUrl = location.origin + location.pathname;
+            const probeUrl = cleanUrl + "?__365_update_check=" + now;
+
+            const response = await fetch(probeUrl, {
+                cache: "no-store",
+                headers: {
+                    "Cache-Control": "no-cache",
+                    "Pragma": "no-cache"
+                }
+            });
+
+            if (!response.ok) return;
+
+            const html = await response.text();
+            const match = html.match(
+                /<meta\s+name=["']app-version["']\s+content=["']([^"']+)["']/i
+            );
+
+            if (!match) return;
+
+            const remoteVersion = match[1];
+
+            if (remoteVersion && remoteVersion !== CURRENT_APP_VERSION) {
+                console.info(
+                    "偵測到新版 365 Savings：",
+                    CURRENT_APP_VERSION,
+                    "→",
+                    remoteVersion
+                );
+
+                const url = new URL(cleanUrl);
+                url.searchParams.set("v", remoteVersion);
+                location.replace(url.toString());
+            }
+        } catch (error) {
+            console.warn("365 版本檢查暫時無法完成：", error);
+        }
+    }
+
+    // 頁面載入後檢查一次。
+    window.addEventListener("load", () => {
+        setTimeout(() => checkFor365Update(false), 1200);
+    });
+
+    // Android Chrome 從背景或 bfcache 返回時，再檢查一次。
+    window.addEventListener("pageshow", event => {
+        if (event.persisted) {
+            checkFor365Update(true);
+        }
+    });
+
+    // 提供除錯用函式，可在 Console 手動執行。
+    window.checkFor365Update = checkFor365Update;
+})();
+</script>
+
 </body>
 </html>
