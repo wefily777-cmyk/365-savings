@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-audio-stop-fix-1">
+    <meta name="app-version" content="2026.08.09-legacy-bridge-v3">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -3135,7 +3135,248 @@
         return normalized;
     }
 
+
+    // ============================================================
+    // 🔄 Legacy Bridge V3
+    // 保留新版所有功能，同時完整理解舊版 365 手帳資料。
+    //
+    // 舊版真實格式（由 Mac 備份確認）：
+    // 手動：{ dayIndex, dateStr, amount: Day, customValue: 真實金額, isPatched:true }
+    // 盲盒：{ dayIndex, dateStr, amount: 真實金額, isPatched:false }
+    //
+    // 原則：
+    // 1. 現有新版資料永遠優先。
+    // 2. 只用 migration/cleanup 備份補回「可以確定」遺失或誤轉的資料。
+    // 3. 不因為舊備份存在就整包覆蓋新版。
+    // 4. 永久保留原始備份，不自動刪除。
+    // ============================================================
+    const LEGACY_BRIDGE_VERSION = 'legacy-v3-20260809';
+
+    function extractJournalRecordsFromParsed(parsed) {
+        if (Array.isArray(parsed)) return parsed;
+
+        if (parsed && typeof parsed === 'object') {
+            if (Array.isArray(parsed.records)) return parsed.records;
+            if (Array.isArray(parsed.history)) return parsed.history;
+            if (Array.isArray(parsed.data)) return parsed.data;
+
+            return Object.entries(parsed).map(([day, amount]) => ({ day, amount }));
+        }
+
+        return [];
+    }
+
+    function isStrongLegacyManualRecord(raw) {
+        return !!(
+            raw &&
+            typeof raw === 'object' &&
+            !Array.isArray(raw) &&
+            raw.dayIndex !== undefined &&
+            raw.customValue !== undefined &&
+            (
+                raw.isPatched === true ||
+                Number(raw.amount) === Number(raw.dayIndex)
+            )
+        );
+    }
+
+    function legacyRecordFingerprint(item) {
+        if (!item) return '';
+        return [
+            Math.round(toFiniteNumber(item.day)),
+            Math.round(toFiniteNumber(item.amt)),
+            String(item.date || ''),
+            String(item.source || '')
+        ].join('|');
+    }
+
+    function getLegacyMigrationBackupKeys() {
+        const keys = [];
+
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+
+            // 只把「程式自動在 migration / cleanup 前建立」的備份
+            // 當成可補資料的可靠來源，避免把使用者很久以前刻意刪除的舊資料復活。
+            if (
+                key.startsWith('365_journal_mode_history_backup_before_migration_') ||
+                key.startsWith('365_journal_mode_history_backup_before_365_data_cleanup_')
+            ) {
+                keys.push(key);
+            }
+        }
+
+        keys.sort((a, b) => {
+            const getTs = key => Number(key.match(/(\d{10,})$/)?.[1] || 0);
+            return getTs(b) - getTs(a);
+        });
+
+        return keys;
+    }
+
+    function rescueLegacyJournalHistory(currentHistory) {
+        const current = Array.isArray(currentHistory)
+            ? currentHistory.map(item => ({ ...item }))
+            : [];
+
+        const report = {
+            version: LEGACY_BRIDGE_VERSION,
+            checkedAt: new Date().toISOString(),
+            backupKeysChecked: [],
+            repairedAmounts: [],
+            restoredMissingRecords: [],
+            unresolved: []
+        };
+
+        const migrationBackupKeys = getLegacyMigrationBackupKeys();
+
+        // 若沒有 migration/cleanup 備份，代表可能是第一次從真正舊版升級；
+        // loadJournalHistoryWithMigration() 已會直接從目前 raw 正確轉換，因此不必再做任何覆蓋。
+        if (!migrationBackupKeys.length) {
+            try {
+                localStorage.setItem('365_legacy_bridge_version', LEGACY_BRIDGE_VERSION);
+                localStorage.setItem('365_legacy_bridge_report', JSON.stringify(report));
+            } catch (_) {}
+            return current;
+        }
+
+        const currentFingerprints = new Set(current.map(legacyRecordFingerprint));
+
+        for (const backupKey of migrationBackupKeys) {
+            const raw = localStorage.getItem(backupKey);
+            const parsed = safeJsonParse(raw, null);
+            if (parsed === null) continue;
+
+            const rawRecords = extractJournalRecordsFromParsed(parsed);
+            if (!rawRecords.length) continue;
+
+            report.backupKeysChecked.push(backupKey);
+
+            for (let index = 0; index < rawRecords.length; index++) {
+                const rawRecord = rawRecords[index];
+                const canonical = normalizeJournalRecord(rawRecord, index);
+                if (!canonical) {
+                    report.unresolved.push({
+                        backupKey,
+                        index,
+                        reason: 'unrecognized_record'
+                    });
+                    continue;
+                }
+
+                const fp = legacyRecordFingerprint(canonical);
+                if (currentFingerprints.has(fp)) continue;
+
+                const sameDayIndexes = [];
+                current.forEach((item, i) => {
+                    if (Math.round(toFiniteNumber(item.day)) === canonical.day) {
+                        sameDayIndexes.push(i);
+                    }
+                });
+
+                // ✅ 最重要的舊版手動金額修復：
+                // 如果舊 raw 明確有 customValue，而且目前同一 Day 的 amt
+                // 被錯誤轉成了 Day 本身，就以 customValue 恢復真實金額。
+                if (isStrongLegacyManualRecord(rawRecord) && sameDayIndexes.length) {
+                    const candidateIndex = sameDayIndexes.find(i => {
+                        const item = current[i];
+                        const currentAmt = Math.round(toFiniteNumber(item.amt));
+                        const sameDate =
+                            !canonical.date ||
+                            !item.date ||
+                            String(item.date) === String(canonical.date);
+
+                        return sameDate &&
+                            currentAmt === canonical.day &&
+                            canonical.amt !== canonical.day;
+                    });
+
+                    if (candidateIndex !== undefined) {
+                        const before = { ...current[candidateIndex] };
+
+                        current[candidateIndex] = {
+                            ...current[candidateIndex],
+                            amt: canonical.amt,
+                            date: canonical.date || current[candidateIndex].date,
+                            source: 'manual',
+                            legacyRecovered: true,
+                            legacyRecoveryType: 'customValue_restore',
+                            legacyOriginalDay: canonical.day
+                        };
+
+                        report.repairedAmounts.push({
+                            day: canonical.day,
+                            from: Math.round(toFiniteNumber(before.amt)),
+                            to: canonical.amt,
+                            backupKey
+                        });
+
+                        currentFingerprints.add(
+                            legacyRecordFingerprint(current[candidateIndex])
+                        );
+                        continue;
+                    }
+                }
+
+                // 若目前完全沒有這一筆 Day，而且它來自 migration 前的可靠備份，
+                // 代表舊紀錄可能曾在前幾版清理過程被漏掉；把它補回。
+                if (sameDayIndexes.length === 0) {
+                    const restored = {
+                        ...canonical,
+                        legacyRecovered: true,
+                        legacyRecoveryType: 'missing_record_restore',
+                        legacyOriginalDay: canonical.day
+                    };
+
+                    current.push(restored);
+                    currentFingerprints.add(fp);
+
+                    report.restoredMissingRecords.push({
+                        day: canonical.day,
+                        amt: canonical.amt,
+                        date: canonical.date,
+                        source: canonical.source,
+                        backupKey
+                    });
+
+                    continue;
+                }
+
+                // 同 Day 但不同金額，且不是可以百分之百判斷的 customValue 誤轉，
+                // 不直接覆蓋目前資料，交給後面的 duplicate-day preservation 處理或健檢顯示。
+                report.unresolved.push({
+                    backupKey,
+                    index,
+                    day: canonical.day,
+                    amt: canonical.amt,
+                    reason: 'same_day_different_amount'
+                });
+            }
+        }
+
+        try {
+            localStorage.setItem('365_legacy_bridge_version', LEGACY_BRIDGE_VERSION);
+            localStorage.setItem('365_legacy_bridge_report', JSON.stringify(report));
+        } catch (_) {}
+
+        if (
+            report.repairedAmounts.length ||
+            report.restoredMissingRecords.length
+        ) {
+            console.info(
+                'Legacy Bridge V3 完成：',
+                `修復金額 ${report.repairedAmounts.length} 筆；`,
+                `補回紀錄 ${report.restoredMissingRecords.length} 筆。`
+            );
+        }
+
+        return current;
+    }
+
+
     let journalListHistory = loadJournalHistoryWithMigration();
+    journalListHistory = rescueLegacyJournalHistory(journalListHistory);
 
     // 🧾 舊資料相容性診斷：保留每筆 Day 與「真正實際金額」的獨立關係。
     // 不使用 Day 當金額，也不會因為盲盒抽到 $188 就把 Day 固定成 188。
@@ -3148,54 +3389,140 @@
     // Day 只代表「第幾天」，amt 才代表「實際存了多少錢」。
     // 同一個 Day 只能有一筆紀錄；不同 Day 可以出現相同金額。
     function normalize365JournalData() {
-        const seen = new Set();
         const normalized = [];
+        const usedDays = new Set();
+
+        function findNextUnusedDay() {
+            for (let d = 1; d <= 365; d++) {
+                if (!usedDays.has(d)) return d;
+            }
+            return null;
+        }
 
         for (const item of journalListHistory) {
-            const day = Math.round(toFiniteNumber(item && item.day));
+            let day = Math.round(toFiniteNumber(item && item.day));
             const amt = Math.round(toFiniteNumber(item && item.amt));
-            if (!Number.isFinite(day) || day < 1 || day > 365 || seen.has(day)) continue;
+
+            if (!Number.isFinite(day) || day < 1 || day > 365) continue;
             if (!Number.isFinite(amt) || amt <= 0) continue;
 
-            seen.add(day);
-            const preservedDate = item && item.date &&
-                item.date !== 'undefined' && item.date !== 'null'
-                ? String(item.date)
-                : getJournalDateByDay(day);
+            const originalDay = day;
+
+            // 舊版曾可能因「手動先指定未來 Day」＋「盲盒用 length+1 當 Day」
+            // 形成兩筆同 Day。以前 cleanup 會直接丟掉其中一筆，造成存款金額消失。
+            // 新版改為：保留兩筆；第二筆自動放到尚未使用的 Day，
+            // 同時記住 legacyOriginalDay，讓金額與日期都不遺失。
+            if (usedDays.has(day)) {
+                const replacementDay = findNextUnusedDay();
+
+                if (replacementDay === null) {
+                    // 理論上只有超過 365 筆才會發生；不強行塞入目前挑戰。
+                    try {
+                        const conflicts = safeJsonParse(
+                            localStorage.getItem('365_legacy_overflow_records'),
+                            []
+                        );
+                        const arr = Array.isArray(conflicts) ? conflicts : [];
+                        arr.push({
+                            ...item,
+                            legacyOriginalDay: originalDay,
+                            reason: 'more_than_365_records',
+                            preservedAt: new Date().toISOString()
+                        });
+                        localStorage.setItem(
+                            '365_legacy_overflow_records',
+                            JSON.stringify(arr)
+                        );
+                    } catch (_) {}
+                    continue;
+                }
+
+                day = replacementDay;
+            }
+
+            usedDays.add(day);
+
+            const preservedDate =
+                item && item.date &&
+                item.date !== 'undefined' &&
+                item.date !== 'null'
+                    ? String(item.date)
+                    : getJournalDateByDay(originalDay);
 
             normalized.push({
                 day,
                 amt,
                 date: preservedDate,
-                source: item && (item.source === 'manual' || item.source === 'blindbox') ? item.source : 'legacy',
-                round: Number(item && item.round) || 1
+                source:
+                    item && (
+                        item.source === 'manual' ||
+                        item.source === 'blindbox'
+                    )
+                        ? item.source
+                        : 'legacy',
+                round: Number(item && item.round) || 1,
+
+                ...(day !== originalDay
+                    ? {
+                        legacyOriginalDay: originalDay,
+                        legacyDayReassigned: true,
+                        migrationNote:
+                            `舊資料 Day ${originalDay} 發生重複，為避免遺失金額已暫放 Day ${day}`
+                    }
+                    : {}),
+
+                ...(item && item.legacyRecovered
+                    ? {
+                        legacyRecovered: true,
+                        legacyRecoveryType: item.legacyRecoveryType || 'legacy_restore',
+                        legacyOriginalDay:
+                            item.legacyOriginalDay !== undefined
+                                ? item.legacyOriginalDay
+                                : originalDay
+                    }
+                    : {})
             });
         }
 
         normalized.sort((a, b) => a.day - b.day);
 
-        const changed = normalized.length !== journalListHistory.length ||
+        const comparable = item => ({
+            day: Math.round(toFiniteNumber(item && item.day)),
+            amt: Math.round(toFiniteNumber(item && item.amt)),
+            date: String(item && item.date || ''),
+            source: String(item && item.source || ''),
+            round: Number(item && item.round) || 1,
+            legacyOriginalDay:
+                item && item.legacyOriginalDay !== undefined
+                    ? Number(item.legacyOriginalDay)
+                    : null
+        });
+
+        const changed =
+            normalized.length !== journalListHistory.length ||
             normalized.some((item, i) => {
-                const old = journalListHistory[i];
-                return !old ||
-                    Math.round(toFiniteNumber(old.day)) !== item.day ||
-                    Math.round(toFiniteNumber(old.amt)) !== item.amt ||
-                    String(old.date || '') !== item.date ||
-                    !['manual', 'blindbox', 'legacy'].includes(old.source);
+                const a = comparable(item);
+                const b = comparable(journalListHistory[i]);
+                return JSON.stringify(a) !== JSON.stringify(b);
             });
 
         if (changed) {
             try {
                 const raw = localStorage.getItem('365_journal_mode_history');
+
                 if (raw) {
                     localStorage.setItem(
-                        `365_journal_mode_history_backup_before_365_data_cleanup_${Date.now()}`,
+                        `365_journal_mode_history_backup_before_legacy_v3_normalize_${Date.now()}`,
                         raw
                     );
                 }
-                localStorage.setItem('365_journal_mode_history', JSON.stringify(normalized));
+
+                localStorage.setItem(
+                    '365_journal_mode_history',
+                    JSON.stringify(normalized)
+                );
             } catch (error) {
-                console.warn('365 手帳資料整理備份失敗：', error);
+                console.warn('Legacy V3 正規化備份失敗：', error);
             }
         }
 
@@ -5276,7 +5603,36 @@
             passes.push(`封存歷史共 ${archivedRoundIds.length} 輪，未發現重複 Day／金額`);
         }
 
-        // 9. 舊備份數量（僅提示）
+        // 9. Legacy Bridge V3 狀態
+        const legacyBridgeHealth = safeJsonParse(
+            localStorage.getItem('365_legacy_bridge_report'),
+            {}
+        );
+        const legacyUnresolvedCount = Array.isArray(legacyBridgeHealth.unresolved)
+            ? legacyBridgeHealth.unresolved.length
+            : 0;
+
+        if (legacyUnresolvedCount > 0) {
+            warnings.push(
+                `Legacy Bridge 尚有 ${legacyUnresolvedCount} 筆舊資料衝突無法百分之百自動判斷；原始備份仍完整保留。`
+            );
+        }
+
+        const legacyRepairedCount =
+            (Array.isArray(legacyBridgeHealth.repairedAmounts)
+                ? legacyBridgeHealth.repairedAmounts.length
+                : 0) +
+            (Array.isArray(legacyBridgeHealth.restoredMissingRecords)
+                ? legacyBridgeHealth.restoredMissingRecords.length
+                : 0);
+
+        if (legacyRepairedCount > 0) {
+            passes.push(
+                `Legacy Bridge 已安全恢復 ${legacyRepairedCount} 筆舊資料資訊`
+            );
+        }
+
+        // 10. 舊備份數量（僅提示）
         const backupKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
@@ -5501,6 +5857,17 @@
             '【封存輪次摘要】',
             archiveSummaryText,
             '',
+            '【舊資料銜接狀態】',
+            (() => {
+                const r = safeJsonParse(localStorage.getItem('365_legacy_bridge_report'), {});
+                return [
+                    `Legacy Bridge：${localStorage.getItem('365_legacy_bridge_version') || '尚未執行'}`,
+                    `修復舊手動金額：${Array.isArray(r.repairedAmounts) ? r.repairedAmounts.length : 0} 筆`,
+                    `補回遺失紀錄：${Array.isArray(r.restoredMissingRecords) ? r.restoredMissingRecords.length : 0} 筆`,
+                    `仍需人工判斷：${Array.isArray(r.unresolved) ? r.unresolved.length : 0} 筆`
+                ].join('\n');
+            })(),
+            '',
             '【LocalStorage 狀態】',
             rawStatusText,
             '',
@@ -5636,7 +6003,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-audio-stop-fix-1";
+    const CURRENT_APP_VERSION = "2026.08.09-legacy-bridge-v3";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
