@@ -194,6 +194,7 @@
         footer { text-align: center; margin-top: 30px; padding: 20px 0; }
         .reset-btn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; opacity: 0.5; }
         .reset-btn:hover { opacity: 1; background: #ffe3e3; color: #d90429; border-color: #d90429; }
+        .reset-btn:disabled { opacity: .35; cursor:not-allowed; pointer-events:none; }
     </style>
 </head>
 <body>
@@ -298,7 +299,7 @@
     <div class="grid-container" id="months-grid"></div>
     
     <footer>
-        <button class="reset-btn" id="lbl-reset-btn-text" onclick="resetChallenge()">🔄 重置大廳所有儲蓄數據</button>
+        <button class="reset-btn" id="lbl-reset-btn-text" onclick="resetChallenge()" disabled>🔒 365/365 完成後可重新開始</button>
     </footer>
 </div>
 
@@ -365,6 +366,7 @@
                 </div>
             </div>
         </div>
+        <div style="margin-top:4px;padding-top:14px;border-top:1px solid var(--border-color);"><div class="settings-row-title">🔄 365 存錢挑戰</div><button class="settings-main-action-btn" style="background:rgba(0,0,0,0.06);color:var(--text-color);box-shadow:none;" onclick="reset365Challenge(true)">♻️ 重新開始 365 挑戰（保留歷史手帳）</button></div>
         <button class="settings-main-action-btn" onclick="closeSettingsPanel()" id="btn-setting-close">儲存變更 / Save</button>
     </div>
 </div>
@@ -2781,7 +2783,8 @@
             day,
             amt: amount,
             date,
-            source
+            source,
+            round: Number(record && record.round) || 1
         };
     }
 
@@ -2899,8 +2902,8 @@
     // 🧾 舊資料相容性診斷：保留每筆 Day 與「真正實際金額」的獨立關係。
     // 不使用 Day 當金額，也不會因為盲盒抽到 $188 就把 Day 固定成 188。
     function getJournalActualAmount(item) {
-        const amt = getJournalActualAmount(item);
-        return Number.isFinite(amt) && amt > 0 ? amt : 0;
+        const amt = toFiniteNumber(item && (item.amt ?? item.amount ?? item.customValue));
+        return Number.isFinite(amt) && amt > 0 ? Math.round(amt) : 0;
     }
 
     // 🛡️ 365 天防誤觸智慧手帳：Day 與金額完全分離。
@@ -2926,9 +2929,8 @@
                 day,
                 amt,
                 date: preservedDate,
-                source: item && (item.source === 'manual' || item.source === 'blindbox')
-                    ? item.source
-                    : 'legacy'
+                source: item && (item.source === 'manual' || item.source === 'blindbox') ? item.source : 'legacy',
+                round: Number(item && item.round) || 1
             });
         }
 
@@ -2972,6 +2974,30 @@
 
     let tempPendingAmount = null;
     let tempPendingDay = null;
+
+    // 365 挑戰採「輪次」保存：重置只結束目前輪次，不刪除歷史手帳。
+    let active365Round = Number(localStorage.getItem('365_active_round')) || 1;
+    let journalArchive = safeJsonParse(localStorage.getItem('365_journal_archive'), []);
+    if (!Array.isArray(journalArchive)) journalArchive = [];
+    journalListHistory = journalListHistory.map(item => ({ ...item, round: Number(item.round) || 1 }));
+
+    function getActiveJournalEntries() {
+        return journalListHistory.filter(item => (Number(item.round) || 1) === active365Round);
+    }
+    function getUsedAmountsSet() {
+        const used = new Set();
+        getActiveJournalEntries().forEach(item => {
+            const amt = getJournalActualAmount(item);
+            if (amt >= 1 && amt <= 365) used.add(amt);
+        });
+        return used;
+    }
+    function is365Complete() { return getUsedAmountsSet().size === 365; }
+    function persist365Data() {
+        localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
+        localStorage.setItem('365_journal_archive', JSON.stringify(journalArchive));
+        localStorage.setItem('365_active_round', String(active365Round));
+    }
 
     // 🗓️ 3. 二十四節氣與節慶檢測邏輯
     function checkSolarTermsAndHolidays() {
@@ -3092,10 +3118,7 @@
             date: getJournalDateByDay(Math.round(item.day))
         }));
 
-        localStorage.setItem(
-            '365_journal_mode_history',
-            JSON.stringify(journalListHistory)
-        );
+        persist365Data();
 
         renderJournalList();
     }
@@ -3141,58 +3164,20 @@
 
     // 📝 7. 手帳防誤觸手動登載（支援語系化提示）
     // 🛡️ 365 天手帳唯一登錄入口：Day 與金額分離。
-    // 同一個 Day 在任何時間都只能存在一筆；金額可為任意正整數。
+    // 同一個 Day 在目前輪次只能存在一筆；金額限定 $1～$365，且本輪不得重複。
     function save365JournalEntry(day, amt, source = 'manual') {
         day = Math.round(toFiniteNumber(day));
         amt = Math.round(toFiniteNumber(amt));
-
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
-
-        if (!Number.isFinite(day) || day < 1 || day > 365) {
-            alert(langDict.errValidDay);
-            return false;
-        }
-
-        if (!Number.isFinite(amt) || amt <= 0) {
-            alert(langDict.errValidAmt);
-            return false;
-        }
-
-        // 同一個 Day 不論來源是手動或盲盒，都只能登錄一次。
-        const duplicateIndex = journalListHistory.findIndex(
-            item => Math.round(toFiniteNumber(item && item.day)) === day
-        );
-
-        if (duplicateIndex !== -1) {
-            alert(langDict.errDuplicateDay(day));
-            return false;
-        }
-
-        const entry = {
-            day,
-            amt,
-            date: getJournalDateByDay(day),
-            source: source === 'blindbox' ? 'blindbox' : 'manual'
-        };
-
+        if (!Number.isFinite(day) || day < 1 || day > 365) { alert(langDict.errValidDay); return false; }
+        if (!Number.isFinite(amt) || amt < 1 || amt > 365) { alert('⚠️ 365 挑戰的金額必須是 $1～$365。'); return false; }
+        const active = getActiveJournalEntries();
+        if (active.some(item => Math.round(toFiniteNumber(item.day)) === day)) { alert(langDict.errDuplicateDay(day)); return false; }
+        if (getUsedAmountsSet().has(amt)) { alert(`⚠️ $${amt.toLocaleString()} 已在第 ${active365Round} 輪使用過，抽取或手動登錄都不能重複。`); return false; }
+        const entry = { day, amt, date: getJournalDateByDay(day), source: source === 'blindbox' ? 'blindbox' : 'manual', round: active365Round };
         journalListHistory.push(entry);
-        journalListHistory.sort((a, b) => a.day - b.day);
-
-        try {
-            localStorage.setItem(
-                '365_journal_mode_history',
-                JSON.stringify(journalListHistory)
-            );
-        } catch (error) {
-            // 儲存失敗時回滾記憶體，避免畫面看似成功但重新整理後消失。
-            journalListHistory = journalListHistory.filter(
-                item => item !== entry
-            );
-            console.error('365 手帳資料儲存失敗：', error);
-            alert('⚠️ 儲存資料失敗，這筆紀錄尚未完成儲存。');
-            return false;
-        }
-
+        journalListHistory.sort((a,b) => (Number(a.round)-Number(b.round)) || (a.day-b.day));
+        try { persist365Data(); } catch(e) { journalListHistory=journalListHistory.filter(x=>x!==entry); alert('⚠️ 儲存資料失敗，這筆紀錄尚未完成儲存。'); return false; }
         return true;
     }
 
@@ -3240,43 +3225,39 @@
     }
 
     function handleManualJournalDelete(index) {
-        if (confirm('⚠️ 確定要刪除此筆手帳紀錄嗎？')) {
-            journalListHistory.splice(index, 1);
-            localStorage.setItem('365_journal_mode_history', JSON.stringify(journalListHistory));
-            renderJournalList();
-            updateDashboard();
+        const active = getActiveJournalEntries();
+        const item = active[index];
+        if (!item) return;
+        if (confirm(`⚠️ 確定要刪除第 ${item.round} 輪 Day ${item.day} / $${getJournalActualAmount(item).toLocaleString()} 嗎？刪除後該金額會重新成為可使用金額。`)) {
+            const target = journalListHistory.indexOf(item);
+            if (target >= 0) journalListHistory.splice(target,1);
+            persist365Data(); renderJournalList(); renderGrid(); updateDashboard();
         }
     }
 
     function renderJournalList() {
-        const container = document.getElementById('journal-list-render-target');
-        const countLabel = document.getElementById('journal-total-count-label');
-        container.innerHTML = '';
-
-        countLabel.innerText = `${journalListHistory.length} 筆`;
-
-        if (journalListHistory.length === 0) {
-            container.innerHTML = `<div style="text-align:center; opacity:0.5; padding:20px; font-size:0.85rem;">🫙 目前手帳尚無登載紀錄</div>`;
-            return;
-        }
-
-        journalListHistory.slice().reverse().forEach((item, revIdx) => {
-            const realIdx = journalListHistory.length - 1 - revIdx;
-            const card = document.createElement('div');
-            card.className = 'journal-row-card';
-            card.innerHTML = `
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <span class="j-day-tag">Day ${item.day}</span>
-                    <span style="font-weight:800; font-size:0.95rem;">$${getJournalActualAmount(item).toLocaleString()}</span>
-                    <span style="font-size:0.65rem; opacity:0.65;">${item.source === 'blindbox' ? '🎲 抽取' : item.source === 'manual' ? '✍️ 手動' : '📦 舊紀錄'}</span>
-                </div>
-                <div style="display:flex; align-items:center;">
-                    <span style="font-size:0.75rem; opacity:0.6; font-weight:bold;">${item.date}</span>
-                    <button class="j-delete-icon-btn" onclick="handleManualJournalDelete(${realIdx})">🗑️</button>
-                </div>
-            `;
+        const container=document.getElementById('journal-list-render-target');
+        const countLabel=document.getElementById('journal-total-count-label');
+        container.innerHTML='';
+        const active=getActiveJournalEntries().sort((a,b)=>a.day-b.day);
+        countLabel.innerText=`${active.length} 筆｜第 ${active365Round} 輪`;
+        if(!active.length){container.innerHTML=`<div style="text-align:center;opacity:.5;padding:20px;font-size:.85rem;">🫙 第 ${active365Round} 輪尚無登載紀錄</div>`;return;}
+        active.slice().reverse().forEach(item=>{
+            const idx=active.indexOf(item), card=document.createElement('div'); card.className='journal-row-card';
+            card.innerHTML=`<div style="display:flex;align-items:center;gap:8px;"><span class="j-day-tag">Day ${item.day}</span><span style="font-weight:800;font-size:.95rem;">$${getJournalActualAmount(item).toLocaleString()}</span><span style="font-size:.65rem;opacity:.65;">${item.source==='blindbox'?'🎲 抽取':'✍️ 手動'}</span></div><div style="display:flex;align-items:center;"><span style="font-size:.75rem;opacity:.6;font-weight:bold;">${item.date||getJournalDateByDay(item.day)}</span><button class="j-delete-icon-btn" onclick="handleManualJournalDelete(${idx})">🗑️</button></div>`;
             container.appendChild(card);
         });
+        const archivedRounds = [...new Set(journalArchive.map(x=>Number(x.round)||1))].sort((a,b)=>b-a);
+        if (archivedRounds.length) {
+            const sep=document.createElement('div'); sep.style.cssText='margin:14px 0 6px;font-size:.75rem;font-weight:800;opacity:.65;'; sep.innerText='📚 已完成／封存的舊輪次（保留，不參與目前進度）'; container.appendChild(sep);
+            archivedRounds.forEach(round=>{
+                const rows=journalArchive.filter(x=>(Number(x.round)||1)===round).sort((a,b)=>a.day-b.day);
+                const summary=document.createElement('div'); summary.className='journal-row-card';
+                const sum=rows.reduce((n,x)=>n+getJournalActualAmount(x),0);
+                summary.innerHTML=`<div><strong>第 ${round} 輪</strong><div style="font-size:.7rem;opacity:.65;margin-top:3px;">${rows.length}/365 筆｜實際存款 $${sum.toLocaleString()}</div></div><span style="font-size:.72rem;opacity:.65;">已封存</span>`;
+                container.appendChild(summary);
+            });
+        }
     }
 
     // 📊 8. 核心計算邏輯與動態 UI 連動
@@ -3288,22 +3269,11 @@
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
 
         if (currentMode === '365_journal') {
-            // Day 是唯一鍵，但總金額一定以「實際存入金額 amt」計算。
-            // 例如 Day 1 抽到 $188，總額要加 $188，而不是加 $1。
-            const savedDaySet = new Set();
-            totalAmt = 0;
-
-            for (const item of journalListHistory) {
-                const day = Math.round(toFiniteNumber(item && item.day));
-                const amt = Math.round(toFiniteNumber(item && item.amt));
-                if (!Number.isFinite(day) || day < 1 || day > 365 || savedDaySet.has(day)) continue;
-                if (!Number.isFinite(amt) || amt <= 0) continue;
-                savedDaySet.add(day);
-                totalAmt += amt;
-            }
-
-            doneCount = savedDaySet.size;
-            document.getElementById('label-completed-unit').innerText = langDict.labelCompletedUnitDay;
+            const active = getActiveJournalEntries();
+            const usedAmounts = getUsedAmountsSet();
+            totalAmt = active.reduce((sum,item)=>sum+getJournalActualAmount(item),0);
+            doneCount = usedAmounts.size;
+            document.getElementById('label-completed-unit').innerText = `第 ${active365Round} 輪｜已完成金額`;
         } else if (currentMode === '365_阶梯') {
             checkedDays365.forEach(day => { totalAmt += Math.round(day); });
             doneCount = checkedDays365.length;
@@ -3328,6 +3298,13 @@
         document.getElementById('total-saved').innerText = `$${totalAmt.toLocaleString()}`;
         document.getElementById('days-count').innerText = `${doneCount} / ${totalCount}`;
         document.getElementById('progress-percent').innerText = `${percent}%`;
+
+        const footerReset = document.getElementById('lbl-reset-btn-text');
+        if (footerReset) {
+            const unlock = currentMode === '365_journal' && is365Complete();
+            footerReset.disabled = !unlock;
+            footerReset.innerText = unlock ? '🔄 已完成 365，重新開始下一輪' : '🔒 365/365 完成後可重新開始';
+        }
 
         const fluid = document.getElementById('dynamic-water-fluid');
         fluid.style.width = `${percent}%`;
@@ -3402,27 +3379,19 @@
                 btn.className = 'day-cell';
 
                 if (currentMode === '365_journal') {
-                    // 防誤觸手帳：日期格只能「顯示」，不能直接存錢。
-                    // 已登載的格子顯示「實際存入金額」，而不是把 Day 當成金額。
-                    const loggedItem = journalListHistory.find(
-                        item => Math.round(toFiniteNumber(item && item.day)) === thisDay
-                    );
-
-                    if (loggedItem) {
-                        const actualAmt = getJournalActualAmount(loggedItem);
-                        btn.innerText = `$${actualAmt.toLocaleString()}`;
+                    // 年度總表：固定顯示 $1～$365；顏色只代表該金額是否已使用。
+                    const usedAmounts = getUsedAmountsSet();
+                    const annualAmount = thisDay;
+                    btn.innerText = `$${annualAmount.toLocaleString()}`;
+                    btn.disabled = true;
+                    btn.classList.add('journal-locked');
+                    if (usedAmounts.has(annualAmount)) {
                         btn.classList.add('checked');
-                        btn.disabled = true;
-                        btn.setAttribute('aria-label', `Day ${thisDay}，已存 $${actualAmt}`);
-                        btn.title = `Day ${thisDay}：已存 $${actualAmt}`;
+                        btn.setAttribute('aria-label', `$${annualAmount} 已完成`);
+                        btn.title = `$${annualAmount} 已使用`;
                     } else {
-                        // 防誤觸模式：未登載的日期格不顯示虛構金額，也不顯示 DXX；留白即可。
-                        // 使用者只能透過手動登載或驚喜任務完成，不允許直接點格子存錢。
-                        btn.innerText = '';
-                        btn.disabled = true;
-                        btn.classList.add('journal-locked');
-                        btn.setAttribute('aria-label', `Day ${thisDay}，尚未登載`);
-                        btn.title = `Day ${thisDay}：尚未登載（請使用手動登載或驚喜任務）`;
+                        btn.setAttribute('aria-label', `$${annualAmount} 尚未使用`);
+                        btn.title = `$${annualAmount} 尚未使用`;
                     }
                 } else {
                     // 其他模式維持原本的互動方式。
@@ -3486,31 +3455,17 @@
 
     // 🎲 9. 盲盒抽取（多國語言提示連動）
     function pickCelebrity() {
-        const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
-        if (currentMode !== '365_journal') {
-            alert(langDict.blindboxModeAlert);
-            return;
-        }
-
-        // 盲盒現在只負責「抽金額」，不替使用者決定 Day。
-        // 因此同一個金額可以再次被抽到，這是允許的；真正不能重複的是「Day」。
-        if (tempPendingAmount !== null) {
-            alert('🎲 目前已有一個待登載的驚喜金額，請先使用或取消。');
-            return;
-        }
-
-        // 365 天儲蓄盲盒：每次獨立抽出 1～365 元。
-        const pickedAmount = Math.floor(Math.random() * 365) + 1;
-        tempPendingDay = null;
-        tempPendingAmount = pickedAmount;
-
-        document.getElementById('confirm-modal-title').innerText = langDict.confirmModalTitle;
-        document.getElementById('confirm-modal-body').innerHTML =
-            `🎲 本次抽到的驚喜金額：<span style="font-size:1.8rem; color:#84a59d; font-weight:900;">$${pickedAmount.toLocaleString()}</span><br><br>請按確認後，到「儲蓄流水手帳」輸入你要使用的 Day。<br><small style="opacity:.7;">同一個 Day 不能重複，但相同金額可以出現在不同 Day。</small>`;
-
-        document.getElementById('confirm-modal-layer').classList.add('active');
-        document.body.style.overflow = 'hidden';
-        playThemeSound();
+        const langDict=UI_I18N[currentLang]||UI_I18N['zh-TW'];
+        if(currentMode!=='365_journal'){alert(langDict.blindboxModeAlert);return;}
+        if(tempPendingAmount!==null){alert('🎲 目前已有待登載金額，請先完成或取消。');return;}
+        const used=getUsedAmountsSet(), available=[];
+        for(let amount=1;amount<=365;amount++) if(!used.has(amount)) available.push(amount);
+        if(!available.length){alert('🎉 365 個金額全部完成！請使用「重新開始 365 挑戰」開啟下一輪。');return;}
+        const pickedAmount=available[Math.floor(Math.random()*available.length)];
+        tempPendingDay=null; tempPendingAmount=pickedAmount;
+        document.getElementById('confirm-modal-title').innerText=langDict.confirmModalTitle;
+        document.getElementById('confirm-modal-body').innerHTML=`🎲 本次抽到的驚喜金額：<span style="font-size:1.8rem;color:#84a59d;font-weight:900;">$${pickedAmount.toLocaleString()}</span><br><br>確認後，請在手帳選擇要登錄的 Day。<br><small style="opacity:.7;">⚠️ $${pickedAmount} 本輪不可再次使用；Day 也不可重複。</small>`;
+        document.getElementById('confirm-modal-layer').classList.add('active'); document.body.style.overflow='hidden'; playThemeSound();
     }
 
     function showConfirmModal(day, amt) {
@@ -4072,12 +4027,15 @@
         }
     }
 
-    function resetChallenge() {
-        if (confirm('⚠️ 確定要重置大廳資料嗎？這將會清空本地快取中累積的手帳天數、完成進度與金額！')) {
-            localStorage.clear();
-            location.reload();
-        }
+    function reset365Challenge(force=false) {
+        if(!force&&!is365Complete()){alert('🔒 365 尚未完成。若要中途重新開始，請從設定裡確認重置。');return;}
+        if(!confirm(`⚠️ 確定要開始第 ${active365Round+1} 輪 365 挑戰嗎？\n\n目前第 ${active365Round} 輪的手帳紀錄會保留在歷史資料，不會被刪除。`)) return;
+        const active=getActiveJournalEntries();
+        if(active.length){journalArchive.push(...active.map(item=>({...item,archivedAt:new Date().toISOString()}))); journalListHistory=journalListHistory.filter(item=>(Number(item.round)||1)!==active365Round);}
+        active365Round++; tempPendingAmount=null; tempPendingDay=null; persist365Data();
+        renderJournalList(); renderGrid(); updateDashboard(); closeSettingsPanel(); alert(`🎉 第 ${active365Round} 輪 365 挑戰已開始！`);
     }
+    function resetChallenge(){ if(currentMode==='365_journal'&&is365Complete()) reset365Challenge(false); }
 
     // 🚀 11. 初始化載入
     window.onload = () => {
