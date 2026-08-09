@@ -1,12 +1,142 @@
-const SOUND_LIBRARY = {
-  waterfall: {
-    name: "瀑布",
-    fileId: "1cuZSwJ3HW7HWoul4cs7bschJCTEg6VyN",
-    url: "https://drive.google.com/uc?export=download&id=1cuZSwJ3HW7HWoul4cs7bschJCTEg6VyN"
-  },
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>瀑布音效測試</title>
+</head>
 
-  rain: {...},
-  ocean: {...},
-  crickets: {...},
-  birds: {...}
-};
+<body>
+
+<h2>🌊 Google Drive 瀑布音效測試</h2>
+
+<p id="status">等待測試...</p>
+
+<audio id="waterfall" controls preload="metadata">
+  <source
+    src="https://drive.google.com/uc?export=download&id=1cuZSwJ3HW7HWoul4cs7bschJCTEg6VyN"
+    type="audio/mpeg">
+</audio>
+
+<br><br>
+
+<button onclick="testPlay()">
+  ▶ 播放瀑布
+</button>
+
+<button onclick="stopAudio()">
+  ⏸ 停止
+</button>
+
+<script>
+
+const audio = document.getElementById("waterfall");
+const status = document.getElementById("status");
+
+audio.volume = 0.5;
+audio.loop = true;
+
+
+/* 成功載入 */
+
+audio.addEventListener("loadedmetadata", () => {
+
+  status.innerHTML =
+    "✅ Google Drive 音訊已成功載入<br>" +
+    "音訊長度：" +
+    Math.round(audio.duration) +
+    " 秒";
+
+});
+
+
+/* 已經可以播放 */
+
+audio.addEventListener("canplay", () => {
+
+  status.innerHTML =
+    "✅ 音訊已準備完成，可以播放";
+
+});
+
+
+/* 播放 */
+
+async function testPlay() {
+
+  status.innerHTML =
+    "⏳ 正在嘗試播放 Google Drive 音效...";
+
+  try {
+
+    await audio.play();
+
+    status.innerHTML =
+      "🔊 播放成功！Google Drive 音效可以使用。";
+
+  }
+
+  catch(error) {
+
+    status.innerHTML =
+      "❌ 播放失敗：" + error.message;
+
+    console.error(error);
+
+  }
+
+}
+
+
+/* 停止 */
+
+function stopAudio() {
+
+  audio.pause();
+
+  status.innerHTML =
+    "⏸ 音效已暫停";
+
+}
+
+
+/* 音訊錯誤 */
+
+audio.addEventListener("error", () => {
+
+  let message = "未知錯誤";
+
+  if(audio.error){
+
+    switch(audio.error.code){
+
+      case 1:
+        message = "MEDIA_ERR_ABORTED";
+        break;
+
+      case 2:
+        message = "MEDIA_ERR_NETWORK";
+        break;
+
+      case 3:
+        message = "MEDIA_ERR_DECODE";
+        break;
+
+      case 4:
+        message = "MEDIA_ERR_SRC_NOT_SUPPORTED";
+        break;
+
+    }
+
+  }
+
+  status.innerHTML =
+    "❌ Google Drive 音效載入失敗：" +
+    message;
+
+});
+
+</script>
+
+</body>
+</html>
