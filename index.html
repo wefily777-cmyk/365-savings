@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-full-health-report-1">
+    <meta name="app-version" content="2026.08.09-audio-compat-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -319,6 +319,32 @@
             }
         }
 
+
+        /* 🎧 跨 iOS / Android 音訊相容層 */
+        .audio-compat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: .68rem;
+            font-weight: 800;
+            background: rgba(0,0,0,.06);
+            color: var(--text-color);
+        }
+        .audio-test-box {
+            background: rgba(0,0,0,.035);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 10px;
+            font-size: .72rem;
+            line-height: 1.65;
+            margin-top: 8px;
+        }
+        .audio-test-ok { color:#16834f; font-weight:800; }
+        .audio-test-warn { color:#d97706; font-weight:800; }
+        .audio-test-error { color:#dc2626; font-weight:800; }
+
 </style>
 </head>
 <body>
@@ -470,6 +496,11 @@
             </div>
             <div>
                 <div class="settings-row-title" id="lbl-setting-music">🎧 療癒環境音 / Healing Ambient Sounds</div>
+
+            <div style="margin-top:8px;">
+                <button type="button" class="health-check-btn" style="background:linear-gradient(135deg,#6a11cb,#2575fc);" onclick="runAudioCompatibilityTest()">🎧 音效相容性測試</button>
+                <div id="audio-compat-mini-status" class="audio-test-box">尚未執行測試。</div>
+            </div>
                 <div class="ambient-sound-panel">
                     <div class="settings-btn-grid ambient-sound-grid">
                         <button class="settings-item-btn ambient-sound-item" data-sound="ocean" onclick="selectAmbientSound('ocean')">🌊 海浪</button>
@@ -4131,6 +4162,373 @@
         document.addEventListener('keydown', resumeOnce, { once: true });
     }
 
+
+    // ============================================================
+    // 🎧 10.1.5 跨 iOS / Android 音訊相容層
+    // ============================================================
+    const AUDIO_COMPAT = {
+        unlocked: false,
+        unlocking: false,
+        lastUserGestureAt: 0,
+        resumeTimer: null,
+        lastVisibilityState: document.visibilityState,
+        maxTracks: 4,
+        isIOS: /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1),
+        isAndroid: /Android/i.test(navigator.userAgent),
+        isLowPowerDevice:
+            ((navigator.deviceMemory && navigator.deviceMemory <= 2) ||
+             (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4)),
+        lastError: '',
+        lastTest: null
+    };
+
+    if (AUDIO_COMPAT.isLowPowerDevice) {
+        AUDIO_COMPAT.maxTracks = 2;
+    } else if (AUDIO_COMPAT.isAndroid) {
+        AUDIO_COMPAT.maxTracks = 3;
+    }
+
+    function getAudioPlatformLabel() {
+        if (AUDIO_COMPAT.isIOS) return 'iOS / Safari';
+        if (AUDIO_COMPAT.isAndroid) return 'Android / Chrome';
+        return 'Desktop / Other';
+    }
+
+    async function unlockAudioCompatibility() {
+        if (AUDIO_COMPAT.unlocked || AUDIO_COMPAT.unlocking) return AUDIO_COMPAT.unlocked;
+        AUDIO_COMPAT.unlocking = true;
+        try {
+            // 以極短、靜音的 WebAudio buffer 解鎖 iOS / Android 使用者手勢限制。
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if (AudioCtx) {
+                if (!window.__365AudioContext) {
+                    window.__365AudioContext = new AudioCtx();
+                }
+                const ctx = window.__365AudioContext;
+                if (ctx.state === 'suspended') {
+                    try { await ctx.resume(); } catch (_) {}
+                }
+                const buffer = ctx.createBuffer(1, 1, 22050);
+                const source = ctx.createBufferSource();
+                const gain = ctx.createGain();
+                gain.gain.value = 0;
+                source.buffer = buffer;
+                source.connect(gain).connect(ctx.destination);
+                try { source.start(0); } catch (_) {}
+            }
+
+            // 同時用 HTMLAudio 做一次靜音播放解鎖。
+            const a = new Audio();
+            a.muted = true;
+            a.playsInline = true;
+            a.setAttribute('playsinline', '');
+            a.preload = 'none';
+            try {
+                const p = a.play();
+                if (p && typeof p.then === 'function') await p.catch(()=>{});
+            } catch (_) {}
+
+            AUDIO_COMPAT.unlocked = true;
+            AUDIO_COMPAT.lastUserGestureAt = Date.now();
+            AUDIO_COMPAT.lastError = '';
+            updateAudioCompatMiniStatus();
+            return true;
+        } finally {
+            AUDIO_COMPAT.unlocking = false;
+        }
+    }
+
+    function registerAudioGestureUnlock() {
+        const unlock = async () => {
+            await unlockAudioCompatibility();
+            if (isBgmEnabled && !ambientSoundReady) {
+                try { await startAmbientAudio(); } catch (_) {}
+            }
+        };
+
+        ['pointerdown','touchend','keydown'].forEach(evt => {
+            document.addEventListener(evt, unlock, { passive: true, once: true });
+        });
+    }
+
+    function updateAudioCompatMiniStatus(message = '') {
+        const box = document.getElementById('audio-compat-mini-status');
+        if (!box) return;
+
+        if (message) {
+            box.innerHTML = message;
+            return;
+        }
+
+        const platform = getAudioPlatformLabel();
+        const unlockText = AUDIO_COMPAT.unlocked ? '✅ 已解鎖' : '⏳ 等待首次互動';
+        const trackText = `最大混音軌數：${AUDIO_COMPAT.maxTracks}`;
+        box.innerHTML = `${platform}<br>${unlockText}<br>${trackText}`;
+    }
+
+    // 對新建 Audio 元素套用跨平台屬性
+    function prepareCompatAudioElement(audio) {
+        if (!audio) return audio;
+        audio.preload = 'auto';
+        audio.loop = true;
+        audio.playsInline = true;
+        audio.setAttribute('playsinline','');
+        audio.setAttribute('webkit-playsinline','');
+        audio.crossOrigin = 'anonymous';
+        return audio;
+    }
+
+    async function safeCompatPlay(audio, retries = 2) {
+        if (!audio) return false;
+        prepareCompatAudioElement(audio);
+
+        let lastErr = null;
+
+        for (let attempt = 0; attempt <= retries; attempt++) {
+            try {
+                if (!AUDIO_COMPAT.unlocked) {
+                    await unlockAudioCompatibility();
+                }
+
+                const p = audio.play();
+                if (p && typeof p.then === 'function') await p;
+                AUDIO_COMPAT.lastError = '';
+                return true;
+
+            } catch (err) {
+                lastErr = err;
+                AUDIO_COMPAT.lastError = err?.message || String(err);
+
+                // 第一次 autoplay 被擋住時，不一直狂重試；等待使用者手勢。
+                if (err && (err.name === 'NotAllowedError' || err.name === 'AbortError')) {
+                    registerAudioGestureUnlock();
+                    break;
+                }
+
+                // 網路 / 解碼錯誤，短暫等待後再試。
+                if (attempt < retries) {
+                    await new Promise(resolve => setTimeout(resolve, 350 * (attempt + 1)));
+                }
+            }
+        }
+
+        console.warn('Audio play failed:', lastErr);
+        updateAudioCompatMiniStatus(
+            `<span class="audio-test-warn">⚠️ 音效等待使用者互動或重新載入</span><br>${getAudioPlatformLabel()}`
+        );
+        return false;
+    }
+
+    function limitSceneTracksForDevice(tracks) {
+        if (!Array.isArray(tracks)) return [];
+        return tracks.slice(0, AUDIO_COMPAT.maxTracks);
+    }
+
+    // 保存原本的 playSoundscape，外面再包一層相容處理
+    const __originalPlaySoundscape = playSoundscape;
+    playSoundscape = async function(name, tracks, options = {}) {
+        const limited = limitSceneTracksForDevice(tracks);
+
+        if (!AUDIO_COMPAT.unlocked) {
+            registerAudioGestureUnlock();
+        }
+
+        try {
+            return await __originalPlaySoundscape(name, limited, options);
+        } catch (error) {
+            AUDIO_COMPAT.lastError = error?.message || String(error);
+            console.warn('Compat soundscape fallback:', error);
+
+            // 多軌失敗時退回單軌，降低 Android / iOS 資源壓力
+            if (limited.length > 1) {
+                try {
+                    return await __originalPlaySoundscape(
+                        name + '・相容模式',
+                        limited.slice(0,1),
+                        { ...options, fast:true }
+                    );
+                } catch (_) {}
+            }
+            return false;
+        }
+    };
+
+    // 包裝 startAmbientAudio，避免前景切換後重複建立音軌
+    const __originalStartAmbientAudio = startAmbientAudio;
+    startAmbientAudio = async function() {
+        if (!isBgmEnabled) return false;
+
+        if (!AUDIO_COMPAT.unlocked) {
+            registerAudioGestureUnlock();
+        }
+
+        try {
+            const result = await __originalStartAmbientAudio();
+            updateAudioCompatMiniStatus();
+            return result;
+        } catch (error) {
+            AUDIO_COMPAT.lastError = error?.message || String(error);
+            registerAudioGestureUnlock();
+            updateAudioCompatMiniStatus(
+                `<span class="audio-test-warn">⚠️ 已等待首次點擊後自動恢復</span><br>${getAudioPlatformLabel()}`
+            );
+            return false;
+        }
+    };
+
+    // 從背景切回前景時恢復音效。
+    function scheduleAudioResume(reason='visibility') {
+        clearTimeout(AUDIO_COMPAT.resumeTimer);
+        AUDIO_COMPAT.resumeTimer = setTimeout(async () => {
+            if (!isBgmEnabled) return;
+            if (document.visibilityState !== 'visible') return;
+
+            // 先停止殘留音軌，再重建目前聲景，避免重複疊音。
+            try { stopActiveAudio(120); } catch (_) {}
+
+            try {
+                await startAmbientAudio();
+                console.info('Audio resumed:', reason);
+            } catch (error) {
+                AUDIO_COMPAT.lastError = error?.message || String(error);
+            }
+        }, 350);
+    }
+
+    document.addEventListener('visibilitychange', () => {
+        const prev = AUDIO_COMPAT.lastVisibilityState;
+        AUDIO_COMPAT.lastVisibilityState = document.visibilityState;
+
+        if (prev === 'hidden' && document.visibilityState === 'visible') {
+            scheduleAudioResume('visibilitychange');
+        }
+    });
+
+    window.addEventListener('pageshow', event => {
+        if (event.persisted) scheduleAudioResume('pageshow-bfcache');
+    });
+
+    window.addEventListener('focus', () => {
+        if (document.visibilityState === 'visible') scheduleAudioResume('focus');
+    });
+
+    // 避免關閉頁面時仍保留多個 audio 物件
+    window.addEventListener('pagehide', () => {
+        try { stopActiveAudio(80); } catch (_) {}
+    });
+
+    async function runAudioCompatibilityTest() {
+        const box = document.getElementById('audio-compat-mini-status');
+        if (box) box.innerHTML = '⏳ 正在測試音效相容性...';
+
+        const result = {
+            platform: getAudioPlatformLabel(),
+            unlocked: false,
+            r2Reachable: false,
+            decode: false,
+            play: false,
+            multiTrack: false,
+            resume: true,
+            maxTracks: AUDIO_COMPAT.maxTracks,
+            error: ''
+        };
+
+        try {
+            result.unlocked = await unlockAudioCompatibility();
+
+            const testMeta = SOUND_LIBRARY.smallWaves || SOUND_LIBRARY.ocean || Object.values(SOUND_LIBRARY)[0];
+            if (!testMeta) throw new Error('找不到測試音效');
+
+            const testUrl = getR2AudioUrl(testMeta.file);
+
+            // 測試 R2 連線
+            try {
+                const resp = await fetch(testUrl, {
+                    method: 'GET',
+                    cache: 'no-store',
+                    headers: { Range: 'bytes=0-2047' }
+                });
+                result.r2Reachable = resp.ok || resp.status === 206;
+            } catch (_) {
+                result.r2Reachable = false;
+            }
+
+            // 測試 HTMLAudio 解碼與播放
+            const testAudio = prepareCompatAudioElement(new Audio(testUrl));
+            testAudio.loop = false;
+            testAudio.volume = 0.05;
+
+            result.decode = await new Promise(resolve => {
+                let settled = false;
+                const done = val => {
+                    if (settled) return;
+                    settled = true;
+                    resolve(val);
+                };
+                testAudio.addEventListener('canplay', () => done(true), { once:true });
+                testAudio.addEventListener('error', () => done(false), { once:true });
+                setTimeout(() => done(testAudio.readyState >= 2), 3500);
+                try { testAudio.load(); } catch (_) { done(false); }
+            });
+
+            if (result.decode) {
+                result.play = await safeCompatPlay(testAudio, 0);
+                try { testAudio.pause(); } catch (_) {}
+                testAudio.src = '';
+            }
+
+            // 簡單多軌測試：不真正播很久，只確認兩軌能啟動
+            const keys = ['softWind','river'].filter(k => SOUND_LIBRARY[k]);
+            if (keys.length >= 2) {
+                const audios = keys.map(k => {
+                    const a = prepareCompatAudioElement(new Audio(getR2AudioUrl(SOUND_LIBRARY[k].file)));
+                    a.loop = false;
+                    a.volume = 0.02;
+                    return a;
+                });
+                const plays = await Promise.all(audios.map(a => safeCompatPlay(a,0)));
+                result.multiTrack = plays.every(Boolean);
+                audios.forEach(a => {
+                    try { a.pause(); } catch (_) {}
+                    a.src = '';
+                });
+            } else {
+                result.multiTrack = true;
+            }
+
+        } catch (error) {
+            result.error = error?.message || String(error);
+        }
+
+        AUDIO_COMPAT.lastTest = result;
+
+        const lines = [
+            `裝置：${result.platform}`,
+            `播放授權：${result.unlocked ? '✅' : '⚠️ 等待點擊'}`,
+            `R2 連線：${result.r2Reachable ? '✅' : '❌'}`,
+            `MP3 解碼：${result.decode ? '✅' : '❌'}`,
+            `單軌播放：${result.play ? '✅' : '⚠️'}`,
+            `雙軌混音：${result.multiTrack ? '✅' : '⚠️'}`,
+            `最大混音軌：${result.maxTracks}`
+        ];
+
+        if (result.error) lines.push(`錯誤：${result.error}`);
+
+        const ok = result.r2Reachable && result.decode && result.play;
+        const cls = ok ? 'audio-test-ok' : 'audio-test-warn';
+
+        if (box) {
+            box.innerHTML = `<span class="${cls}">${ok ? '✅ 音效系統可用' : '⚠️ 音效系統需要注意'}</span><br>${lines.join('<br>')}`;
+        }
+
+        return result;
+    }
+
+    registerAudioGestureUnlock();
+    updateAudioCompatMiniStatus();
+
+
     // 🌏 10.2 24節氣＋節慶＋晝夜真實聲景系統
     let seasonalAutoEnabled = localStorage.getItem('seasonal_auto_enabled') !== 'false';
     let seasonalLastKey = '';
@@ -5069,7 +5467,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-full-health-report-1";
+    const CURRENT_APP_VERSION = "2026.08.09-audio-compat-1";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
