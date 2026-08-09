@@ -2725,8 +2725,10 @@
             if (record.dayIndex !== undefined && record.dayIndex !== null) {
                 dayValue = record.dayIndex;
                 if (record.isPatched === true && record.customValue !== undefined && record.customValue !== null) {
+                    // 舊版「手動登載」：amount 是 Grid/Day，customValue 才是真實存款金額。
                     amountValue = record.customValue;
                 } else if (record.amount !== undefined && record.amount !== null) {
+                    // 舊版「盲盒」：amount 就是真實抽到的存款金額，dayIndex 才是第幾天。
                     amountValue = record.amount;
                 }
                 dateValue = pickFirstDefined(record, ['dateStr', 'date', 'savedDate', 'savingDate', 'createdAt', 'timestamp', 'time', 't']);
@@ -2754,7 +2756,8 @@
         const day = Math.round(toFiniteNumber(dayValue));
         let amount = Math.round(toFiniteNumber(amountValue));
 
-        // 如果舊資料只保存 Day，而沒有保存金額，依原 365 手帳/盲盒規則以 Day 作為金額。
+        // 只有「真正只有 Day、完全沒有金額欄位」的極早期格式，才以 Day 作為暫代金額。
+        // 舊版 365$$.txt 的 dayIndex/amount/customValue 不會走到這裡，因此不會再把 Day 當成實際金額。
         if (!Number.isFinite(amount) && Number.isFinite(day)) amount = day;
 
         if (!Number.isFinite(day) || day < 1 || day > 365) return null;
@@ -2768,10 +2771,17 @@
             date = getJournalDateByDay(day);
         }
 
+        let source = 'legacy';
+        if (record && typeof record === 'object' && !Array.isArray(record)) {
+            if (record.isPatched === true || record.customValue !== undefined) source = 'manual';
+            else if (record.dayIndex !== undefined && record.amount !== undefined) source = 'blindbox';
+        }
+
         return {
             day,
             amt: amount,
-            date
+            date,
+            source
         };
     }
 
@@ -2779,17 +2789,40 @@
         const key = '365_journal_mode_history';
         const currentRaw = localStorage.getItem(key);
 
-        // 如果之前版本曾做過錯誤的「Day=金額」校正，優先從備份恢復真正的舊資料。
-        // 這能避免把原本像「Day 1 / $188」誤改成「Day 1 / $1」。
+        // ⚠️ 重要：舊版 365$$.txt 有兩種不同的紀錄格式：
+        // 1) 手動：{ dayIndex: Day, amount: Day, customValue: 實際金額, isPatched: true }
+        // 2) 盲盒：{ dayIndex: Day, amount: 實際抽到金額, isPatched: false }
+        // 因此「amount」絕對不能直接當成金額，也不能直接當成 Day；必須依 isPatched 判斷。
+        // 若目前資料已被前一版錯誤 Migration 成 {day, amt}，優先尋找仍保有 dayIndex/customValue 的原始備份。
+
+        function containsLegacyRecords(raw) {
+            if (!raw) return false;
+            const parsed = safeJsonParse(raw, null);
+            if (!parsed) return false;
+            const records = Array.isArray(parsed)
+                ? parsed
+                : (Array.isArray(parsed.records) ? parsed.records
+                    : Array.isArray(parsed.history) ? parsed.history
+                    : Array.isArray(parsed.data) ? parsed.data
+                    : Object.values(parsed));
+            return records.some(r => r && typeof r === 'object' && (
+                Object.prototype.hasOwnProperty.call(r, 'dayIndex') ||
+                Object.prototype.hasOwnProperty.call(r, 'customValue') ||
+                Object.prototype.hasOwnProperty.call(r, 'isPatched')
+            ));
+        }
+
+        // 先使用目前 LocalStorage 中仍然存在的真正舊格式。
+        if (containsLegacyRecords(currentRaw)) {
+            return { raw: currentRaw, fromBackup: false, backupKey: null, isLegacy: true };
+        }
+
+        // 再從所有備份中尋找「真正含舊欄位」的版本；不要盲目使用最新備份，
+        // 因為前幾版修正程式也可能已經建立過一份錯誤標準化資料的備份。
         const backupKeys = [];
         for (let i = 0; i < localStorage.length; i++) {
             const k = localStorage.key(i);
-            if (k && (
-                k.startsWith(key + '_backup_before_365_amount_fix_') ||
-                k.startsWith(key + '_backup_before_migration_')
-            )) {
-                backupKeys.push(k);
-            }
+            if (k && k.startsWith(key + '_backup_')) backupKeys.push(k);
         }
         backupKeys.sort((a, b) => {
             const na = Number(a.match(/_(\d+)$/)?.[1] || 0);
@@ -2797,12 +2830,14 @@
             return nb - na;
         });
 
-        if (backupKeys.length > 0) {
-            const latestBackup = localStorage.getItem(backupKeys[0]);
-            if (latestBackup) return { raw: latestBackup, fromBackup: true, backupKey: backupKeys[0] };
+        for (const backupKey of backupKeys) {
+            const raw = localStorage.getItem(backupKey);
+            if (containsLegacyRecords(raw)) {
+                return { raw, fromBackup: true, backupKey, isLegacy: true };
+            }
         }
 
-        return { raw: currentRaw, fromBackup: false, backupKey: null };
+        return { raw: currentRaw, fromBackup: false, backupKey: null, isLegacy: false };
     }
 
     function loadJournalHistoryWithMigration() {
@@ -2860,6 +2895,13 @@
     }
 
     let journalListHistory = loadJournalHistoryWithMigration();
+
+    // 🧾 舊資料相容性診斷：保留每筆 Day 與「真正實際金額」的獨立關係。
+    // 不使用 Day 當金額，也不會因為盲盒抽到 $188 就把 Day 固定成 188。
+    function getJournalActualAmount(item) {
+        const amt = getJournalActualAmount(item);
+        return Number.isFinite(amt) && amt > 0 ? amt : 0;
+    }
 
     // 🛡️ 365 天防誤觸智慧手帳：Day 與金額完全分離。
     // Day 只代表「第幾天」，amt 才代表「實際存了多少錢」。
@@ -3225,7 +3267,8 @@
             card.innerHTML = `
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span class="j-day-tag">Day ${item.day}</span>
-                    <span style="font-weight:800; font-size:0.95rem;">$${Math.round(item.amt)}</span>
+                    <span style="font-weight:800; font-size:0.95rem;">$${getJournalActualAmount(item).toLocaleString()}</span>
+                    <span style="font-size:0.65rem; opacity:0.65;">${item.source === 'blindbox' ? '🎲 抽取' : item.source === 'manual' ? '✍️ 手動' : '📦 舊紀錄'}</span>
                 </div>
                 <div style="display:flex; align-items:center;">
                     <span style="font-size:0.75rem; opacity:0.6; font-weight:bold;">${item.date}</span>
@@ -3366,15 +3409,16 @@
                     );
 
                     if (loggedItem) {
-                        const actualAmt = Math.round(toFiniteNumber(loggedItem.amt));
+                        const actualAmt = getJournalActualAmount(loggedItem);
                         btn.innerText = `$${actualAmt.toLocaleString()}`;
                         btn.classList.add('checked');
                         btn.disabled = true;
                         btn.setAttribute('aria-label', `Day ${thisDay}，已存 $${actualAmt}`);
                         btn.title = `Day ${thisDay}：已存 $${actualAmt}`;
                     } else {
-                        // 尚未存錢的日期沒有「當日金額」，因此顯示「未存」，而不是虛構一個 $Day。
-                        btn.innerText = '未存';
+                        // 防誤觸模式：未登載的日期格不顯示虛構金額，也不顯示 DXX；留白即可。
+                        // 使用者只能透過手動登載或驚喜任務完成，不允許直接點格子存錢。
+                        btn.innerText = '';
                         btn.disabled = true;
                         btn.classList.add('journal-locked');
                         btn.setAttribute('aria-label', `Day ${thisDay}，尚未登載`);
