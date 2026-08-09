@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-settings-scroll-1">
+    <meta name="app-version" content="2026.08.09-settings-scroll-fix-2">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -194,137 +194,7 @@
         .custom-modal-overlay.active .custom-modal { transform: scale(1); }
         
 
-        
-        /* ⚙️ 設定視窗：手機可滾動優化 */
-        .settings-overlay {
-            padding: 12px;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .settings-modal {
-            width: min(94vw, 620px);
-            max-width: 620px;
-            height: min(90dvh, 820px);
-            max-height: 90dvh;
-            padding: 0 !important;
-            overflow: hidden !important;
-            display: flex;
-            flex-direction: column;
-            border-radius: 24px;
-        }
-
-        .settings-modal-header {
-            flex: 0 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 18px 18px 12px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--card-bg);
-            z-index: 2;
-        }
-
-        .settings-modal-title {
-            font-weight: 900;
-            font-size: 1.08rem;
-            color: var(--text-color);
-        }
-
-        .settings-modal-subtitle {
-            margin-top: 3px;
-            font-size: .68rem;
-            opacity: .58;
-        }
-
-        .settings-modal-close {
-            flex: 0 0 auto;
-            width: 34px;
-            height: 34px;
-            border: none;
-            border-radius: 50%;
-            background: rgba(0,0,0,.06);
-            color: var(--text-color);
-            cursor: pointer;
-            font-size: .9rem;
-        }
-
-        .settings-modal-scroll {
-            flex: 1 1 auto;
-            min-height: 0;
-            overflow-y: auto;
-            overflow-x: hidden;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            padding: 14px 16px 18px;
-            scroll-behavior: smooth;
-        }
-
-        .settings-modal-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .settings-modal-scroll::-webkit-scrollbar-thumb {
-            background: rgba(0,0,0,.18);
-            border-radius: 999px;
-        }
-
-        .settings-modal-footer {
-            flex: 0 0 auto;
-            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
-            border-top: 1px solid var(--border-color);
-            background: var(--card-bg);
-            box-shadow: 0 -6px 18px rgba(0,0,0,.04);
-        }
-
-        .settings-modal-footer .settings-main-action-btn {
-            margin: 0;
-            width: 100%;
-        }
-
-        .settings-modal-scroll .settings-row-title {
-            margin-bottom: 7px;
-        }
-
-        .settings-modal-scroll > div {
-            scroll-margin-top: 10px;
-        }
-
-        @media (max-width: 640px) {
-            .settings-overlay {
-                padding: 8px;
-                align-items: flex-end;
-            }
-
-            .settings-modal {
-                width: 100%;
-                max-width: none;
-                height: 92dvh;
-                max-height: 92dvh;
-                border-radius: 22px 22px 0 0;
-            }
-
-            .settings-modal-header {
-                padding: 14px 14px 10px;
-            }
-
-            .settings-modal-scroll {
-                padding: 12px 12px 16px;
-            }
-
-            .settings-modal-scroll .settings-row {
-                gap: 8px;
-            }
-
-            .settings-modal-scroll input,
-            .settings-modal-scroll select,
-            .settings-modal-scroll button {
-                max-width: 100%;
-            }
-        }
-
-.health-check-btn {
+        .health-check-btn {
             background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
             color: #fff;
             border: none;
@@ -403,7 +273,53 @@
         .audio-source-list a { font-size:.72rem; color:inherit; text-decoration:none; padding:6px 8px; border-radius:9px; background:rgba(255,255,255,.25); }
         .audio-source-list a:hover { text-decoration:underline; }
 
-    </style>
+    
+        /* ⚙️ 設定頁滾動修復：保留原本 DOM，不重組設定內容 */
+        .settings-scroll-overlay {
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 14px !important;
+            align-items: flex-start !important;
+        }
+
+        .settings-scroll-modal {
+            width: min(94vw, 620px) !important;
+            max-width: 620px !important;
+            max-height: calc(100dvh - 28px) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            margin: auto !important;
+            scrollbar-gutter: stable;
+        }
+
+        .settings-scroll-modal::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .settings-scroll-modal::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,.18);
+            border-radius: 999px;
+        }
+
+        @media (max-width: 640px) {
+            .settings-scroll-overlay {
+                padding: 8px !important;
+                align-items: flex-start !important;
+            }
+
+            .settings-scroll-modal {
+                width: 100% !important;
+                max-width: none !important;
+                max-height: calc(100dvh - 16px) !important;
+                margin: 0 auto !important;
+                border-radius: 20px !important;
+            }
+        }
+
+</style>
 </head>
 <body>
     <div id="seasonal-ambience-banner" aria-live="polite"></div>
@@ -525,17 +441,8 @@
 </div>
 
 <!-- ⚙️ 設定彈窗 -->
-<div class="custom-modal settings-modal-overlay settings-overlay" id="settings-modal-layer" onclick="if(event.target===this)closeSettingsPanel();">
-    <div class="settings-modal-header">
-        <div>
-            <div class="settings-modal-title">⚙️ 設定</div>
-            <div class="settings-modal-subtitle">可上下滑動調整各項設定</div>
-        </div>
-        <button type="button" class="settings-modal-close" onclick="closeSettingsPanel()" aria-label="關閉設定">✕</button>
-    </div>
-    <div class="settings-modal-scroll">
-
-    <div class="custom-modal">
+<div class="settings-scroll-overlay custom-modal-overlay" id="settings-modal-layer" onclick="if(event.target===this)closeSettingsPanel();">
+    <div class="settings-scroll-modal custom-modal">
         <div class="settings-panel-box">
             <div>
                 <div class="settings-row-title" id="lbl-setting-lang">🌐 選擇語言 / Language</div>
@@ -544,13 +451,8 @@
                     <button class="settings-item-btn lang-item" id="s-lang-zh-CN" onclick="changeLanguage('zh-CN')">简体中文</button>
                     <button class="settings-item-btn lang-item" id="s-lang-en" onclick="changeLanguage('en')">English</button>
                     <button class="settings-item-btn lang-item" id="s-lang-ja" onclick="changeLanguage('ja')">日本語</button>
-                
-    </div>
-    <div class="settings-modal-footer">
-        <button class="settings-main-action-btn" onclick="closeSettingsPanel()" id="btn-setting-close">儲存變更 / Save</button>
-    </div>
-</div>
-</div>
+                </div>
+            </div>
             <div>
                 <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
@@ -5032,7 +4934,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-settings-scroll-1";
+    const CURRENT_APP_VERSION = "2026.08.09-settings-scroll-fix-2";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
