@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-storage-cache-fix-1">
+    <meta name="app-version" content="2026.08.09-settings-scroll-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -193,6 +193,193 @@
         .custom-modal { background-color: #ffffff; border-radius: 32px; padding: 24px; width: 88%; max-width: 340px; box-shadow: 0 30px 70px rgba(0,0,0,0.25); border: 1px solid var(--border-color); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.15); text-align: center; color: #2b2d42; }
         .custom-modal-overlay.active .custom-modal { transform: scale(1); }
         
+
+        
+        /* ⚙️ 設定視窗：手機可滾動優化 */
+        .settings-overlay {
+            padding: 12px;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .settings-modal {
+            width: min(94vw, 620px);
+            max-width: 620px;
+            height: min(90dvh, 820px);
+            max-height: 90dvh;
+            padding: 0 !important;
+            overflow: hidden !important;
+            display: flex;
+            flex-direction: column;
+            border-radius: 24px;
+        }
+
+        .settings-modal-header {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 18px 18px 12px;
+            border-bottom: 1px solid var(--border-color);
+            background: var(--card-bg);
+            z-index: 2;
+        }
+
+        .settings-modal-title {
+            font-weight: 900;
+            font-size: 1.08rem;
+            color: var(--text-color);
+        }
+
+        .settings-modal-subtitle {
+            margin-top: 3px;
+            font-size: .68rem;
+            opacity: .58;
+        }
+
+        .settings-modal-close {
+            flex: 0 0 auto;
+            width: 34px;
+            height: 34px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0,0,0,.06);
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: .9rem;
+        }
+
+        .settings-modal-scroll {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 14px 16px 18px;
+            scroll-behavior: smooth;
+        }
+
+        .settings-modal-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .settings-modal-scroll::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,.18);
+            border-radius: 999px;
+        }
+
+        .settings-modal-footer {
+            flex: 0 0 auto;
+            padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+            border-top: 1px solid var(--border-color);
+            background: var(--card-bg);
+            box-shadow: 0 -6px 18px rgba(0,0,0,.04);
+        }
+
+        .settings-modal-footer .settings-main-action-btn {
+            margin: 0;
+            width: 100%;
+        }
+
+        .settings-modal-scroll .settings-row-title {
+            margin-bottom: 7px;
+        }
+
+        .settings-modal-scroll > div {
+            scroll-margin-top: 10px;
+        }
+
+        @media (max-width: 640px) {
+            .settings-overlay {
+                padding: 8px;
+                align-items: flex-end;
+            }
+
+            .settings-modal {
+                width: 100%;
+                max-width: none;
+                height: 92dvh;
+                max-height: 92dvh;
+                border-radius: 22px 22px 0 0;
+            }
+
+            .settings-modal-header {
+                padding: 14px 14px 10px;
+            }
+
+            .settings-modal-scroll {
+                padding: 12px 12px 16px;
+            }
+
+            .settings-modal-scroll .settings-row {
+                gap: 8px;
+            }
+
+            .settings-modal-scroll input,
+            .settings-modal-scroll select,
+            .settings-modal-scroll button {
+                max-width: 100%;
+            }
+        }
+
+.health-check-btn {
+            background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+            color: #fff;
+            border: none;
+            padding: 13px 15px;
+            border-radius: 16px;
+            font-size: .86rem;
+            font-weight: 800;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 6px 16px rgba(58,123,213,.18);
+        }
+        .health-summary-card {
+            padding: 14px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: rgba(255,255,255,.58);
+            margin-bottom: 10px;
+        }
+        .health-status-ok { color: #16834f; font-weight: 900; }
+        .health-status-warn { color: #d97706; font-weight: 900; }
+        .health-status-error { color: #dc2626; font-weight: 900; }
+        .health-report-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 8px;
+            margin: 12px 0;
+        }
+        .health-metric {
+            background: rgba(0,0,0,.035);
+            border-radius: 12px;
+            padding: 10px;
+            font-size: .75rem;
+        }
+        .health-metric b {
+            display: block;
+            font-size: 1rem;
+            margin-top: 3px;
+        }
+        .health-issue-list {
+            margin: 8px 0 0;
+            padding-left: 18px;
+            font-size: .78rem;
+            line-height: 1.6;
+        }
+        .health-report-pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: rgba(0,0,0,.045);
+            border-radius: 12px;
+            padding: 10px;
+            font-size: .7rem;
+            line-height: 1.55;
+            max-height: 220px;
+            overflow: auto;
+        }
         .settings-main-action-btn { background: var(--btn-gradient); color: white; border: none; padding: 15px; font-size: 0.95rem; font-weight: 800; border-radius: 18px; cursor: pointer; margin-top: 18px; width: 100%; box-shadow: 0 6px 18px rgba(242, 132, 130, 0.25); }
         
         footer { text-align: center; margin-top: 30px; padding: 20px 0; }
@@ -338,7 +525,16 @@
 </div>
 
 <!-- ⚙️ 設定彈窗 -->
-<div class="custom-modal-overlay" id="settings-modal-layer" onclick="if(event.target===this)closeSettingsPanel();">
+<div class="custom-modal settings-modal-overlay settings-overlay" id="settings-modal-layer" onclick="if(event.target===this)closeSettingsPanel();">
+    <div class="settings-modal-header">
+        <div>
+            <div class="settings-modal-title">⚙️ 設定</div>
+            <div class="settings-modal-subtitle">可上下滑動調整各項設定</div>
+        </div>
+        <button type="button" class="settings-modal-close" onclick="closeSettingsPanel()" aria-label="關閉設定">✕</button>
+    </div>
+    <div class="settings-modal-scroll">
+
     <div class="custom-modal">
         <div class="settings-panel-box">
             <div>
@@ -348,8 +544,13 @@
                     <button class="settings-item-btn lang-item" id="s-lang-zh-CN" onclick="changeLanguage('zh-CN')">简体中文</button>
                     <button class="settings-item-btn lang-item" id="s-lang-en" onclick="changeLanguage('en')">English</button>
                     <button class="settings-item-btn lang-item" id="s-lang-ja" onclick="changeLanguage('ja')">日本語</button>
-                </div>
-            </div>
+                
+    </div>
+    <div class="settings-modal-footer">
+        <button class="settings-main-action-btn" onclick="closeSettingsPanel()" id="btn-setting-close">儲存變更 / Save</button>
+    </div>
+</div>
+</div>
             <div>
                 <div class="settings-row-title" id="lbl-setting-theme">🎨 選擇世界觀主題 / Theme</div>
                 <div class="settings-btn-grid">
@@ -395,8 +596,39 @@
                 </div>
             </div>
         </div>
-        <div style="margin-top:4px;padding-top:14px;border-top:1px solid var(--border-color);"><div class="settings-row-title">🔄 365 存錢挑戰</div><button class="settings-main-action-btn" style="background:rgba(0,0,0,0.06);color:var(--text-color);box-shadow:none;" onclick="reset365Challenge(true)">♻️ 重新開始 365 挑戰（保留歷史手帳）</button></div>
+        <div style="margin-top:4px;padding-top:14px;border-top:1px solid var(--border-color);">
+            <div class="settings-row-title">🩺 365 資料安全與健檢</div>
+            <button class="health-check-btn" type="button" onclick="run365DataHealthCheck(true)">🔍 檢查 365 手帳資料</button>
+            <div style="font-size:.68rem;opacity:.62;line-height:1.5;margin-top:7px;">只做診斷，不會自動刪除或修改任何存錢紀錄。</div>
+        </div>
+        <div style="margin-top:4px;padding-top:14px;border-top:1px solid var(--border-color);">
+            <div class="settings-row-title">🔄 365 存錢挑戰</div>
+            <button class="settings-main-action-btn" style="background:rgba(0,0,0,0.06);color:var(--text-color);box-shadow:none;" onclick="reset365Challenge(true)">♻️ 重新開始 365 挑戰（保留歷史手帳）</button>
+        </div>
         <button class="settings-main-action-btn" onclick="closeSettingsPanel()" id="btn-setting-close">儲存變更 / Save</button>
+    </div>
+</div>
+
+
+<!-- 🩺 365 資料健檢報告 -->
+<div class="custom-modal-overlay" id="health-check-modal-layer" onclick="if(event.target===this)close365HealthCheck();">
+    <div class="custom-modal" style="max-width:620px;max-height:88vh;overflow:auto;text-align:left;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div>
+                <h3 style="margin:0;color:#3a7bd5;font-size:1.2rem;">🩺 365 手帳資料健檢</h3>
+                <p style="font-size:.72rem;opacity:.62;margin:5px 0 0;">檢查目前輪次、LocalStorage、重複金額與歷史封存資料。</p>
+            </div>
+            <button type="button" onclick="close365HealthCheck()" style="border:none;background:rgba(0,0,0,.06);border-radius:50%;width:32px;height:32px;cursor:pointer;">✕</button>
+        </div>
+
+        <div id="health-check-result" style="margin-top:16px;">
+            <div class="health-summary-card">等待檢查...</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+            <button type="button" class="settings-main-action-btn" style="margin:0;flex:1;min-width:150px;" onclick="run365DataHealthCheck(false)">🔄 重新檢查</button>
+            <button type="button" class="settings-main-action-btn" style="margin:0;flex:1;min-width:150px;background:rgba(0,0,0,.07);color:var(--text-color);box-shadow:none;" onclick="copy365HealthReport()">📋 複製健檢報告</button>
+        </div>
     </div>
 </div>
 
@@ -4345,6 +4577,381 @@
         }
     }
 
+
+    // 🩺 365 手帳資料健檢：只讀診斷，不自動修改正式資料
+    let last365HealthReportText = '';
+
+    function formatHealthMoney(value) {
+        return '$' + Math.round(Number(value) || 0).toLocaleString();
+    }
+
+    function close365HealthCheck() {
+        const modal = document.getElementById('health-check-modal-layer');
+        if (modal) modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function groupDuplicateValues(items, selector) {
+        const map = new Map();
+        items.forEach(item => {
+            const value = selector(item);
+            if (!map.has(value)) map.set(value, []);
+            map.get(value).push(item);
+        });
+        return [...map.entries()].filter(([, rows]) => rows.length > 1);
+    }
+
+    function run365DataHealthCheck(openModal = true) {
+        const resultBox = document.getElementById('health-check-result');
+        const modal = document.getElementById('health-check-modal-layer');
+
+        if (openModal && modal) {
+            document.getElementById('settings-modal-layer')?.classList.remove('active');
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        const issues = [];
+        const warnings = [];
+        const passes = [];
+
+        // 1. LocalStorage 基本讀寫測試
+        let storageWritable = false;
+        try {
+            const probeKey = '__365_health_probe__';
+            const probeVal = `${Date.now()}_${Math.random()}`;
+            localStorage.setItem(probeKey, probeVal);
+            storageWritable = localStorage.getItem(probeKey) === probeVal;
+            localStorage.removeItem(probeKey);
+        } catch (error) {
+            storageWritable = false;
+        }
+
+        if (storageWritable) passes.push('LocalStorage 可正常讀寫');
+        else issues.push('LocalStorage 無法正常讀寫；重新開啟網頁後資料可能消失。');
+
+        // 2. 直接解析實際儲存資料
+        const rawHistory = localStorage.getItem('365_journal_mode_history');
+        const rawArchive = localStorage.getItem('365_journal_archive');
+        const rawRound = localStorage.getItem('365_active_round');
+
+        let storedHistory = [];
+        let storedArchive = [];
+        let historyJsonValid = true;
+        let archiveJsonValid = true;
+
+        try {
+            storedHistory = rawHistory === null ? [] : JSON.parse(rawHistory);
+            if (!Array.isArray(storedHistory)) {
+                historyJsonValid = false;
+                issues.push('365_journal_mode_history 不是合法陣列格式。');
+                storedHistory = [];
+            }
+        } catch (error) {
+            historyJsonValid = false;
+            issues.push('365_journal_mode_history JSON 已損壞或無法解析。');
+        }
+
+        try {
+            storedArchive = rawArchive === null ? [] : JSON.parse(rawArchive);
+            if (!Array.isArray(storedArchive)) {
+                archiveJsonValid = false;
+                issues.push('365_journal_archive 不是合法陣列格式。');
+                storedArchive = [];
+            }
+        } catch (error) {
+            archiveJsonValid = false;
+            issues.push('365_journal_archive JSON 已損壞或無法解析。');
+        }
+
+        if (historyJsonValid) passes.push('目前手帳 JSON 格式正常');
+        if (archiveJsonValid) passes.push('封存手帳 JSON 格式正常');
+
+        const storedRound = Number(rawRound || 1);
+        if (!Number.isFinite(storedRound) || storedRound < 1) {
+            issues.push(`目前輪次值異常：${String(rawRound)}`);
+        } else if (storedRound !== Number(active365Round)) {
+            issues.push(`記憶體輪次 ${active365Round} 與 LocalStorage 輪次 ${storedRound} 不一致。`);
+        } else {
+            passes.push(`目前輪次一致：第 ${active365Round} 輪`);
+        }
+
+        // 3. 記憶體與 LocalStorage 是否同步
+        const memoryActive = getActiveJournalEntries().slice();
+        const storedActive = storedHistory.filter(item =>
+            (Number(item && item.round) || 1) === Number(active365Round)
+        );
+
+        if (memoryActive.length !== storedActive.length) {
+            issues.push(`記憶體目前輪次有 ${memoryActive.length} 筆，但 LocalStorage 有 ${storedActive.length} 筆。`);
+        } else {
+            const memorySignature = memoryActive
+                .map(x => `${Math.round(toFiniteNumber(x.day))}:${getJournalActualAmount(x)}`)
+                .sort().join('|');
+            const storedSignature = storedActive
+                .map(x => `${Math.round(toFiniteNumber(x && (x.day ?? x.dayIndex)))}:${Math.round(toFiniteNumber(x && (x.amt ?? x.customValue ?? x.amount)))}`)
+                .sort().join('|');
+
+            if (memorySignature !== storedSignature) {
+                issues.push('畫面記憶體資料與 LocalStorage 內容不完全一致。');
+            } else {
+                passes.push('畫面資料與 LocalStorage 內容一致');
+            }
+        }
+
+        // 4. 每筆有效性
+        const activeRows = memoryActive.map(item => ({
+            raw: item,
+            day: Math.round(toFiniteNumber(item && item.day)),
+            amt: getJournalActualAmount(item),
+            source: item && item.source ? item.source : 'unknown',
+            round: Number(item && item.round) || 1
+        }));
+
+        const invalidDayRows = activeRows.filter(x =>
+            !Number.isFinite(x.day) || x.day < 1 || x.day > 365
+        );
+        const invalidAmountRows = activeRows.filter(x =>
+            !Number.isFinite(x.amt) || x.amt < 1 || x.amt > 365
+        );
+
+        if (invalidDayRows.length) {
+            issues.push(`有 ${invalidDayRows.length} 筆 Day 不在 1～365 範圍。`);
+        } else {
+            passes.push('所有 Day 都在 1～365 範圍');
+        }
+
+        if (invalidAmountRows.length) {
+            issues.push(`有 ${invalidAmountRows.length} 筆金額不在 $1～$365 範圍。`);
+        } else {
+            passes.push('所有金額都在 $1～$365 範圍');
+        }
+
+        // 5. Day / 金額重複
+        const validActiveRows = activeRows.filter(x =>
+            Number.isFinite(x.day) && x.day >= 1 && x.day <= 365 &&
+            Number.isFinite(x.amt) && x.amt >= 1 && x.amt <= 365
+        );
+
+        const duplicateDays = groupDuplicateValues(validActiveRows, x => x.day);
+        const duplicateAmounts = groupDuplicateValues(validActiveRows, x => x.amt);
+
+        if (duplicateDays.length) {
+            duplicateDays.forEach(([day, rows]) => {
+                issues.push(`Day ${day} 重複 ${rows.length} 次：${rows.map(x => formatHealthMoney(x.amt)).join('、')}`);
+            });
+        } else {
+            passes.push('目前輪次沒有重複 Day');
+        }
+
+        if (duplicateAmounts.length) {
+            duplicateAmounts.forEach(([amt, rows]) => {
+                issues.push(`${formatHealthMoney(amt)} 重複出現在 ${rows.map(x => `Day ${x.day}`).join('、')}`);
+            });
+        } else {
+            passes.push('目前輪次沒有重複金額');
+        }
+
+        // 6. 完成數與總額
+        const uniqueDays = new Set(validActiveRows.map(x => x.day));
+        const uniqueAmounts = new Set(validActiveRows.map(x => x.amt));
+        const totalAmount = validActiveRows.reduce((sum, x) => sum + x.amt, 0);
+        const expectedCompleteTotal = 66795;
+
+        if (
+            validActiveRows.length !== uniqueDays.size ||
+            validActiveRows.length !== uniqueAmounts.size
+        ) {
+            warnings.push('紀錄筆數、唯一 Day 數、唯一金額數不同，首頁完成進度與加總可能看起來不一致。');
+        }
+
+        if (uniqueAmounts.size === 365) {
+            if (totalAmount === expectedCompleteTotal) {
+                passes.push('365 個金額全部完成，總額正確為 $66,795');
+            } else {
+                issues.push(`已使用 365 個不同金額，但總額是 ${formatHealthMoney(totalAmount)}，正常應為 $66,795。`);
+            }
+        }
+
+        // 7. 檢查缺少的金額／Day（只列前 20 個）
+        const missingDays = [];
+        const missingAmounts = [];
+        for (let i = 1; i <= 365; i++) {
+            if (!uniqueDays.has(i)) missingDays.push(i);
+            if (!uniqueAmounts.has(i)) missingAmounts.push(i);
+        }
+
+        // 8. 封存資料基本健檢（逐輪）
+        const archivedRoundIds = [...new Set(storedArchive.map(x => Number(x && x.round) || 1))];
+        let archivedIssueCount = 0;
+
+        archivedRoundIds.forEach(round => {
+            const rows = storedArchive
+                .filter(x => (Number(x && x.round) || 1) === round)
+                .map(item => ({
+                    day: Math.round(toFiniteNumber(item && (item.day ?? item.dayIndex))),
+                    amt: Math.round(toFiniteNumber(item && (item.amt ?? item.customValue ?? item.amount)))
+                }))
+                .filter(x => Number.isFinite(x.day) && Number.isFinite(x.amt));
+
+            const dupD = groupDuplicateValues(rows, x => x.day);
+            const dupA = groupDuplicateValues(rows, x => x.amt);
+
+            if (dupD.length || dupA.length) {
+                archivedIssueCount++;
+                warnings.push(`封存第 ${round} 輪存在重複 Day 或重複金額。`);
+            }
+        });
+
+        if (archivedRoundIds.length && archivedIssueCount === 0) {
+            passes.push(`封存歷史共 ${archivedRoundIds.length} 輪，未發現重複 Day／金額`);
+        }
+
+        // 9. 舊備份數量（僅提示）
+        const backupKeys = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('365_journal_mode_history_backup_')) {
+                backupKeys.push(k);
+            }
+        }
+        if (backupKeys.length) {
+            warnings.push(`瀏覽器內保留 ${backupKeys.length} 份舊資料備份；新版只會在目前資料損壞時才使用。`);
+        }
+
+        // 10. 顯示狀態
+        let overall = 'ok';
+        if (issues.length) overall = 'error';
+        else if (warnings.length) overall = 'warn';
+
+        const statusIcon = overall === 'ok' ? '✅' : overall === 'warn' ? '⚠️' : '❌';
+        const statusClass = overall === 'ok'
+            ? 'health-status-ok'
+            : overall === 'warn'
+                ? 'health-status-warn'
+                : 'health-status-error';
+
+        const statusText = overall === 'ok'
+            ? '資料狀態正常'
+            : overall === 'warn'
+                ? '資料可用，但有需要注意的項目'
+                : '發現資料異常';
+
+        const missingDayPreview = missingDays.length
+            ? missingDays.slice(0, 20).join('、') + (missingDays.length > 20 ? '…' : '')
+            : '無';
+        const missingAmountPreview = missingAmounts.length
+            ? missingAmounts.slice(0, 20).map(x => '$' + x).join('、') + (missingAmounts.length > 20 ? '…' : '')
+            : '無';
+
+        const issueHtml = issues.length
+            ? `<div class="health-summary-card"><b class="health-status-error">❌ 發現 ${issues.length} 項異常</b><ul class="health-issue-list">${issues.map(x => `<li>${escapeHealthHtml(x)}</li>`).join('')}</ul></div>`
+            : '';
+
+        const warningHtml = warnings.length
+            ? `<div class="health-summary-card"><b class="health-status-warn">⚠️ ${warnings.length} 項提醒</b><ul class="health-issue-list">${warnings.map(x => `<li>${escapeHealthHtml(x)}</li>`).join('')}</ul></div>`
+            : '';
+
+        const passHtml = passes.length
+            ? `<div class="health-summary-card"><b class="health-status-ok">✅ 通過 ${passes.length} 項檢查</b><ul class="health-issue-list">${passes.map(x => `<li>${escapeHealthHtml(x)}</li>`).join('')}</ul></div>`
+            : '';
+
+        if (resultBox) {
+            resultBox.innerHTML = `
+                <div class="health-summary-card">
+                    <div class="${statusClass}" style="font-size:1.05rem;">${statusIcon} ${statusText}</div>
+                    <div style="font-size:.7rem;opacity:.58;margin-top:4px;">檢查時間：${new Date().toLocaleString()}</div>
+                </div>
+
+                <div class="health-report-grid">
+                    <div class="health-metric">目前輪次<b>第 ${active365Round} 輪</b></div>
+                    <div class="health-metric">紀錄筆數<b>${validActiveRows.length} / 365</b></div>
+                    <div class="health-metric">唯一金額<b>${uniqueAmounts.size} / 365</b></div>
+                    <div class="health-metric">目前總額<b>${formatHealthMoney(totalAmount)}</b></div>
+                </div>
+
+                ${issueHtml}
+                ${warningHtml}
+                ${passHtml}
+
+                <div class="health-summary-card">
+                    <b style="font-size:.8rem;">📌 尚未使用</b>
+                    <div style="font-size:.72rem;line-height:1.65;margin-top:6px;">
+                        Day：${escapeHealthHtml(missingDayPreview)}<br>
+                        金額：${escapeHealthHtml(missingAmountPreview)}
+                    </div>
+                </div>
+            `;
+        }
+
+        last365HealthReportText = [
+            '365 手帳資料健檢',
+            `檢查時間：${new Date().toLocaleString()}`,
+            `狀態：${statusText}`,
+            `目前輪次：第 ${active365Round} 輪`,
+            `紀錄筆數：${validActiveRows.length}/365`,
+            `唯一 Day：${uniqueDays.size}/365`,
+            `唯一金額：${uniqueAmounts.size}/365`,
+            `目前總額：${formatHealthMoney(totalAmount)}`,
+            '',
+            issues.length ? '【異常】\n- ' + issues.join('\n- ') : '【異常】無',
+            '',
+            warnings.length ? '【提醒】\n- ' + warnings.join('\n- ') : '【提醒】無',
+            '',
+            '【通過】\n- ' + (passes.length ? passes.join('\n- ') : '無'),
+            '',
+            `尚未使用 Day：${missingDayPreview}`,
+            `尚未使用金額：${missingAmountPreview}`
+        ].join('\n');
+
+        return {
+            ok: issues.length === 0,
+            status: overall,
+            issues,
+            warnings,
+            passes,
+            activeRound: active365Round,
+            recordCount: validActiveRows.length,
+            uniqueDayCount: uniqueDays.size,
+            uniqueAmountCount: uniqueAmounts.size,
+            totalAmount
+        };
+    }
+
+    function escapeHealthHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    async function copy365HealthReport() {
+        if (!last365HealthReportText) {
+            run365DataHealthCheck(false);
+        }
+
+        try {
+            await navigator.clipboard.writeText(last365HealthReportText);
+            alert('✅ 健檢報告已複製，可以直接貼給我檢查。');
+        } catch (error) {
+            // 舊版 Android / Safari Clipboard API 不可用時使用 textarea fallback。
+            const textarea = document.createElement('textarea');
+            textarea.value = last365HealthReportText;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            const success = document.execCommand('copy');
+            textarea.remove();
+            alert(success
+                ? '✅ 健檢報告已複製，可以直接貼給我檢查。'
+                : '⚠️ 無法自動複製，請手動截圖健檢結果。'
+            );
+        }
+    }
+
     function reset365Challenge(force=false) {
         if(!force&&!is365Complete()){alert('🔒 365 尚未完成。若要中途重新開始，請從設定裡確認重置。');return;}
         if(!confirm(`⚠️ 確定要開始第 ${active365Round+1} 輪 365 挑戰嗎？\n\n目前第 ${active365Round} 輪的手帳紀錄會保留在歷史資料，不會被刪除。`)) return;
@@ -4425,7 +5032,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-storage-cache-fix-1";
+    const CURRENT_APP_VERSION = "2026.08.09-settings-scroll-1";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
