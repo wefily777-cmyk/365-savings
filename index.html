@@ -195,9 +195,27 @@
         .reset-btn { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; opacity: 0.5; }
         .reset-btn:hover { opacity: 1; background: #ffe3e3; color: #d90429; border-color: #d90429; }
         .reset-btn:disabled { opacity: .35; cursor:not-allowed; pointer-events:none; }
+    
+        /* 🌿 季節／節氣／節慶動態背景 */
+        #seasonal-ambience-banner { margin: 10px 0 14px; padding: 12px 14px; border-radius: 18px; background: rgba(255,255,255,.34); border: 1px solid rgba(255,255,255,.55); box-shadow: 0 8px 24px rgba(0,0,0,.05); backdrop-filter: blur(10px); }
+        .seasonal-title { font-weight: 900; font-size: .92rem; }
+        .seasonal-subtitle { margin-top: 3px; font-size: .74rem; opacity: .72; }
+        .seasonal-source { margin-top: 7px; font-size: .68rem; opacity: .58; }
+        .seasonal-source a { color: inherit; text-decoration: underline; }
+        body.season-spring { background: linear-gradient(135deg,#edf8ed 0%,#dff3e7 45%,#fff3df 100%) !important; }
+        body.season-summer { background: linear-gradient(135deg,#dff6ef 0%,#cdeed8 45%,#fff0c7 100%) !important; }
+        body.season-autumn { background: linear-gradient(135deg,#fff0dc 0%,#f5d7b5 48%,#e9d8c0 100%) !important; }
+        body.season-winter { background: linear-gradient(135deg,#eaf1f8 0%,#dfe8f2 48%,#f7eadf 100%) !important; }
+        body.festival-mode { background-image: radial-gradient(circle at 15% 20%, rgba(255,255,255,.38), transparent 28%), radial-gradient(circle at 85% 10%, rgba(255,255,255,.28), transparent 25%), var(--season-gradient, linear-gradient(135deg,#f7ede2,#f5cac3)) !important; }
+        .real-audio-note { font-size:.69rem; line-height:1.45; opacity:.65; margin-top:8px; }
+        .audio-source-list { display:grid; gap:6px; margin-top:8px; }
+        .audio-source-list a { font-size:.72rem; color:inherit; text-decoration:none; padding:6px 8px; border-radius:9px; background:rgba(255,255,255,.25); }
+        .audio-source-list a:hover { text-decoration:underline; }
+
     </style>
 </head>
 <body>
+    <div id="seasonal-ambience-banner" aria-live="polite"></div>
 
 <div class="container">
     <div class="top-header-bar">
@@ -362,6 +380,13 @@
                             <span id="ambient-volume-value">45%</span>
                         </div>
                         <div class="ambient-now-playing" id="ambient-now-playing">🌊 海浪</div>
+                        <div class="settings-item-btn" style="margin-top:4px;cursor:default;">🌏 <b>季節與節慶自動背景</b><br><span style="font-size:.7rem;opacity:.7;">24節氣＋重要節慶＋早晚時段自動呼應</span></div>
+                        <button class="settings-main-action-btn" onclick="toggleSeasonalAuto()" id="seasonal-auto-btn">🌿 自動跟隨節氣：開啟</button>
+                        <div class="real-audio-note">🎧 真實自然錄音：已連接 Cloudflare R2 音效庫，共 22 種真實環境音。開啟「自動跟隨節氣」後，系統會依 24 節氣、重要節慶與早晚時段自動混音；手動點選海浪／雨聲等按鈕時，會暫停自動模式並播放指定真實音效。</div>
+                        <div class="audio-source-list">
+                            <span style="font-size:.72rem;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.25);">☁️ Cloudflare R2：365-savings-audio</span>
+                            <span style="font-size:.72rem;padding:6px 8px;border-radius:9px;background:rgba(255,255,255,.25);">🎚️ 支援多軌混音、淡入淡出、單軌失效容錯</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -412,7 +437,7 @@
             lblSettingLang: "🌐 選擇語言 / Language",
             lblSettingTheme: "🎨 選擇世界觀主題 / Theme",
             lblSettingBday: "🎂 登載生日 / Birthday",
-            lblSettingMusic: "🎵 背景沉浸自然音效 / Nature Sounds",
+            lblSettingMusic: "🎵 真實自然音景 / Nature Soundscapes",
             btnSettingClose: "儲存變更 / Save",
             btnMilestoneClose: "收下祝福，繼續前行",
             monthPrefix: "Month ",
@@ -455,7 +480,7 @@
             lblSettingLang: "🌐 选择语言 / Language",
             lblSettingTheme: "🎨 选择世界观主题 / Theme",
             lblSettingBday: "🎂 登载生日 / Birthday",
-            lblSettingMusic: "🎵 背景沉浸自然音效 / Nature Sounds",
+            lblSettingMusic: "🎵 真實自然音景 / Nature Soundscapes",
             btnSettingClose: "保存变更 / Save",
             btnMilestoneClose: "收下祝福，继续前行",
             monthPrefix: "Month ",
@@ -3559,235 +3584,189 @@
         }
     }
 
-    // 🎧 10.1 完整療癒環境音系統（Web Audio API，不需要外部音檔）
-    let ambientAudioContext = null;
-    let ambientMasterGain = null;
-    let ambientNodes = [];
+    // 🎧 10.1 真實自然音效系統（Cloudflare R2 + 多軌混音）
+    // 所有音效均由同一個公開 R2 Bucket 提供，避免 Google Drive 重新導向與串流不穩定問題。
+    const R2_AUDIO_BASE = 'https://pub-a2859f8c83524448bc30ea83e308bc1a.r2.dev/';
+
+    const SOUND_LIBRARY = {
+        rain:             { icon:'🌧️', name:'下雨',             file:'下雨.mp3' },
+        summerNight:      { icon:'🌙', name:'夏夜蟲鳴與蛙鳴',   file:'夏夜蟲鳴與蛙鳴.mp3' },
+        bigWaves:         { icon:'🌊', name:'大海浪',           file:'大海浪.mp3' },
+        waveFire:         { icon:'🌊', name:'小浪與柴火',       file:'小浪與柴火.mp3' },
+        smallWaves:       { icon:'🌊', name:'小海浪',           file:'小海浪.mp3' },
+        softWind:         { icon:'🍃', name:'柔風',             file:'柔風.mp3' },
+        fire:             { icon:'🔥', name:'柴火',             file:'柴火.mp3' },
+        fire2:            { icon:'🔥', name:'柴火2',            file:'柴火2.mp3' },
+        fire3:            { icon:'🔥', name:'柴火3',            file:'柴火3.mp3' },
+        forestBirds:      { icon:'🐦', name:'森林鳥鳴',         file:'森林鳥鳴.mp3' },
+        river:            { icon:'💧', name:'河水',             file:'河水.mp3' },
+        riverFrogsBirds:  { icon:'🐸', name:'河流青蛙鳥鳴',     file:'河流青蛙鳥鳴.mp3' },
+        ocean:            { icon:'🌊', name:'海浪',             file:'海浪.mp3' },
+        seagullsWaves:    { icon:'🕊️', name:'海鷗與小浪',       file:'海鷗與小浪.mp3' },
+        waterfall:        { icon:'💦', name:'瀑布',             file:'瀑布.mp3' },
+        drizzle:          { icon:'🌦️', name:'細雨',             file:'細雨.mp3' },
+        crickets:         { icon:'🦗', name:'蟋蟀',             file:'蟋蟀.mp3' },
+        rainyFire:        { icon:'🏠', name:'雨天柴火',         file:'雨天柴火.mp3' },
+        thunderstorm:     { icon:'⛈️', name:'雷雨',             file:'雷雨.mp3' },
+        wind:             { icon:'🌬️', name:'風',               file:'風.mp3' },
+        wind2:            { icon:'🌬️', name:'風2',              file:'風2.mp3' },
+        windSound:        { icon:'🍂', name:'風聲',             file:'風聲.mp3' }
+    };
+
+    Object.values(SOUND_LIBRARY).forEach(sound => {
+        sound.url = R2_AUDIO_BASE + encodeURIComponent(sound.file);
+    });
+
+    // 手動模式仍保留原本 6 個簡單分類；實際播放改用真實 R2 音效。
+    const AMBIENT_SOUND_META = {
+        ocean:    { icon:'🌊', names:{'zh-TW':'海浪','zh-CN':'海浪','en':'Ocean Waves','ja':'波の音'}, track:'ocean' },
+        rain:     { icon:'🌧️', names:{'zh-TW':'雨聲','zh-CN':'雨声','en':'Rain','ja':'雨音'}, track:'drizzle' },
+        forest:   { icon:'🌲', names:{'zh-TW':'森林','zh-CN':'森林','en':'Forest','ja':'森'}, track:'forestBirds' },
+        insects:  { icon:'🦗', names:{'zh-TW':'蟲鳴','zh-CN':'虫鸣','en':'Night Insects','ja':'虫の声'}, track:'crickets' },
+        stream:   { icon:'💧', names:{'zh-TW':'溪流','zh-CN':'溪流','en':'Stream','ja':'せせらぎ'}, track:'river' },
+        campfire: { icon:'🔥', names:{'zh-TW':'營火','zh-CN':'篝火','en':'Campfire','ja':'焚き火'}, track:'fire' }
+    };
+
     let ambientCurrentSound = localStorage.getItem('ambient_sound_profile') || 'ocean';
     let ambientVolume = parseInt(localStorage.getItem('ambient_sound_volume'), 10);
     if (isNaN(ambientVolume)) ambientVolume = 45;
     let ambientSoundReady = false;
     let ambientAutoResumeBound = false;
+    let activeAudioTracks = [];
+    let currentSoundscapeName = '';
+    let currentSoundscapeTracks = '';
 
-    const AMBIENT_SOUND_META = {
-        ocean:    { icon:'🌊', names:{'zh-TW':'海浪','zh-CN':'海浪','en':'Ocean Waves','ja':'波の音'} },
-        rain:     { icon:'🌧️', names:{'zh-TW':'雨聲','zh-CN':'雨声','en':'Rain','ja':'雨音'} },
-        forest:   { icon:'🌲', names:{'zh-TW':'森林','zh-CN':'森林','en':'Forest','ja':'森'} },
-        insects:  { icon:'🦗', names:{'zh-TW':'蟲鳴','zh-CN':'虫鸣','en':'Night Insects','ja':'虫の声'} },
-        stream:   { icon:'💧', names:{'zh-TW':'溪流','zh-CN':'溪流','en':'Stream','ja':'せせらぎ'} },
-        campfire: { icon:'🔥', names:{'zh-TW':'營火','zh-CN':'篝火','en':'Campfire','ja':'焚き火'} }
-    };
+    function getSoundUrl(key) {
+        return SOUND_LIBRARY[key]?.url || '';
+    }
 
     function getAmbientLabel(key = ambientCurrentSound) {
         const meta = AMBIENT_SOUND_META[key] || AMBIENT_SOUND_META.ocean;
         return `${meta.icon} ${meta.names[currentLang] || meta.names['zh-TW']}`;
     }
 
-    function createNoiseBuffer(ctx, seconds = 2) {
-        const length = Math.max(1, Math.floor(ctx.sampleRate * seconds));
-        const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
-        return buffer;
+    function clamp01(value) {
+        return Math.max(0, Math.min(1, Number(value) || 0));
     }
 
-    function createBrownNoiseBuffer(ctx, seconds = 2) {
-        const length = Math.max(1, Math.floor(ctx.sampleRate * seconds));
-        const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-        const data = buffer.getChannelData(0);
-        let last = 0;
-        for (let i = 0; i < length; i++) {
-            last = last * 0.985 + (Math.random() * 2 - 1) * 0.015;
-            data[i] = Math.max(-1, Math.min(1, last * 3.2));
-        }
-        return buffer;
-    }
-
-    function addAmbientNode(node) {
-        ambientNodes.push(node);
-        return node;
-    }
-
-    function createLoopNoise(ctx, gainValue, filterType, frequency, q = 0.2, noiseType = 'white') {
-        const source = addAmbientNode(ctx.createBufferSource());
-        source.buffer = noiseType === 'brown' ? createBrownNoiseBuffer(ctx, 2) : createNoiseBuffer(ctx, 2);
-        source.loop = true;
-        const filter = addAmbientNode(ctx.createBiquadFilter());
-        filter.type = filterType;
-        filter.frequency.value = frequency;
-        filter.Q.value = q;
-        const gain = addAmbientNode(ctx.createGain());
-        gain.gain.value = gainValue;
-        source.connect(filter).connect(gain).connect(ambientMasterGain);
-        source.start();
-        return { source, filter, gain };
-    }
-
-    function createLfo(ctx, targetGain, min, max, speed) {
-        const lfo = addAmbientNode(ctx.createOscillator());
-        const lfoGain = addAmbientNode(ctx.createGain());
-        lfo.frequency.value = speed;
-        lfoGain.gain.value = (max - min) / 2;
-        targetGain.gain.value = (max + min) / 2;
-        lfo.connect(lfoGain).connect(targetGain.gain);
-        lfo.start();
-        return lfo;
-    }
-
-    function buildOceanSound(ctx) {
-        const low = createLoopNoise(ctx, 0.22, 'lowpass', 900, 0.25, 'brown');
-        createLfo(ctx, low.gain, 0.05, 0.30, 0.075);
-        const hiss = createLoopNoise(ctx, 0.035, 'highpass', 2200, 0.15, 'white');
-        createLfo(ctx, hiss.gain, 0.008, 0.055, 0.11);
-    }
-
-    function buildRainSound(ctx) {
-        const rain = createLoopNoise(ctx, 0.12, 'highpass', 1500, 0.25, 'white');
-        createLfo(ctx, rain.gain, 0.045, 0.14, 0.12);
-        const lowRain = createLoopNoise(ctx, 0.06, 'lowpass', 700, 0.2, 'brown');
-        createLfo(ctx, lowRain.gain, 0.025, 0.075, 0.08);
-    }
-
-    function buildForestSound(ctx) {
-        const wind = createLoopNoise(ctx, 0.07, 'bandpass', 500, 0.5, 'brown');
-        createLfo(ctx, wind.gain, 0.018, 0.08, 0.045);
-        const air = createLoopNoise(ctx, 0.018, 'highpass', 3200, 0.3, 'white');
-        createLfo(ctx, air.gain, 0.005, 0.024, 0.09);
-        scheduleBirdChirps(ctx, 2.5);
-    }
-
-    function scheduleBirdChirps(ctx, interval) {
-        const now = ctx.currentTime + 0.2;
-        for (let i = 0; i < 5; i++) {
-            const osc = addAmbientNode(ctx.createOscillator());
-            const gain = addAmbientNode(ctx.createGain());
-            const start = now + i * interval + Math.random() * 1.6;
-            const freq = 1800 + Math.random() * 1700;
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, start);
-            osc.frequency.exponentialRampToValueAtTime(freq * 1.35, start + 0.12);
-            osc.frequency.exponentialRampToValueAtTime(freq * 0.9, start + 0.24);
-            gain.gain.setValueAtTime(0, start);
-            gain.gain.linearRampToValueAtTime(0.035, start + 0.03);
-            gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.3);
-            osc.connect(gain).connect(ambientMasterGain);
-            osc.start(start);
-            osc.stop(start + 0.35);
-        }
-    }
-
-    function buildInsectsSound(ctx) {
-        const night = createLoopNoise(ctx, 0.025, 'lowpass', 1000, 0.3, 'brown');
-        createLfo(ctx, night.gain, 0.008, 0.032, 0.035);
-        for (let i = 0; i < 7; i++) {
-            const osc = addAmbientNode(ctx.createOscillator());
-            const gain = addAmbientNode(ctx.createGain());
-            const base = 3200 + Math.random() * 2300;
-            const t = ctx.currentTime + 0.3 + i * 0.9 + Math.random() * 2;
-            osc.type = 'triangle';
-            osc.frequency.value = base;
-            gain.gain.setValueAtTime(0.0001, t);
-            gain.gain.linearRampToValueAtTime(0.012, t + 0.08);
-            gain.gain.linearRampToValueAtTime(0.0001, t + 0.45);
-            osc.connect(gain).connect(ambientMasterGain);
-            osc.start(t);
-            osc.stop(t + 0.5);
-        }
-    }
-
-    function buildStreamSound(ctx) {
-        const water = createLoopNoise(ctx, 0.15, 'bandpass', 1450, 0.65, 'white');
-        createLfo(ctx, water.gain, 0.055, 0.18, 0.17);
-        const low = createLoopNoise(ctx, 0.045, 'lowpass', 420, 0.3, 'brown');
-        createLfo(ctx, low.gain, 0.018, 0.055, 0.11);
-    }
-
-    function buildCampfireSound(ctx) {
-        const ember = createLoopNoise(ctx, 0.055, 'lowpass', 700, 0.3, 'brown');
-        createLfo(ctx, ember.gain, 0.015, 0.06, 0.06);
-        for (let i = 0; i < 18; i++) {
-            const osc = addAmbientNode(ctx.createOscillator());
-            const gain = addAmbientNode(ctx.createGain());
-            const t = ctx.currentTime + 0.2 + Math.random() * 8;
-            osc.type = 'square';
-            osc.frequency.value = 700 + Math.random() * 1900;
-            gain.gain.setValueAtTime(0.0001, t);
-            gain.gain.exponentialRampToValueAtTime(0.025 + Math.random() * 0.035, t + 0.006);
-            gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.055 + Math.random() * 0.08);
-            osc.connect(gain).connect(ambientMasterGain);
-            osc.start(t);
-            osc.stop(t + 0.18);
-        }
-    }
-
-    function clearAmbientNodes() {
-        ambientNodes.forEach(node => {
-            try { if (typeof node.stop === 'function') node.stop(); } catch (e) {}
-            try { node.disconnect(); } catch (e) {}
+    function createRealAudioTrack(soundKey, mixVolume = 0.5) {
+        const sound = SOUND_LIBRARY[soundKey];
+        if (!sound) return null;
+        const audio = new Audio(sound.url);
+        audio.loop = true;
+        audio.preload = 'none';
+        audio.playsInline = true;
+        audio.dataset.soundKey = soundKey;
+        audio._mixVolume = clamp01(mixVolume);
+        audio.volume = 0;
+        audio.addEventListener('error', () => {
+            console.warn(`音效載入失敗：${sound.name}`, audio.error);
         });
-        ambientNodes = [];
+        return audio;
     }
 
-    function buildAmbientProfile(key) {
-        clearAmbientNodes();
-        const ctx = ambientAudioContext;
-        if (!ctx || !ambientMasterGain) return;
-        const builders = {
-            ocean: buildOceanSound,
-            rain: buildRainSound,
-            forest: buildForestSound,
-            insects: buildInsectsSound,
-            stream: buildStreamSound,
-            campfire: buildCampfireSound
-        };
-        (builders[key] || builders.ocean)(ctx);
+    function setTrackTargetVolume(audio, master = ambientVolume / 100) {
+        if (!audio) return;
+        audio.volume = clamp01((audio._mixVolume || 0) * master);
+    }
+
+    function fadeAudio(audio, from, to, duration = 800) {
+        return new Promise(resolve => {
+            if (!audio) { resolve(); return; }
+            const start = performance.now();
+            const safeFrom = clamp01(from);
+            const safeTo = clamp01(to);
+            audio.volume = safeFrom;
+            function step(now) {
+                const p = Math.min(1, (now - start) / Math.max(1, duration));
+                audio.volume = clamp01(safeFrom + (safeTo - safeFrom) * p);
+                if (p < 1) requestAnimationFrame(step);
+                else resolve();
+            }
+            requestAnimationFrame(step);
+        });
+    }
+
+    async function stopActiveAudio(fadeMs = 500) {
+        const oldTracks = activeAudioTracks.slice();
+        activeAudioTracks = [];
+        await Promise.allSettled(oldTracks.map(async audio => {
+            try {
+                await fadeAudio(audio, audio.volume, 0, fadeMs);
+                audio.pause();
+                audio.currentTime = 0;
+                audio.src = '';
+            } catch (e) {}
+        }));
+    }
+
+    async function playSoundscape(name, tracks, options = {}) {
+        if (!isBgmEnabled) return false;
+        const normalized = (tracks || [])
+            .filter(t => t && SOUND_LIBRARY[t.key])
+            .map(t => ({ key: t.key, volume: clamp01(t.volume ?? 0.3) }));
+        if (!normalized.length) return false;
+
+        // 同一聲景不重複重建，僅調整總音量。
+        const signature = JSON.stringify(normalized);
+        if (currentSoundscapeName === name && currentSoundscapeTracks === signature && activeAudioTracks.length) {
+            activeAudioTracks.forEach(a => setTrackTargetVolume(a));
+            updateAmbientUI();
+            return true;
+        }
+
+        await stopActiveAudio(options.fast ? 120 : 650);
+        const tracksToPlay = normalized.map(t => {
+            const a = createRealAudioTrack(t.key, t.volume);
+            if (a) a._targetVolume = clamp01(t.volume * (ambientVolume / 100));
+            return a;
+        }).filter(Boolean);
+        activeAudioTracks = tracksToPlay;
+        currentSoundscapeName = name;
+        currentSoundscapeTracks = signature;
+
+        const results = await Promise.allSettled(tracksToPlay.map(async audio => {
+            try {
+                audio.volume = 0;
+                await audio.play();
+                await fadeAudio(audio, 0, audio._targetVolume, options.fadeMs ?? 1000);
+                return true;
+            } catch (e) {
+                console.warn('音效播放失敗：', SOUND_LIBRARY[audio.dataset.soundKey]?.name, e);
+                return false;
+            }
+        }));
+        ambientSoundReady = results.some(r => r.status === 'fulfilled' && r.value === true);
+        updateAmbientUI();
+        return ambientSoundReady;
+    }
+
+    async function playManualAmbient(key) {
+        const meta = AMBIENT_SOUND_META[key] || AMBIENT_SOUND_META.ocean;
+        const trackKey = meta.track;
+        return playSoundscape(getAmbientLabel(key), [{ key: trackKey, volume: 0.82 }], { fast:true, fadeMs:500 });
     }
 
     async function startAmbientAudio() {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) {
-            alert('⚠️ 您的瀏覽器不支援 Web Audio API。');
-            isBgmEnabled = false;
-            localStorage.setItem('bgm_engine_enabled', 'false');
-            updateAmbientUI();
-            return false;
+        if (!isBgmEnabled) return false;
+        if (seasonalAutoEnabled) {
+            updateSeasonalAmbience(true);
+            return true;
         }
-
-        if (!ambientAudioContext) {
-            ambientAudioContext = new AudioCtx();
-            ambientMasterGain = ambientAudioContext.createGain();
-            ambientMasterGain.gain.value = ambientVolume / 100;
-            ambientMasterGain.connect(ambientAudioContext.destination);
-            buildAmbientProfile(ambientCurrentSound);
-        }
-
-        if (ambientAudioContext.state === 'suspended') {
-            await ambientAudioContext.resume();
-        }
-        ambientSoundReady = true;
-        updateAmbientUI();
-        return true;
+        return playManualAmbient(ambientCurrentSound);
     }
 
     function stopAmbientAudio() {
-        if (ambientMasterGain && ambientAudioContext) {
-            const now = ambientAudioContext.currentTime;
-            ambientMasterGain.gain.cancelScheduledValues(now);
-            ambientMasterGain.gain.setTargetAtTime(0, now, 0.08);
-        }
+        stopActiveAudio(450);
+        ambientSoundReady = false;
+        updateAmbientUI();
     }
 
     async function toggleBgmState() {
         isBgmEnabled = !isBgmEnabled;
         localStorage.setItem('bgm_engine_enabled', String(isBgmEnabled));
-        if (isBgmEnabled) {
-            await startAmbientAudio();
-            if (ambientMasterGain && ambientAudioContext) {
-                ambientMasterGain.gain.setTargetAtTime(ambientVolume / 100, ambientAudioContext.currentTime, 0.12);
-            }
-        } else {
-            stopAmbientAudio();
-        }
+        if (isBgmEnabled) await startAmbientAudio();
+        else stopAmbientAudio();
         updateAmbientUI();
     }
 
@@ -3796,39 +3775,39 @@
         ambientCurrentSound = key;
         localStorage.setItem('ambient_sound_profile', key);
         localStorage.setItem('ambient_sound_user_selected', 'true');
+        // 使用者手動選音效時，暫停自動節氣聲景，避免一分鐘後又被覆蓋。
+        seasonalAutoEnabled = false;
+        localStorage.setItem('seasonal_auto_enabled', 'false');
+        updateSeasonalAutoUI();
         updateAmbientUI();
-        if (!isBgmEnabled) return;
-        const started = await startAmbientAudio();
-        if (started) {
-            buildAmbientProfile(key);
-            ambientMasterGain.gain.setTargetAtTime(ambientVolume / 100, ambientAudioContext.currentTime, 0.15);
-        }
+        if (isBgmEnabled) await playManualAmbient(key);
     }
 
     function setAmbientVolume(value) {
         ambientVolume = Math.max(0, Math.min(100, parseInt(value, 10) || 0));
         localStorage.setItem('ambient_sound_volume', String(ambientVolume));
-        if (ambientMasterGain && ambientAudioContext) {
-            const target = isBgmEnabled ? ambientVolume / 100 : 0;
-            ambientMasterGain.gain.setTargetAtTime(target, ambientAudioContext.currentTime, 0.05);
-        }
+        activeAudioTracks.forEach(audio => setTrackTargetVolume(audio));
         updateAmbientUI();
     }
 
     function updateAmbientUI() {
         const toggle = document.getElementById('btn-toggle-bgm');
+        const nowPlaying = document.getElementById('ambient-now-playing');
         const slider = document.getElementById('ambient-volume-slider');
         const value = document.getElementById('ambient-volume-value');
-        const nowPlaying = document.getElementById('ambient-now-playing');
         const icon = document.getElementById('ambient-volume-icon');
 
         if (slider) slider.value = ambientVolume;
         if (value) value.innerText = `${ambientVolume}%`;
         if (icon) icon.innerText = ambientVolume === 0 ? '🔇' : (ambientVolume < 40 ? '🔉' : '🔊');
-        if (nowPlaying) nowPlaying.innerText = isBgmEnabled ? `🎧 ${getAmbientLabel()}` : `⏸️ ${getAmbientLabel()} · ${currentLang === 'en' ? 'Paused' : currentLang === 'ja' ? '停止中' : '目前未播放'}`;
+        if (nowPlaying) {
+            if (!isBgmEnabled) nowPlaying.innerText = `⏸️ ${getAmbientLabel()} · 目前未播放`;
+            else if (seasonalAutoEnabled && currentSoundscapeName) nowPlaying.innerText = `🌿 ${currentSoundscapeName}`;
+            else nowPlaying.innerText = `🎧 ${getAmbientLabel()}`;
+        }
 
         document.querySelectorAll('.ambient-sound-item').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.sound === ambientCurrentSound);
+            btn.classList.toggle('active', !seasonalAutoEnabled && btn.dataset.sound === ambientCurrentSound);
         });
 
         if (toggle) {
@@ -3846,12 +3825,8 @@
         if (ambientAutoResumeBound) return;
         ambientAutoResumeBound = true;
         const resumeOnce = async () => {
-            if (isBgmEnabled && !ambientSoundReady) await startAmbientAudio();
-            if (ambientAudioContext && ambientAudioContext.state === 'suspended') {
-                try { await ambientAudioContext.resume(); } catch (e) {}
-            }
-            if (isBgmEnabled && ambientMasterGain && ambientAudioContext) {
-                ambientMasterGain.gain.setTargetAtTime(ambientVolume / 100, ambientAudioContext.currentTime, 0.12);
+            if (isBgmEnabled && !ambientSoundReady) {
+                try { await startAmbientAudio(); } catch (e) {}
             }
             document.removeEventListener('pointerdown', resumeOnce);
             document.removeEventListener('keydown', resumeOnce);
@@ -3859,6 +3834,187 @@
         document.addEventListener('pointerdown', resumeOnce, { once: true });
         document.addEventListener('keydown', resumeOnce, { once: true });
     }
+
+    // 🌏 10.2 24節氣＋節慶＋晝夜真實聲景系統
+    let seasonalAutoEnabled = localStorage.getItem('seasonal_auto_enabled') !== 'false';
+    let seasonalLastKey = '';
+
+    const SOLAR_TERMS = [
+        ['小寒','01-05','winter'],['大寒','01-20','winter'],['立春','02-04','spring'],['雨水','02-19','spring'],
+        ['驚蟄','03-05','spring'],['春分','03-20','spring'],['清明','04-04','spring'],['穀雨','04-20','spring'],
+        ['立夏','05-05','summer'],['小滿','05-21','summer'],['芒種','06-05','summer'],['夏至','06-21','summer'],
+        ['小暑','07-07','summer'],['大暑','07-22','summer'],['立秋','08-07','autumn'],['處暑','08-23','autumn'],
+        ['白露','09-07','autumn'],['秋分','09-23','autumn'],['寒露','10-08','autumn'],['霜降','10-23','autumn'],
+        ['立冬','11-07','winter'],['小雪','11-22','winter'],['大雪','12-07','winter'],['冬至','12-21','winter']
+    ];
+
+    // 24 節氣專屬聲景：22 個上傳音效全部會在一年中至少被使用一次。
+    const TERM_SOUND_SCENES = {
+        '小寒': [{key:'fire2',volume:.55},{key:'wind2',volume:.18}],
+        '大寒': [{key:'fire3',volume:.58},{key:'windSound',volume:.16}],
+        '立春': [{key:'forestBirds',volume:.45},{key:'softWind',volume:.18},{key:'river',volume:.16}],
+        '雨水': [{key:'drizzle',volume:.52},{key:'river',volume:.18}],
+        '驚蟄': [{key:'thunderstorm',volume:.22},{key:'rain',volume:.35},{key:'forestBirds',volume:.12}],
+        '春分': [{key:'forestBirds',volume:.42},{key:'riverFrogsBirds',volume:.20},{key:'softWind',volume:.14}],
+        '清明': [{key:'drizzle',volume:.42},{key:'forestBirds',volume:.20},{key:'softWind',volume:.10}],
+        '穀雨': [{key:'rain',volume:.45},{key:'waterfall',volume:.18},{key:'river',volume:.14}],
+        '立夏': [{key:'waterfall',volume:.32},{key:'forestBirds',volume:.28},{key:'softWind',volume:.14}],
+        '小滿': [{key:'riverFrogsBirds',volume:.34},{key:'river',volume:.20},{key:'forestBirds',volume:.18}],
+        '芒種': [{key:'wind',volume:.20},{key:'forestBirds',volume:.30},{key:'river',volume:.18}],
+        '夏至': [{key:'seagullsWaves',volume:.38},{key:'smallWaves',volume:.26},{key:'softWind',volume:.12}],
+        '小暑': [{key:'ocean',volume:.38},{key:'smallWaves',volume:.25},{key:'summerNight',volume:.16}],
+        '大暑': [{key:'bigWaves',volume:.38},{key:'ocean',volume:.25},{key:'summerNight',volume:.16}],
+        '立秋': [{key:'windSound',volume:.26},{key:'forestBirds',volume:.28},{key:'river',volume:.15}],
+        '處暑': [{key:'smallWaves',volume:.32},{key:'softWind',volume:.20},{key:'seagullsWaves',volume:.16}],
+        '白露': [{key:'river',volume:.23},{key:'crickets',volume:.26},{key:'softWind',volume:.13}],
+        '秋分': [{key:'seagullsWaves',volume:.28},{key:'smallWaves',volume:.28},{key:'wind',volume:.14}],
+        '寒露': [{key:'drizzle',volume:.34},{key:'windSound',volume:.20},{key:'crickets',volume:.14}],
+        '霜降': [{key:'wind2',volume:.26},{key:'forestBirds',volume:.20},{key:'fire',volume:.14}],
+        '立冬': [{key:'rainyFire',volume:.48},{key:'windSound',volume:.15}],
+        '小雪': [{key:'fire',volume:.50},{key:'softWind',volume:.15},{key:'wind2',volume:.08}],
+        '大雪': [{key:'fire2',volume:.50},{key:'wind',volume:.16}],
+        '冬至': [{key:'waveFire',volume:.42},{key:'fire3',volume:.30},{key:'wind2',volume:.08}]
+    };
+
+    const FESTIVAL_SOUND_SCENES = {
+        '元旦': [{key:'fire',volume:.42},{key:'smallWaves',volume:.22}],
+        '除夕': [{key:'fire3',volume:.50},{key:'softWind',volume:.10}],
+        '春節': [{key:'fire2',volume:.45},{key:'forestBirds',volume:.20}],
+        '元宵節': [{key:'river',volume:.24},{key:'softWind',volume:.18},{key:'forestBirds',volume:.18}],
+        '清明節': [{key:'drizzle',volume:.45},{key:'forestBirds',volume:.15}],
+        '端午節': [{key:'riverFrogsBirds',volume:.35},{key:'river',volume:.25},{key:'wind',volume:.12}],
+        '中元節': [{key:'crickets',volume:.32},{key:'windSound',volume:.14}],
+        '中秋節': [{key:'crickets',volume:.34},{key:'smallWaves',volume:.25},{key:'softWind',volume:.12}],
+        '重陽節': [{key:'windSound',volume:.24},{key:'forestBirds',volume:.20},{key:'river',volume:.13}],
+        '父親節': [{key:'ocean',volume:.28},{key:'softWind',volume:.15}],
+        '國慶日': [{key:'bigWaves',volume:.28},{key:'wind',volume:.14}],
+        '行憲紀念日': [{key:'fire',volume:.40},{key:'wind2',volume:.10}]
+    };
+
+    function getSeasonForMonth(m) {
+        if ([2,3,4].includes(m)) return 'spring';
+        if ([5,6,7].includes(m)) return 'summer';
+        if ([8,9,10].includes(m)) return 'autumn';
+        return 'winter';
+    }
+
+    function getSolarTermForDate(date) {
+        const y = date.getFullYear();
+        let best = null;
+        for (const [name, md, season] of SOLAR_TERMS) {
+            const d = new Date(`${y}-${md}T00:00:00`);
+            if (date >= d) best = { name, season, date: md };
+        }
+        if (!best) best = { name:'冬至', season:'winter', date:'12-21' };
+        return best;
+    }
+
+    function getFestivalForDate(date) {
+        const y = date.getFullYear();
+        const m = date.getMonth()+1, d = date.getDate();
+        const fixed = {
+            '1-1':'元旦','2-28':'和平紀念日','3-8':'婦女節','3-12':'植樹節','3-29':'青年節','4-4':'兒童節','4-5':'清明節','5-1':'勞動節','5-12':'護士節','6-5':'世界環境日','6-8':'國家海洋日','8-8':'父親節','9-3':'軍人節','9-28':'教師節／孔子誕辰','10-10':'國慶日','10-25':'光復暨金門古寧頭大捷紀念日','11-8':'海巡節','11-12':'國父誕辰／中華文化復興節','12-3':'身心障礙者日','12-10':'人權日','12-18':'移民日','12-25':'行憲紀念日','12-28':'全國客家日'
+        };
+        const lunar2026 = {
+            '2-16':'除夕','2-17':'春節','3-3':'元宵節','6-19':'端午節','8-27':'中元節','9-25':'中秋節','10-18':'重陽節'
+        };
+        if (y === 2026 && lunar2026[`${m}-${d}`]) return lunar2026[`${m}-${d}`];
+        return fixed[`${m}-${d}`] || '';
+    }
+
+    function getTimePhase(date = new Date()) {
+        const h = date.getHours();
+        if (h < 6) return {key:'night',label:'深夜',icon:'🌙'};
+        if (h < 11) return {key:'morning',label:'晨間',icon:'🌅'};
+        if (h < 17) return {key:'day',label:'白天',icon:'☀️'};
+        if (h < 19) return {key:'dusk',label:'黃昏',icon:'🌇'};
+        return {key:'night',label:'夜晚',icon:'🌙'};
+    }
+
+    function mergeSceneTracks(baseTracks, phase, season) {
+        const tracks = (baseTracks || []).map(t => ({...t}));
+        const has = key => tracks.some(t => t.key === key);
+        // 時段只做「輕量加層」，不蓋掉節氣主聲景。
+        if (phase.key === 'morning' && !has('forestBirds') && season !== 'winter') tracks.push({key:'forestBirds',volume:.10});
+        if (phase.key === 'dusk' && !has('softWind')) tracks.push({key:'softWind',volume:.09});
+        if (phase.key === 'night') {
+            if ((season === 'summer' || season === 'autumn') && !has('crickets') && !has('summerNight')) tracks.push({key:'crickets',volume:.12});
+            if (season === 'winter' && !has('fire') && !has('fire2') && !has('fire3') && !has('rainyFire')) tracks.push({key:'fire',volume:.12});
+        }
+        return tracks.slice(0, 4);
+    }
+
+    function getSeasonalScene(term, festival, phase) {
+        let tracks = TERM_SOUND_SCENES[term.name] || [{key:'forestBirds',volume:.35},{key:'softWind',volume:.15}];
+        let name = `${term.name} · ${phase.label}`;
+        if (festival && FESTIVAL_SOUND_SCENES[festival]) {
+            tracks = FESTIVAL_SOUND_SCENES[festival];
+            name = `${festival} · ${phase.label}`;
+        }
+        tracks = mergeSceneTracks(tracks, phase, term.season);
+        return { name, tracks };
+    }
+
+    function describeSceneTracks(tracks) {
+        return (tracks || []).map(t => `${SOUND_LIBRARY[t.key]?.icon || '🎧'} ${SOUND_LIBRARY[t.key]?.name || t.key}`).join('＋');
+    }
+
+    function updateSeasonalAmbience(force = false) {
+        if (!seasonalAutoEnabled) return;
+        const now = new Date();
+        const term = getSolarTermForDate(now);
+        const festival = getFestivalForDate(now);
+        const phase = getTimePhase(now);
+        const season = term.season || getSeasonForMonth(now.getMonth()+1);
+        const scene = getSeasonalScene(term, festival, phase);
+        const key = `${term.name}|${festival}|${phase.key}|${season}|${JSON.stringify(scene.tracks)}`;
+        if (!force && key === seasonalLastKey) return;
+        seasonalLastKey = key;
+
+        document.body.classList.remove('season-spring','season-summer','season-autumn','season-winter');
+        document.body.classList.add(`season-${season}`);
+        document.body.classList.toggle('festival-mode', !!festival);
+
+        const banner = document.getElementById('seasonal-ambience-banner');
+        if (banner) {
+            const label = festival ? `🎎 ${festival}` : `🌿 ${term.name}`;
+            banner.innerHTML = `<div class="seasonal-title">${label} · ${phase.icon} ${phase.label}</div><div class="seasonal-subtitle">🎧 ${describeSceneTracks(scene.tracks)}</div><div class="seasonal-source">Cloudflare R2 真實自然錄音 · ${Object.keys(SOUND_LIBRARY).length} 種音效全年輪替混音</div>`;
+        }
+
+        currentSoundscapeName = scene.name;
+        currentSoundscapeTracks = '';
+        updateAmbientUI();
+        if (isBgmEnabled) playSoundscape(scene.name, scene.tracks).catch(()=>{});
+    }
+
+    async function selectSeasonalAudio() {
+        updateSeasonalAmbience(true);
+    }
+
+    function toggleSeasonalAuto() {
+        seasonalAutoEnabled = !seasonalAutoEnabled;
+        localStorage.setItem('seasonal_auto_enabled', String(seasonalAutoEnabled));
+        updateSeasonalAutoUI();
+        if (seasonalAutoEnabled) {
+            seasonalLastKey = '';
+            updateSeasonalAmbience(true);
+        } else if (isBgmEnabled) {
+            playManualAmbient(ambientCurrentSound);
+        }
+        updateAmbientUI();
+    }
+
+    function updateSeasonalAutoUI() {
+        const btn = document.getElementById('seasonal-auto-btn');
+        if (btn) btn.innerText = seasonalAutoEnabled ? '🌿 自動跟隨節氣：開啟' : '⏸️ 自動跟隨節氣：關閉';
+    }
+
+    function scheduleSeasonalClock() {
+        updateSeasonalAmbience(true);
+        updateSeasonalAutoUI();
+        setInterval(() => updateSeasonalAmbience(false), 60 * 1000);
+    }
+
 
     function applyThemeVariables(key) {
         const themes = {
@@ -4041,6 +4197,7 @@
     window.onload = () => {
         updateAmbientUI();
         bindAmbientAutoResume();
+        scheduleSeasonalClock();
         checkSolarTermsAndHolidays();
 
         const modeSelect = document.getElementById('main-saving-mode-select');
