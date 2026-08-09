@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-audio-compat-1">
+    <meta name="app-version" content="2026.08.09-audio-stop-fix-1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -498,7 +498,7 @@
                 <div class="settings-row-title" id="lbl-setting-music">🎧 療癒環境音 / Healing Ambient Sounds</div>
 
             <div style="margin-top:8px;">
-                <button type="button" class="health-check-btn" style="background:linear-gradient(135deg,#6a11cb,#2575fc);" onclick="runAudioCompatibilityTest()">🎧 音效相容性測試</button>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"><button type="button" class="health-check-btn" style="background:linear-gradient(135deg,#6a11cb,#2575fc);" onclick="runAudioCompatibilityTest()">🎧 相容性測試</button><button type="button" class="health-check-btn" style="background:linear-gradient(135deg,#ef4444,#b91c1c);" onclick="stopAmbientAudio()">🛑 強制停止音效</button></div>
                 <div id="audio-compat-mini-status" class="audio-test-box">尚未執行測試。</div>
             </div>
                 <div class="ambient-sound-panel">
@@ -3963,6 +3963,12 @@
     let currentSoundscapeName = '';
     let currentSoundscapeTracks = '';
 
+    // 🛑 音效播放取消令牌
+    // 每次停止都增加 generation，讓所有尚未完成的 async 播放流程立即失效。
+    let audioPlaybackGeneration = 0;
+    let userForcedAudioStop = localStorage.getItem('bgm_engine_enabled') === 'false';
+
+
     function getSoundUrl(key) {
         return SOUND_LIBRARY[key]?.url || '';
     }
@@ -4014,56 +4020,200 @@
         });
     }
 
-    async function stopActiveAudio(fadeMs = 500) {
+    async function stopActiveAudio(fadeMs = 500, hard = false) {
         const oldTracks = activeAudioTracks.slice();
         activeAudioTracks = [];
+
+        if (hard || fadeMs <= 0) {
+            oldTracks.forEach(audio => {
+                try {
+                    audio.pause();
+                    audio.volume = 0;
+                    audio.currentTime = 0;
+                    audio.removeAttribute('src');
+                    audio.load();
+                } catch (e) {}
+            });
+            return;
+        }
+
         await Promise.allSettled(oldTracks.map(async audio => {
             try {
                 await fadeAudio(audio, audio.volume, 0, fadeMs);
                 audio.pause();
                 audio.currentTime = 0;
-                audio.src = '';
-            } catch (e) {}
+                audio.removeAttribute('src');
+                audio.load();
+            } catch (e) {
+                try { audio.pause(); } catch (_) {}
+            }
         }));
     }
 
+    function hardStopAllAmbientAudio() {
+        // 取消所有尚未完成的播放流程
+        audioPlaybackGeneration++;
+
+        // 取消相容層可能排程的自動恢復
+        try {
+            if (typeof AUDIO_COMPAT !== 'undefined' && AUDIO_COMPAT.resumeTimer) {
+                clearTimeout(AUDIO_COMPAT.resumeTimer);
+                AUDIO_COMPAT.resumeTimer = null;
+            }
+        } catch (_) {}
+
+        // 立即停止目前追蹤中的音軌
+        const tracks = activeAudioTracks.slice();
+        activeAudioTracks = [];
+        tracks.forEach(audio => {
+            try {
+                audio.pause();
+                audio.volume = 0;
+                audio.currentTime = 0;
+                audio.removeAttribute('src');
+                audio.load();
+            } catch (_) {}
+        });
+
+        ambientSoundReady = false;
+        currentSoundscapeTracks = '';
+    }
+
     async function playSoundscape(name, tracks, options = {}) {
-        if (!isBgmEnabled) return false;
+        if (!isBgmEnabled || userForcedAudioStop) return false;
+
+        const myGeneration = audioPlaybackGeneration;
+
         const normalized = (tracks || [])
             .filter(t => t && SOUND_LIBRARY[t.key])
             .map(t => ({ key: t.key, volume: clamp01(t.volume ?? 0.3) }));
+
         if (!normalized.length) return false;
 
-        // 同一聲景不重複重建，僅調整總音量。
         const signature = JSON.stringify(normalized);
-        if (currentSoundscapeName === name && currentSoundscapeTracks === signature && activeAudioTracks.length) {
+
+        if (
+            currentSoundscapeName === name &&
+            currentSoundscapeTracks === signature &&
+            activeAudioTracks.length
+        ) {
+            if (myGeneration !== audioPlaybackGeneration || userForcedAudioStop || !isBgmEnabled) {
+                return false;
+            }
             activeAudioTracks.forEach(a => setTrackTargetVolume(a));
             updateAmbientUI();
             return true;
         }
 
         await stopActiveAudio(options.fast ? 120 : 650);
+
+        // 🛑 停止按鈕可能在 await 期間被按下；這裡必須重新檢查。
+        if (
+            myGeneration !== audioPlaybackGeneration ||
+            userForcedAudioStop ||
+            !isBgmEnabled
+        ) {
+            return false;
+        }
+
         const tracksToPlay = normalized.map(t => {
             const a = createRealAudioTrack(t.key, t.volume);
             if (a) a._targetVolume = clamp01(t.volume * (ambientVolume / 100));
             return a;
         }).filter(Boolean);
+
+        // 再檢查一次，避免建立音軌後、真正 play() 前被停止。
+        if (
+            myGeneration !== audioPlaybackGeneration ||
+            userForcedAudioStop ||
+            !isBgmEnabled
+        ) {
+            tracksToPlay.forEach(a => {
+                try {
+                    a.pause();
+                    a.removeAttribute('src');
+                    a.load();
+                } catch (_) {}
+            });
+            return false;
+        }
+
         activeAudioTracks = tracksToPlay;
         currentSoundscapeName = name;
         currentSoundscapeTracks = signature;
 
         const results = await Promise.allSettled(tracksToPlay.map(async audio => {
             try {
+                if (
+                    myGeneration !== audioPlaybackGeneration ||
+                    userForcedAudioStop ||
+                    !isBgmEnabled
+                ) {
+                    return false;
+                }
+
                 audio.volume = 0;
                 await audio.play();
-                await fadeAudio(audio, 0, audio._targetVolume, options.fadeMs ?? 1000);
+
+                // play() 成功後也可能剛好被使用者停止
+                if (
+                    myGeneration !== audioPlaybackGeneration ||
+                    userForcedAudioStop ||
+                    !isBgmEnabled
+                ) {
+                    try {
+                        audio.pause();
+                        audio.volume = 0;
+                        audio.removeAttribute('src');
+                        audio.load();
+                    } catch (_) {}
+                    return false;
+                }
+
+                await fadeAudio(
+                    audio,
+                    0,
+                    audio._targetVolume,
+                    options.fadeMs ?? 1000
+                );
+
+                if (
+                    myGeneration !== audioPlaybackGeneration ||
+                    userForcedAudioStop ||
+                    !isBgmEnabled
+                ) {
+                    try {
+                        audio.pause();
+                        audio.volume = 0;
+                    } catch (_) {}
+                    return false;
+                }
+
                 return true;
+
             } catch (e) {
-                console.warn('音效播放失敗：', SOUND_LIBRARY[audio.dataset.soundKey]?.name, e);
+                console.warn(
+                    '音效播放失敗：',
+                    SOUND_LIBRARY[audio.dataset.soundKey]?.name,
+                    e
+                );
                 return false;
             }
         }));
-        ambientSoundReady = results.some(r => r.status === 'fulfilled' && r.value === true);
+
+        if (
+            myGeneration !== audioPlaybackGeneration ||
+            userForcedAudioStop ||
+            !isBgmEnabled
+        ) {
+            hardStopAllAmbientAudio();
+            return false;
+        }
+
+        ambientSoundReady = results.some(
+            r => r.status === 'fulfilled' && r.value === true
+        );
+
         updateAmbientUI();
         return ambientSoundReady;
     }
@@ -4084,16 +4234,28 @@
     }
 
     function stopAmbientAudio() {
-        stopActiveAudio(450);
-        ambientSoundReady = false;
+        userForcedAudioStop = true;
+        isBgmEnabled = false;
+        localStorage.setItem('bgm_engine_enabled', 'false');
+
+        // 使用者明確按停止時，不做淡出，直接硬停止，避免手機上殘留音軌。
+        hardStopAllAmbientAudio();
         updateAmbientUI();
     }
 
     async function toggleBgmState() {
-        isBgmEnabled = !isBgmEnabled;
-        localStorage.setItem('bgm_engine_enabled', String(isBgmEnabled));
-        if (isBgmEnabled) await startAmbientAudio();
-        else stopAmbientAudio();
+        if (isBgmEnabled) {
+            stopAmbientAudio();
+            return;
+        }
+
+        // 使用者再次按開始，才解除「強制停止」狀態。
+        userForcedAudioStop = false;
+        isBgmEnabled = true;
+        localStorage.setItem('bgm_engine_enabled', 'true');
+        audioPlaybackGeneration++;
+
+        await startAmbientAudio();
         updateAmbientUI();
     }
 
@@ -4152,7 +4314,7 @@
         if (ambientAutoResumeBound) return;
         ambientAutoResumeBound = true;
         const resumeOnce = async () => {
-            if (isBgmEnabled && !ambientSoundReady) {
+            if (isBgmEnabled && !userForcedAudioStop && !ambientSoundReady) {
                 try { await startAmbientAudio(); } catch (e) {}
             }
             document.removeEventListener('pointerdown', resumeOnce);
@@ -4242,7 +4404,7 @@
     function registerAudioGestureUnlock() {
         const unlock = async () => {
             await unlockAudioCompatibility();
-            if (isBgmEnabled && !ambientSoundReady) {
+            if (isBgmEnabled && !userForcedAudioStop && !ambientSoundReady) {
                 try { await startAmbientAudio(); } catch (_) {}
             }
         };
@@ -4357,7 +4519,7 @@
     // 包裝 startAmbientAudio，避免前景切換後重複建立音軌
     const __originalStartAmbientAudio = startAmbientAudio;
     startAmbientAudio = async function() {
-        if (!isBgmEnabled) return false;
+        if (!isBgmEnabled || userForcedAudioStop) return false;
 
         if (!AUDIO_COMPAT.unlocked) {
             registerAudioGestureUnlock();
@@ -4381,11 +4543,13 @@
     function scheduleAudioResume(reason='visibility') {
         clearTimeout(AUDIO_COMPAT.resumeTimer);
         AUDIO_COMPAT.resumeTimer = setTimeout(async () => {
-            if (!isBgmEnabled) return;
+            if (!isBgmEnabled || userForcedAudioStop) return;
             if (document.visibilityState !== 'visible') return;
 
             // 先停止殘留音軌，再重建目前聲景，避免重複疊音。
-            try { stopActiveAudio(120); } catch (_) {}
+            try { await stopActiveAudio(120); } catch (_) {}
+
+            if (!isBgmEnabled || userForcedAudioStop) return;
 
             try {
                 await startAmbientAudio();
@@ -4415,7 +4579,12 @@
 
     // 避免關閉頁面時仍保留多個 audio 物件
     window.addEventListener('pagehide', () => {
-        try { stopActiveAudio(80); } catch (_) {}
+        // 頁面離開只清掉實體 Audio，不改使用者的開關設定。
+        try {
+            audioPlaybackGeneration++;
+            stopActiveAudio(0, true);
+            ambientSoundReady = false;
+        } catch (_) {}
     });
 
     async function runAudioCompatibilityTest() {
@@ -5467,7 +5636,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-audio-compat-1";
+    const CURRENT_APP_VERSION = "2026.08.09-audio-stop-fix-1";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
