@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="app-version" content="2026.08.09-legacy-bridge-v3">
+    <meta name="app-version" content="2026.08.11-android-total-sync-v1">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
@@ -3381,8 +3381,18 @@
     // 🧾 舊資料相容性診斷：保留每筆 Day 與「真正實際金額」的獨立關係。
     // 不使用 Day 當金額，也不會因為盲盒抽到 $188 就把 Day 固定成 188。
     function getJournalActualAmount(item) {
-        const amt = toFiniteNumber(item && (item.amt ?? item.amount ?? item.customValue));
-        return Number.isFinite(amt) && amt > 0 ? Math.round(amt) : 0;
+        if (!item) return 0;
+        if (item.amt !== undefined && item.amt !== null) {
+            const amt = toFiniteNumber(item.amt);
+            return Number.isFinite(amt) && amt > 0 ? Math.round(amt) : 0;
+        }
+        if (item.customValue !== undefined && item.customValue !== null &&
+            (item.isPatched === true || item.dayIndex !== undefined)) {
+            const custom = toFiniteNumber(item.customValue);
+            if (Number.isFinite(custom) && custom > 0) return Math.round(custom);
+        }
+        const legacyAmount = toFiniteNumber(item.amount);
+        return Number.isFinite(legacyAmount) && legacyAmount > 0 ? Math.round(legacyAmount) : 0;
     }
 
     // 🛡️ 365 天防誤觸智慧手帳：Day 與金額完全分離。
@@ -3557,6 +3567,50 @@
         });
         return used;
     }
+    // 📱 Android / bfcache：統一的目前輪次加總來源
+    function calculateActive365JournalSummary() {
+        const rows = getActiveJournalEntries().map(item => ({
+            item,
+            day: Math.round(toFiniteNumber(item && item.day)),
+            amt: getJournalActualAmount(item)
+        })).filter(x =>
+            Number.isFinite(x.day) && x.day >= 1 && x.day <= 365 &&
+            Number.isFinite(x.amt) && x.amt >= 1 && x.amt <= 365
+        );
+        return {
+            rows,
+            recordCount: rows.length,
+            totalAmount: rows.reduce((sum,x)=>sum+x.amt,0),
+            uniqueDays: new Set(rows.map(x=>x.day)),
+            uniqueAmounts: new Set(rows.map(x=>x.amt))
+        };
+    }
+
+    function reload365JournalStateFromStorage() {
+        const raw = safeJsonParse(localStorage.getItem('365_journal_mode_history'), []);
+        const round = Number(localStorage.getItem('365_active_round')) || 1;
+        if (!Array.isArray(raw)) return false;
+        const normalized = raw.map((item,index)=>normalizeJournalRecord(item,index))
+            .filter(Boolean).map(item=>({...item,round:Number(item.round)||1}));
+        const changed = JSON.stringify(journalListHistory) !== JSON.stringify(normalized) ||
+                        active365Round !== round;
+        active365Round = round;
+        if (changed) journalListHistory = normalized;
+        return changed;
+    }
+
+    function sync365JournalUIFromStorage(reason='manual') {
+        if (currentMode !== '365_journal') return;
+        try {
+            reload365JournalStateFromStorage();
+            renderJournalList();
+            updateDashboard();
+            console.info('365 journal resynced:', reason);
+        } catch(error) {
+            console.warn('365 journal resync failed:', reason, error);
+        }
+    }
+
     function is365Complete() { return getUsedAmountsSet().size === 365; }
     function persist365Data() {
         const historyJson = JSON.stringify(journalListHistory);
@@ -3948,10 +4002,9 @@
         const langDict = UI_I18N[currentLang] || UI_I18N['zh-TW'];
 
         if (currentMode === '365_journal') {
-            const active = getActiveJournalEntries();
-            const usedAmounts = getUsedAmountsSet();
-            totalAmt = active.reduce((sum,item)=>sum+getJournalActualAmount(item),0);
-            doneCount = usedAmounts.size;
+            const summary = calculateActive365JournalSummary();
+            totalAmt = summary.totalAmount;
+            doneCount = summary.uniqueAmounts.size;
             document.getElementById('label-completed-unit').innerText = `第 ${active365Round} 輪｜已完成金額`;
         } else if (currentMode === '365_阶梯') {
             checkedDays365.forEach(day => { totalAmt += Math.round(day); });
@@ -5995,6 +6048,24 @@
 </script>
 
 <script>
+// ============================================================
+// 📱 Android Chrome / BFCache / 多分頁資料同步層
+// ============================================================
+(function () {
+    const resync = reason => {
+        if (typeof sync365JournalUIFromStorage === 'function')
+            setTimeout(()=>sync365JournalUIFromStorage(reason),0);
+    };
+    window.addEventListener('pageshow', e => resync(e.persisted ? 'pageshow-bfcache' : 'pageshow'));
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') resync('visibility-visible');
+    });
+    window.addEventListener('storage', e => {
+        if (e.key === '365_journal_mode_history' || e.key === '365_active_round') resync('storage-event');
+    });
+    window.addEventListener('focus', ()=>resync('window-focus'));
+})();
+
 /* =========================================================
    🔄 GitHub Pages 版本更新偵測
    - 不使用 Service Worker。
@@ -6003,7 +6074,7 @@
    - localStorage 儲蓄資料不會因為重新載入而被清除。
    ========================================================= */
 (function () {
-    const CURRENT_APP_VERSION = "2026.08.09-legacy-bridge-v3";
+    const CURRENT_APP_VERSION = "2026.08.11-android-total-sync-v1";
     const LAST_CHECK_KEY = "365_last_version_check_at";
     const CHECK_INTERVAL_MS = 60 * 1000; // 一分鐘內不重複檢查
 
